@@ -83,7 +83,17 @@ export function Header() {
           React • Next.js • TypeScript
         </p>
         <p className="mt-4 max-w-xs leading-normal">
-          Building scalable web applications with a performance-first mindset.
+          Building scalable frontend platforms focused on architecture,
+          performance, and developer experience.
+        </p>
+        <p className="mt-3 flex items-center gap-2 text-sm text-slate-400">
+          <span
+            className="h-2 w-2 shrink-0 rounded-full bg-teal-300"
+            aria-hidden="true"
+          />
+          Available for Remote
+          <span className="text-slate-600">·</span>
+          Hanoi, Vietnam
         </p>
         <nav className="nav hidden lg:block" aria-label="In-page jump links">
           <ul className="mt-16 w-max">

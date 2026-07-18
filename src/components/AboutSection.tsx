@@ -1,3 +1,12 @@
+const stats = [
+  { value: "~5", label: "Years Experience" },
+  { value: "5", label: "B2B/B2C Products" },
+  { value: "1K+", label: "Monthly Users" },
+  { value: "60%", label: "Faster Loads" },
+  { value: "2x", label: "Lighthouse Score" },
+  { value: "~30%", label: "AI Productivity" },
+];
+
 export function AboutSection() {
   return (
     <section
@@ -12,63 +21,99 @@ export function AboutSection() {
       </div>
       <div>
         <p className="mb-4">
-          Hi there! I&apos;m Hà, a frontend engineer and tech lead with nearly
-          five years of experience architecting and building large-scale web
-          systems across EdTech and TravelTech. I specialize in React, Next.js,
-          and TypeScript, with a deep focus on frontend architecture, performance
-          optimization, and developer experience.
+          Hi there! I&apos;m Hà, a Senior Frontend Engineer and Frontend Tech
+          Lead with nearly 5 years of experience building scalable web
+          applications across EdTech and TravelTech. I specialize in React,
+          Next.js, TypeScript, frontend architecture, performance optimization,
+          and developer experience.
         </p>
-        <p className="mb-4">
-          Currently, I&apos;m a Frontend Tech Lead at{" "}
-          <a
-            className="font-medium text-slate-200 hover:text-teal-300 focus-visible:text-teal-300"
-            href="https://sapp.edu.vn/"
-            target="_blank"
-            rel="noreferrer noopener"
-          >
-            SAPP Academy
-          </a>
-          , where I set the technical direction for the frontend across our
-          product ecosystem. I designed and rolled out a Monorepo architecture
-          with pnpm Workspace and Turborepo, migrated the LMS from Next.js 12 to
-          Next.js 14 (App Router), and cut page load time by ~60% (15.2s → 6.1s)
-          while raising the mobile Lighthouse score from 29 to 65+. I also build
-          shared internal packages that improve reuse and standardize the
-          developer experience across products.
-        </p>
-        <p className="mb-4">
-          Previously, at{" "}
-          <a
-            className="font-medium text-slate-200 hover:text-teal-300 focus-visible:text-teal-300"
-            href="https://tweetworldtravel.com/"
-            target="_blank"
-            rel="noreferrer noopener"
-          >
-            Tweet World Travel Group
-          </a>
-          , I worked as a full-stack developer — building Spring Boot
-          microservices and high-performance React/Next.js interfaces across five
-          B2B/B2C e-commerce platforms serving ~1,000 users a month. Earlier, I
-          built responsive web apps at Minastik (onsite at 3S Intersoft) and
-          interned at{" "}
-          <a
-            className="font-medium text-slate-200 hover:text-teal-300 focus-visible:text-teal-300"
-            href="https://www.fpt-software.com/"
-            target="_blank"
-            rel="noreferrer noopener"
-          >
-            FPT Software
-          </a>
-          .
-        </p>
-        <p className="mb-4">
-          I care about the whole delivery pipeline, too — integrating security
-          CI/CD (Gitleaks, Trivy, Semgrep, ZAP) and designing AI workflows that
-          lift team productivity by ~30%. I hold a B.Eng in Electronics &amp;
-          Telecommunications from Hanoi University of Science and Technology and
-          published research at the REV-ECIT 2021 conference. Outside of work,
-          you&apos;ll usually find me playing badminton, basketball, or billiards.
-        </p>
+
+        <ul className="mb-6 grid grid-cols-2 gap-4 border-y border-slate-800 py-5 sm:grid-cols-3">
+          {stats.map((stat) => (
+            <li key={stat.label}>
+              <p className="text-2xl font-bold text-teal-300">{stat.value}</p>
+              <p className="mt-0.5 text-xs font-medium uppercase tracking-wide text-slate-500">
+                {stat.label}
+              </p>
+            </li>
+          ))}
+        </ul>
+
+        <div className="space-y-8">
+          {/* Current */}
+          <div>
+            <h3 className="mb-3 text-lg font-semibold text-slate-200">
+              Frontend Tech Lead · SAPP Academy
+            </h3>
+
+            <ul className="list-disc space-y-2 pl-5 text-slate-400">
+              <li>Led frontend architecture across the product ecosystem.</li>
+
+              <li>
+                Built a <strong>Monorepo</strong> with{" "}
+                <strong>pnpm Workspace</strong> and <strong>Turborepo</strong>.
+              </li>
+
+              <li>
+                Migrated the LMS from{" "}
+                <strong>Next.js 12 → Next.js 14 (App Router)</strong>.
+              </li>
+
+              <li>
+                Reduced page load time by <strong>~60%</strong> (15.2s → 6.1s)
+                and improved mobile Lighthouse from <strong>29 → 65+</strong>.
+              </li>
+
+              <li>
+                Built shared internal packages to standardize developer
+                experience.
+              </li>
+            </ul>
+          </div>
+
+          {/* Previous */}
+          <div>
+            <h3 className="mb-3 text-lg font-semibold text-slate-200">
+              Full-stack Developer · Tweet World Travel Group
+            </h3>
+
+            <ul className="list-disc space-y-2 pl-5 text-slate-400">
+              <li>
+                Developed Spring Boot microservices and high-performance React /
+                Next.js applications.
+              </li>
+
+              <li>
+                Delivered <strong>5 B2B/B2C products</strong> serving
+                approximately <strong>1,000 monthly users</strong>.
+              </li>
+            </ul>
+          </div>
+
+          {/* Additional */}
+          <div>
+            <h3 className="mb-3 text-lg font-semibold text-slate-200">
+              Additional Highlights
+            </h3>
+
+            <ul className="list-disc space-y-2 pl-5 text-slate-400">
+              <li>
+                Integrated security CI/CD with Gitleaks, Trivy, Semgrep, and
+                ZAP.
+              </li>
+
+              <li>
+                Designed AI workflows that improved engineering productivity by
+                <strong> ~30%</strong>.
+              </li>
+
+              <li>
+                B.Eng in Electronics & Telecommunications (HUST) · Published
+                research at <strong>REV-ECIT 2021</strong>.
+              </li>
+            </ul>
+          </div>
+        </div>
       </div>
     </section>
   );

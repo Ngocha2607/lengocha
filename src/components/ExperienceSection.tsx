@@ -17,7 +17,7 @@ const experiences: ExperienceEntry[] = [
     url: "https://sapp.edu.vn",
     ariaLabel: "Frontend Tech Lead at SAPP Academy (opens in a new tab)",
     description:
-      "Lead the frontend technical direction and architecture across SAPP’s product ecosystem (LMS, Ops) — setting coding standards, reviewing 100% of merge requests, and mentoring two junior engineers. Designed a Monorepo with pnpm Workspace and Turborepo, migrated the LMS to Next.js 14 App Router, cut page load time by 60% (15.2s → 6.1s), and raised the mobile Lighthouse score from 29 to 65+. Built a shared Tiptap-based rich text editor package to replace TinyMCE — eliminating monthly subscription costs, improving code reuse, and standardizing the editing experience across products. Integrated a security pipeline (Gitleaks, Trivy, Semgrep, ZAP) and AI workflows that save the team ~10 hours per week.",
+      "Lead the frontend technical direction and architecture across SAPP’s product ecosystem (LMS, Ops) — setting coding standards, reviewing all frontend merge requests, and mentoring two junior engineers. Designed a Monorepo with pnpm Workspace and Turborepo, migrated the LMS to Next.js 14 App Router, cut page load time by 60% (15.2s → 6.1s), and raised the mobile Lighthouse score from 29 to 65+. Built a shared Tiptap-based rich text editor package to replace TinyMCE — eliminating monthly subscription costs, improving code reuse, and standardizing the editing experience across products. Integrated a security pipeline (Gitleaks, Trivy, Semgrep, ZAP) and AI workflows that save the team ~10 hours per week.",
     tags: [
       "Next.js",
       "TypeScript",
@@ -35,7 +35,7 @@ const experiences: ExperienceEntry[] = [
     ariaLabel:
       "Fullstack Developer at Tweet World Travel Group (opens in a new tab)",
     description:
-      "Built and maintained Spring Boot microservices and high-performance React/Next.js interfaces across five B2B/B2C e-commerce platforms and an internal multi-language ERP serving ~1,000 users a month. Applied SSR and resource-optimization strategies to cut page load from 3.2s to 1.1s (Lighthouse 85+), mentored three junior engineers, and reviewed every pull request before staging.",
+      "Built Spring Boot microservices and high-performance React/Next.js applications across five B2B/B2C e-commerce platforms and a multilingual ERP serving 1K+ monthly users. Optimized performance (3.2s → 1.1s, Lighthouse 85+), mentored three junior engineers, and led code reviews to maintain production quality.",
     tags: [
       "Java",
       "Spring Boot",
@@ -72,7 +72,7 @@ const experiences: ExperienceEntry[] = [
     ariaLabel:
       "Bachelor of Engineering at Hanoi University of Science and Technology (opens in a new tab)",
     description:
-      "Advanced Program in Electronics & Telecommunications at Hanoi University of Science and Technology. Published research in the proceedings of the REV-ECIT 2021 conference.",
+      "B.Eng in Electronics & Telecommunications (HUST). Published research at REV-ECIT 2021.",
     tags: [],
   },
 ];
