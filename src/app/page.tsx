@@ -4,6 +4,7 @@ import { AboutSection } from "@/components/AboutSection";
 import { ExperienceSection } from "@/components/ExperienceSection";
 import { ProjectsSection } from "@/components/ProjectsSection";
 import { Footer } from "@/components/Footer";
+import { FloatingCTA } from "@/components/FloatingCTA";
 
 export default function Home() {
   return (
@@ -19,6 +20,7 @@ export default function Home() {
           </main>
         </div>
       </div>
+      <FloatingCTA />
     </SpotlightEffect>
   );
 }

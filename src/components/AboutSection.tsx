@@ -32,7 +32,9 @@ export function AboutSection() {
           product ecosystem. I designed and rolled out a Monorepo architecture
           with pnpm Workspace and Turborepo, migrated the LMS from Next.js 12 to
           Next.js 14 (App Router), and cut page load time by ~60% (15.2s → 6.1s)
-          while raising the mobile Lighthouse score from 29 to 65+.
+          while raising the mobile Lighthouse score from 29 to 65+. I also build
+          shared internal packages that improve reuse and standardize the
+          developer experience across products.
         </p>
         <p className="mb-4">
           Previously, at{" "}

@@ -79,8 +79,11 @@ export function Header() {
         <h2 className="mt-3 text-lg font-medium tracking-tight text-slate-200 sm:text-xl">
           Senior Frontend Engineer | Frontend Tech Lead
         </h2>
+        <p className="mt-2 text-sm font-medium tracking-wide text-teal-300">
+          React • Next.js • TypeScript
+        </p>
         <p className="mt-4 max-w-xs leading-normal">
-          I build fast, scalable web experiences and lead frontend architecture.
+          Building scalable web applications with a performance-first mindset.
         </p>
         <nav className="nav hidden lg:block" aria-label="In-page jump links">
           <ul className="mt-16 w-max">
