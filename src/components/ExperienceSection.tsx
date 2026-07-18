@@ -17,7 +17,7 @@ const experiences: ExperienceEntry[] = [
     url: "https://sapp.edu.vn",
     ariaLabel: "Frontend Tech Lead at SAPP Academy (opens in a new tab)",
     description:
-      "Lead the frontend technical direction and architecture across SAPP’s product ecosystem (LMS, Ops) — setting coding standards, reviewing all frontend merge requests, and mentoring two junior engineers. Designed a Monorepo with pnpm Workspace and Turborepo, migrated the LMS to Next.js 14 App Router, cut page load time by 60% (15.2s → 6.1s), and raised the mobile Lighthouse score from 29 to 65+. Built a shared Tiptap-based rich text editor package to replace TinyMCE — eliminating monthly subscription costs, improving code reuse, and standardizing the editing experience across products. Integrated a security pipeline (Gitleaks, Trivy, Semgrep, ZAP) and AI workflows that save the team ~10 hours per week.",
+      "Led the frontend technical direction and architecture across SAPP’s product ecosystem (LMS, Ops), defining coding standards, leading code reviews, and mentoring two junior engineers.Designed a Monorepo with pnpm Workspace and Turborepo, migrated the LMS to Next.js 14 App Router, reduced page load time by 60% (15.2s → 6.1s), and improved Lighthouse score from 29 to 65+. Built a shared Tiptap editor package replacing TinyMCE, reducing subscription costs and standardizing the editing experience. Integrated a security pipeline (Gitleaks, Trivy, Semgrep, ZAP) and AI workflows that save the team ~10 hours per week.",
     tags: [
       "Next.js",
       "TypeScript",
