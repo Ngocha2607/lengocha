@@ -8,6 +8,7 @@ const NAV_ITEMS = [
   { id: "about", label: "About" },
   { id: "experience", label: "Experience" },
   { id: "projects", label: "Projects" },
+  { id: "writing", label: "Writing" },
 ] as const;
 
 const SOCIAL_LINKS = [

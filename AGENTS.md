@@ -39,10 +39,12 @@ unsure about an API or convention, check the docs bundled in
 ```
 src/
   app/              # Next.js routes, root layout, global CSS
-  components/       # React components (Header, About, Experience, Projects, Footer)
+    writing/[slug]/ # Notion-backed article pages (ISR)
+  components/       # React components (Header, About, Experience, Projects, Writing, Footer)
     ui/             # shadcn/ui primitives
     icons.tsx       # SVG icons as React components
   lib/utils.ts      # cn() utility
+  lib/notion.ts     # Notion "Writing" data layer (getPublishedPosts, getPostBySlug)
   types/            # TypeScript interfaces
   hooks/            # Custom React hooks
 public/
@@ -50,3 +52,18 @@ public/
   seo/              # Favicons, OG images, webmanifest
   resume.pdf        # Downloadable CV
 ```
+
+## Content: Writing (Notion)
+
+The Writing section and `/writing/[slug]` pages are driven by a Notion database
+via the official API, rendered to Markdown (`notion-to-md`) and displayed with
+`react-markdown` + `remark-gfm`. Content refreshes via ISR (`revalidate = 3600`),
+so new published posts appear within an hour — no redeploy needed.
+
+- Config: `NOTION_TOKEN` + `NOTION_WRITING_DB_ID` (see `.env.example`). Secrets
+  go in `.env.local` locally and Vercel env vars in production — never in the
+  committed `.env`.
+- Graceful fallback: with no env configured, `src/lib/notion.ts` returns empty
+  and `WritingSection` renders a hardcoded entry, so the build never breaks.
+- Notion image URLs are signed and expire (~1h); embedded images may 404 near
+  the revalidation boundary. Text/tables/code are unaffected.

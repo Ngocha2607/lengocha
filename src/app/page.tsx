@@ -3,8 +3,13 @@ import { Header } from "@/components/Header";
 import { AboutSection } from "@/components/AboutSection";
 import { ExperienceSection } from "@/components/ExperienceSection";
 import { ProjectsSection } from "@/components/ProjectsSection";
+import { WritingSection } from "@/components/WritingSection";
 import { Footer } from "@/components/Footer";
 import { FloatingCTA } from "@/components/FloatingCTA";
+
+// Revalidate the homepage hourly so newly published Notion posts appear in the
+// Writing list without a redeploy (ISR).
+export const revalidate = 3600;
 
 export default function Home() {
   return (
@@ -16,6 +21,7 @@ export default function Home() {
             <AboutSection />
             <ExperienceSection />
             <ProjectsSection />
+            <WritingSection />
             <Footer />
           </main>
         </div>
