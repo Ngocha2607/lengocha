@@ -3,7 +3,7 @@ const stats = [
   { value: "5", label: "B2B/B2C Products" },
   { value: "1K+", label: "Monthly Users" },
   { value: "60%", label: "Faster Loads" },
-  { value: "2x", label: "Lighthouse Score" },
+  { value: "15", label: "LMS Routes Audited" },
   { value: "~30%", label: "AI Productivity" },
 ];
 
@@ -60,8 +60,17 @@ export function AboutSection() {
               </li>
 
               <li>
-                Reduced page load time by <strong>~60%</strong> (15.2s → 6.1s)
-                and improved mobile Lighthouse from <strong>29 → 65+</strong>.
+                Ran a performance pass across 15 LMS routes — took{" "}
+                <code>/courses</code> from <strong>15.2s → 6.1s</strong> with
+                Lighthouse Performance <strong>29 → 65</strong>, lifting the
+                student route group to <strong>49 → 67</strong> —{" "}
+                <a
+                  className="font-medium text-slate-200 underline decoration-slate-600 underline-offset-2 hover:text-teal-300 hover:decoration-teal-300 focus-visible:text-teal-300"
+                  href="#performance"
+                >
+                  the audit, and the fix I held back
+                </a>
+                .
               </li>
 
               <li>
@@ -99,7 +108,14 @@ export function AboutSection() {
             <ul className="list-disc space-y-2 pl-5 text-slate-400">
               <li>
                 Integrated security CI/CD with Gitleaks, Trivy, Semgrep, and
-                ZAP.
+                ZAP — gating{" "}
+                <a
+                  className="font-medium text-slate-200 underline decoration-slate-600 underline-offset-2 hover:text-teal-300 hover:decoration-teal-300 focus-visible:text-teal-300"
+                  href="#performance"
+                >
+                  every merge request
+                </a>
+                .
               </li>
 
               <li>

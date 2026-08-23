@@ -1,6 +1,7 @@
 import { SpotlightEffect } from "@/components/SpotlightEffect";
 import { Header } from "@/components/Header";
 import { AboutSection } from "@/components/AboutSection";
+import { PerformanceSection } from "@/components/PerformanceSection";
 import { ExperienceSection } from "@/components/ExperienceSection";
 import { ProjectsSection } from "@/components/ProjectsSection";
 import { WritingSection } from "@/components/WritingSection";
@@ -19,6 +20,7 @@ export default function Home() {
           <Header />
           <main id="content" className="pt-24 lg:w-[52%] lg:py-24">
             <AboutSection />
+            <PerformanceSection />
             <ExperienceSection />
             <ProjectsSection />
             <WritingSection />
