@@ -85,7 +85,7 @@ const NODES: WorkspaceNode[] = [
     internal: true,
   },
   {
-    name: "subscriber-erp",
+    name: "subscriber-platform",
     dir: "apps",
     title: "Subscriber Platform · Tweet World Travel",
     period: "2023 — 2025",
@@ -117,7 +117,7 @@ const NODES: WorkspaceNode[] = [
     href: "https://tweetworldtravel.com",
   },
   {
-    name: "newsletter-studio",
+    name: "newsletter",
     dir: "apps",
     title: "Newsletter System · Tweet World Travel",
     period: "2023 — 2024",
@@ -132,7 +132,7 @@ const NODES: WorkspaceNode[] = [
     imageAlt: "Drag-and-drop email newsletter builder interface",
   },
   {
-    name: "evn-power",
+    name: "evn",
     dir: "apps",
     title: "EVN Hanoi Power Company · 3S Intersoft",
     period: "2022 — 2023",
