@@ -54,6 +54,8 @@ export function PerformanceSection() {
       <p className="mb-6 text-sm leading-normal">
         I ran a performance pass over the LMS across 15 routes. Drag the slider
         to replay it — the scores are the audit, not a marketing round-up.
+        Further down is the change I measured, proved out, and then chose not to
+        ship; that is the one I&apos;d rather talk about.
       </p>
 
       <PerformanceCase />
