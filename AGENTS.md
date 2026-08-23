@@ -40,7 +40,7 @@ unsure about an API or convention, check the docs bundled in
 src/
   app/              # Next.js routes, root layout, global CSS
     writing/[slug]/ # Notion-backed article pages (ISR)
-  components/       # React components (Header, About, Experience, Projects, Writing, Footer)
+  components/       # React components (Header, About, Performance, Experience, Projects, Writing, Footer)
     ui/             # shadcn/ui primitives
     icons.tsx       # SVG icons as React components
   lib/utils.ts      # cn() utility
@@ -52,6 +52,55 @@ public/
   seo/              # Favicons, OG images, webmanifest
   resume.pdf        # Downloadable CV
 ```
+
+## Interactive sections
+
+Three components carry custom interaction instead of the stock list layout. The
+only runtime dependency any of them adds is `web-vitals` (~2KB, no transitive
+deps) — there is deliberately no animation library, because the site's own pitch
+is bundle size:
+
+- `PerformanceCase` + `PerformanceSection` — the LMS performance pass. Sourced
+  from the internal Confluence page "[FE] Cam nang Performance & Toi uu cho LMS
+  (Next.js 14 App Router)", which is the source of truth for every number in
+  this section, with one known correction: the page attributes the weakest
+  student route to `/`, but `/` only redirects, and the measurements were taken
+  on `/courses`. So `/courses` went 15.2s -> 6.1s with Lighthouse Performance
+  29 -> 65; the student route group went 49 -> 67 across 8 routes and the
+  teacher group 72 -> 89 across 7. Lab numbers are desktop, cold cache, against
+  `next build && next start`; field Core Web Vitals are P75 desktop on UAT,
+  taken before the pass. Do not add a number here that is in neither source.
+- `PipelineTerminal` — replays the Gitleaks / Trivy / Semgrep / ZAP gate.
+  Results stay qualitative and the caption states it is not a live scan.
+- `WorkspaceExplorer` (Projects) — a workspace-style tree over every project,
+  built on the ARIA tablist pattern with roving tabindex and arrow-key
+  navigation. Folder names mirror the real SAPP monorepo, which is called
+  `lms-fe`: `apps/` (`lms-pro`, `lms-test`, `lms-finhub`), `libs/` (`ui`,
+  `editor`, `styles`), `features/`, with Turborepo running the task graph.
+  `lms-fe` is the repo, NOT an app. Every panel's copy stays in the DOM
+  (`hidden`) so it remains crawlable; only the selected panel mounts its
+  `<Image>`.
+
+- `WebVitalsMonitor` (in the Footer) — live LCP/FCP/TTFB/INP/CLS for the page
+  the visitor is on, measured with `web-vitals` and rendered locally; nothing is
+  sent anywhere. It mirrors the five metrics the Performance section quotes as
+  lab data, so the two strips read as a pair. Unmeasured metrics show `—`, never
+  a placeholder number, and both states occupy one line so filling in cannot
+  cause the layout shift the widget is reporting on. Measure it against
+  `next build && next start`: the dev server reports a wildly inflated FCP.
+
+All of it respects `prefers-reduced-motion`.
+
+### Claims discipline
+
+The portfolio states engineering claims a reviewer can probe, so anything on the
+page must be traceable to the Confluence audit, a published Writing post, or the
+CV. Notably NOT true as of the last update, so do not write it: server-side data
+fetching (roadmap P2 — `lms-pro` is still ~270 `'use client'` files) and the
+`revalidate = 0` removal (measured, then deliberately left unshipped — see the
+callout in `PerformanceSection`). The Tiptap package has replaced TinyMCE across
+the whole monorepo, so the audit page's TinyMCE entries are stale — it was last
+edited before that landed.
 
 ## Content: Writing (Notion)
 

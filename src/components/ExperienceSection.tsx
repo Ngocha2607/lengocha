@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ArrowUpRightIcon, ArrowRightIcon } from "@/components/icons";
 
 interface ExperienceEntry {
@@ -7,6 +8,12 @@ interface ExperienceEntry {
   ariaLabel?: string;
   subtitles?: string[];
   description: string;
+  /**
+   * Optional deep-dive article about this work. `href` points at an internal
+   * `/writing/[slug]` route, so only add it once the post is published in
+   * Notion — an unpublished slug 404s.
+   */
+  writeup?: { href: string; label: string };
   tags: string[];
 }
 
@@ -17,7 +24,11 @@ const experiences: ExperienceEntry[] = [
     url: "https://sapp.edu.vn",
     ariaLabel: "Frontend Tech Lead at SAPP Academy (opens in a new tab)",
     description:
-      "Led the frontend technical direction and architecture across SAPP’s product ecosystem (LMS, Ops), defining coding standards, leading code reviews, and mentoring two junior engineers.Designed a Monorepo with pnpm Workspace and Turborepo, migrated the LMS to Next.js 14 App Router, reduced page load time by 60% (15.2s → 6.1s), and improved Lighthouse score from 29 to 65+. Built a shared Tiptap editor package replacing TinyMCE, reducing subscription costs and standardizing the editing experience. Integrated a security pipeline (Gitleaks, Trivy, Semgrep, ZAP) and AI workflows that save the team ~10 hours per week.",
+      "Led the frontend technical direction and architecture across SAPP’s product ecosystem (LMS, Ops), defining coding standards, leading code reviews, and mentoring two junior engineers. Designed a Monorepo with pnpm Workspace and Turborepo, migrated the LMS to Next.js 14 App Router, and ran a performance pass across 15 routes — /courses went 15.2s → 6.1s with Lighthouse Performance 29 → 65, lifting the student route group to 49 → 67. Built a shared Tiptap editor package that replaced TinyMCE across the monorepo, cutting a per-seat subscription and standardizing the editing experience. Integrated a security pipeline (Gitleaks, Trivy, Semgrep, ZAP) and AI workflows that save the team ~10 hours per week.",
+    writeup: {
+      href: "/writing/ban-lms-theo-module-kien-truc-plugin-trong-monorepo-next-js",
+      label: "Bán LMS theo module: kiến trúc plugin trong monorepo Next.js",
+    },
     tags: [
       "Next.js",
       "TypeScript",
@@ -137,6 +148,17 @@ export function ExperienceSection() {
                 <p className="mt-2 text-sm leading-normal">
                   {experience.description}
                 </p>
+                {experience.writeup && (
+                  <Link
+                    className="group/link relative mt-3 inline-flex items-baseline text-sm font-medium leading-tight text-slate-400 hover:text-teal-300 focus-visible:text-teal-300"
+                    href={experience.writeup.href}
+                  >
+                    <span>
+                      Deep dive: {experience.writeup.label}
+                      <ArrowUpRightIcon />
+                    </span>
+                  </Link>
+                )}
                 {experience.tags.length > 0 && (
                   <ul
                     className="mt-2 flex flex-wrap"

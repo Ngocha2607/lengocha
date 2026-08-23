@@ -6,6 +6,7 @@ import { GitHubIcon, LinkedInIcon, MailIcon } from "@/components/icons";
 
 const NAV_ITEMS = [
   { id: "about", label: "About" },
+  { id: "performance", label: "Performance" },
   { id: "experience", label: "Experience" },
   { id: "projects", label: "Projects" },
   { id: "writing", label: "Writing" },
