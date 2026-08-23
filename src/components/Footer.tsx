@@ -1,7 +1,10 @@
+import { WebVitalsMonitor } from "@/components/WebVitalsMonitor";
+
 export function Footer() {
   return (
-    <footer className="max-w-md pb-16 text-sm text-slate-500 sm:pb-0">
-      <p>
+    <footer className="pb-16 text-sm text-slate-500 sm:pb-0">
+      <WebVitalsMonitor />
+      <p className="mt-8 max-w-md">
         Built with{" "}
         <a
           href="https://nextjs.org/"

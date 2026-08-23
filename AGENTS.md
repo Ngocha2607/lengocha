@@ -55,9 +55,10 @@ public/
 
 ## Interactive sections
 
-Two sections carry custom interaction instead of the stock list layout. Both are
-deliberately dependency-free — no animation library — because the site's own
-pitch is bundle size:
+Three components carry custom interaction instead of the stock list layout. The
+only runtime dependency any of them adds is `web-vitals` (~2KB, no transitive
+deps) — there is deliberately no animation library, because the site's own pitch
+is bundle size:
 
 - `PerformanceCase` + `PerformanceSection` — the LMS performance pass. Sourced
   from the internal Confluence page "[FE] Cam nang Performance & Toi uu cho LMS
@@ -79,6 +80,14 @@ pitch is bundle size:
   `lms-fe` is the repo, NOT an app. Every panel's copy stays in the DOM
   (`hidden`) so it remains crawlable; only the selected panel mounts its
   `<Image>`.
+
+- `WebVitalsMonitor` (in the Footer) — live LCP/FCP/TTFB/INP/CLS for the page
+  the visitor is on, measured with `web-vitals` and rendered locally; nothing is
+  sent anywhere. It mirrors the five metrics the Performance section quotes as
+  lab data, so the two strips read as a pair. Unmeasured metrics show `—`, never
+  a placeholder number, and both states occupy one line so filling in cannot
+  cause the layout shift the widget is reporting on. Measure it against
+  `next build && next start`: the dev server reports a wildly inflated FCP.
 
 All of it respects `prefers-reduced-motion`.
 

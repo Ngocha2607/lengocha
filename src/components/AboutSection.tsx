@@ -74,8 +74,12 @@ export function AboutSection() {
               </li>
 
               <li>
-                Built shared internal packages to standardize developer
-                experience.
+                Replaced a <strong>per-seat TinyMCE licence</strong> with a
+                custom <strong>Tiptap</strong> package across the monorepo. The
+                editor sits in front of every student and teacher, so the bill
+                tracked enrolment — the one number nobody can forecast a year
+                out, and an unforecastable seat count is an unbudgetable line
+                item.
               </li>
             </ul>
           </div>

@@ -63,7 +63,7 @@ export function PerformanceSection() {
       </h3>
       <p className="mb-4 text-sm leading-normal">
         Field data first, so the work follows real users rather than a lab
-        score:
+        score. Thresholds are the Core Web Vitals targets:
       </p>
 
       <ul className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-5">
@@ -89,7 +89,7 @@ export function PerformanceSection() {
               {metric.value}
             </p>
             <p className="text-xs tabular-nums text-slate-600">
-              good {metric.good}
+              {metric.good}
             </p>
           </li>
         ))}
