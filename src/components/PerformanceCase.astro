@@ -1,0 +1,394 @@
+---
+/**
+ * The LMS performance pass, replayable. Every number here comes from the
+ * internal Confluence audit — see AGENTS.md for the one correction applied
+ * (the audit attributes the weakest student route to `/`, but `/` only
+ * redirects and the measurements were taken on `/courses`).
+ *
+ * Rewritten from React to plain DOM work on purpose: the section argues about
+ * bundle size, so it cannot be the thing that ships a framework runtime to
+ * animate a bar. Total cost of this component's interactivity is one small
+ * inline module.
+ */
+
+const GROUPS = [
+  { key: "student", name: "Student", routes: 8, before: 49, after: 67 },
+  { key: "teacher", name: "Teacher", routes: 7, before: 72, after: 89 },
+];
+
+const TARGET = {
+  route: "/courses",
+  load: { before: 15.2, after: 6.1 },
+  score: { before: 29, after: 65 },
+};
+
+/** Only what actually shipped. Roadmap items live further down the page. */
+const LEVERS = [
+  "13 render-blocking stylesheets in the root layout down to 3 — the rest moved into the lazy component that owns them, verified pixel-identical",
+  "PinnedNotifications lazy-loaded, taking react-fast-marquee out of the initial bundle on every route",
+  "next/font self-hosted with display optional and adjustFontFallback — field CLS holds at 0.01",
+  "Auth bootstrap consolidated behind a single authReady gate, replacing loading fallbacks scattered across the tree",
+  "Lottie moved to API-driven load-and-cache; the tour-guide animation became a video",
+  "Build config: optimizePackageImports, swcMinify, removeConsole and optimizeCss in production",
+];
+
+const RADIUS = 30;
+const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
+
+/** Lighthouse's own banding: red under 50, amber under 90, green above. */
+function tone(score: number) {
+  if (score >= 90) return "text-pass";
+  if (score >= 50) return "text-warn";
+  return "text-fail";
+}
+
+const config = {
+  groups: GROUPS.map(({ key, before, after }) => ({ key, before, after })),
+  target: TARGET,
+  levers: LEVERS.length,
+  circumference: CIRCUMFERENCE,
+};
+---
+
+<div class="border-2 border-rule" data-perf-case data-config={JSON.stringify(config)}>
+  <div class="border-b-2 border-rule px-4 py-3">
+    <p class="label">Lighthouse performance · lms-pro</p>
+    {/* The donuts are meaningless to anyone who has not run Lighthouse. */}
+    <p class="mt-1 text-sm text-ink-3">
+      Google&apos;s page-quality score out of 100 — higher is better. Lighthouse
+      bands it red under 50, amber under 90, green above.
+    </p>
+  </div>
+
+  <div class="grid border-b-2 border-rule sm:grid-cols-2">
+    {
+      GROUPS.map((group, i) => (
+        <div
+          class:list={[
+            "flex items-center gap-4 px-4 py-5",
+            i === 0 && "border-b-2 border-rule sm:border-b-0 sm:border-r-2",
+          ]}
+        >
+          <svg
+            viewBox="0 0 80 80"
+            class="h-20 w-20 shrink-0 -rotate-90"
+            role="img"
+            aria-label={`${group.name} routes, Lighthouse performance`}
+            data-donut={group.key}
+          >
+            <circle
+              cx="40"
+              cy="40"
+              r={RADIUS}
+              fill="none"
+              stroke-width="8"
+              class="stroke-hush"
+            />
+            <circle
+              cx="40"
+              cy="40"
+              r={RADIUS}
+              fill="none"
+              stroke-width="8"
+              stroke-dasharray={CIRCUMFERENCE}
+              stroke-dashoffset={CIRCUMFERENCE * (1 - group.before / 100)}
+              class:list={[tone(group.before), "stroke-current"]}
+              data-donut-arc
+            />
+            <text
+              x="40"
+              y="40"
+              text-anchor="middle"
+              dominant-baseline="central"
+              transform="rotate(90 40 40)"
+              class:list={[
+                tone(group.before),
+                "fill-current font-mono text-xl font-bold tabular-nums",
+              ]}
+              data-donut-text>{group.before}</text
+            >
+          </svg>
+          <div class="min-w-0">
+            <p class="font-mono font-semibold text-ink">{group.name}</p>
+            <p class="label mt-1 text-ink-3">
+              {group.routes} routes · {group.before} → {group.after}
+            </p>
+          </div>
+        </div>
+      ))
+    }
+  </div>
+
+  {/* The route the whole pass was aimed at, so it gets its own readout. */}
+  <div class="border-b-2 border-rule bg-hush px-4 py-5">
+    {/*
+      `normal-case` on the route: a filesystem path is not a label, and the
+      uppercase from `.label` turned it into /COURSES.
+    */}
+    <p class="label mb-4">
+      <span class="border-2 border-rule bg-acid px-1.5 py-0.5 normal-case">
+        {TARGET.route}
+      </span>
+      <span class="ml-2 text-ink-3">the route the pass was aimed at</span>
+    </p>
+
+    <div class="grid gap-6 sm:grid-cols-2">
+      <div>
+        <p class="label text-ink-3">Page load</p>
+        <p class="mt-1 flex items-baseline gap-1 font-mono text-5xl font-bold tabular-nums text-ink">
+          <span data-load>{TARGET.load.before.toFixed(1)}</span>
+          <span class="text-2xl font-medium text-ink-2">s</span>
+        </p>
+        <p class="label mt-1 text-ink-3 normal-case">
+          {TARGET.load.before.toFixed(1)}s → {TARGET.load.after.toFixed(1)}s
+        </p>
+        {/* Full bar = the 15.2s starting point; the fill is where it sits now. */}
+        <div class="mt-3 h-4 w-full border-2 border-rule">
+          <div class="h-full bg-ink" style="width:100%" data-load-bar></div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-4">
+        <svg
+          viewBox="0 0 80 80"
+          class="h-20 w-20 shrink-0 -rotate-90"
+          role="img"
+          aria-label={`${TARGET.route} Lighthouse performance`}
+          data-donut="target"
+        >
+          <circle
+            cx="40"
+            cy="40"
+            r={RADIUS}
+            fill="none"
+            stroke-width="8"
+            class="stroke-paper"
+          />
+          <circle
+            cx="40"
+            cy="40"
+            r={RADIUS}
+            fill="none"
+            stroke-width="8"
+            stroke-dasharray={CIRCUMFERENCE}
+            stroke-dashoffset={CIRCUMFERENCE * (1 - TARGET.score.before / 100)}
+            class:list={[tone(TARGET.score.before), "stroke-current"]}
+            data-donut-arc
+          />
+          <text
+            x="40"
+            y="40"
+            text-anchor="middle"
+            dominant-baseline="central"
+            transform="rotate(90 40 40)"
+            class:list={[
+              tone(TARGET.score.before),
+              "fill-current font-mono text-xl font-bold tabular-nums",
+            ]}
+            data-donut-text>{TARGET.score.before}</text
+          >
+        </svg>
+        <div>
+          <p class="label text-ink-3">Lighthouse</p>
+          <p class="label mt-1 text-ink-3">
+            {TARGET.score.before} → {TARGET.score.after}
+          </p>
+          <p class="mt-1 text-sm text-ink-3">LCP 6.4s at baseline</p>
+        </div>
+      </div>
+    </div>
+
+    <p class="mt-5 max-w-[70ch] border-t-2 border-rule pt-4 text-sm text-ink-2">
+      <code class="font-semibold text-ink">/teachers</code> is the honest
+      counterweight: still 66, LCP still 5.9s. The teacher side never moved,
+      because none of the shipped items touched what makes that route slow.
+    </p>
+  </div>
+
+  <div class="border-b-2 border-rule px-4 py-5">
+    <label class="label" for="perf-slider">Drag to replay the pass</label>
+    <div class="mt-3 flex items-center gap-3">
+      <button
+        type="button"
+        class="label shrink-0 border-2 border-rule px-3 py-1.5 hover:bg-acid focus-visible:bg-acid"
+        data-preset="0"
+      >
+        Baseline
+      </button>
+      <input
+        id="perf-slider"
+        type="range"
+        min="0"
+        max="100"
+        step="1"
+        value="0"
+        class="accent-ink min-w-0 flex-1 cursor-ew-resize"
+        data-slider
+        aria-valuetext={`${TARGET.route}: ${TARGET.load.before.toFixed(1)} second load, Lighthouse performance ${TARGET.score.before}`}
+      />
+      <button
+        type="button"
+        class="label shrink-0 border-2 border-rule bg-ink px-3 py-1.5 text-paper hover:bg-acid hover:text-ink focus-visible:bg-acid focus-visible:text-ink"
+        data-preset="100"
+      >
+        Shipped
+      </button>
+    </div>
+  </div>
+
+  <div class="px-4 py-5">
+    <p class="label text-ink-3">What shipped</p>
+    <ul class="mt-3 space-y-3">
+      {
+        LEVERS.map((lever) => (
+          <li class="flex gap-3" data-lever>
+            <span
+              class="mt-1.5 h-3 w-3 shrink-0 border-2 border-rule"
+              aria-hidden="true"
+              data-lever-box
+            />
+            <span class="text-sm text-ink-3" data-lever-text>
+              {lever}
+            </span>
+          </li>
+        ))
+      }
+    </ul>
+    <p class="mt-5 border-t-2 border-rule pt-4 text-sm text-ink-3">
+      Lab Lighthouse, desktop, cold cache, run against
+      <code>next build &amp;&amp; next start</code> — never the dev server.
+    </p>
+  </div>
+</div>
+
+<script>
+  interface PerfConfig {
+    groups: { key: string; before: number; after: number }[];
+    target: {
+      route: string;
+      load: { before: number; after: number };
+      score: { before: number; after: number };
+    };
+    levers: number;
+    circumference: number;
+  }
+
+  const TONES = ["text-pass", "text-warn", "text-fail"];
+  const TRANSITION_MS = 900;
+
+  const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+  const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
+
+  function toneFor(score: number) {
+    if (score >= 90) return "text-pass";
+    if (score >= 50) return "text-warn";
+    return "text-fail";
+  }
+
+  function applyTone(el: Element, score: number) {
+    const next = toneFor(score);
+    for (const tone of TONES) el.classList.toggle(tone, tone === next);
+  }
+
+  for (const root of document.querySelectorAll<HTMLElement>("[data-perf-case]")) {
+    const config: PerfConfig = JSON.parse(root.dataset.config!);
+    const slider = root.querySelector<HTMLInputElement>("[data-slider]")!;
+    const loadValue = root.querySelector<HTMLElement>("[data-load]")!;
+    const loadBar = root.querySelector<HTMLElement>("[data-load-bar]")!;
+    const levers = Array.from(root.querySelectorAll<HTMLElement>("[data-lever]"));
+
+    const donuts = new Map<string, { arc: SVGCircleElement; text: SVGTextElement }>();
+    for (const svg of root.querySelectorAll<SVGElement>("[data-donut]")) {
+      donuts.set(svg.dataset.donut!, {
+        arc: svg.querySelector("[data-donut-arc]")!,
+        text: svg.querySelector("[data-donut-text]")!,
+      });
+    }
+
+    function paintDonut(key: string, score: number) {
+      const donut = donuts.get(key);
+      if (!donut) return;
+      donut.arc.setAttribute(
+        "stroke-dashoffset",
+        String(config.circumference * (1 - score / 100)),
+      );
+      donut.text.textContent = String(score);
+      applyTone(donut.arc, score);
+      applyTone(donut.text, score);
+    }
+
+    function render(t: number) {
+      for (const group of config.groups) {
+        paintDonut(group.key, Math.round(lerp(group.before, group.after, t)));
+      }
+
+      const score = Math.round(
+        lerp(config.target.score.before, config.target.score.after, t),
+      );
+      paintDonut("target", score);
+
+      const load = lerp(config.target.load.before, config.target.load.after, t);
+      loadValue.textContent = load.toFixed(1);
+      loadBar.style.width = `${(load / config.target.load.before) * 100}%`;
+
+      slider.setAttribute(
+        "aria-valuetext",
+        `${config.target.route}: ${load.toFixed(1)} second load, Lighthouse performance ${score}`,
+      );
+
+      levers.forEach((lever, index) => {
+        const applied = t > index / config.levers;
+        const box = lever.querySelector<HTMLElement>("[data-lever-box]")!;
+        const text = lever.querySelector<HTMLElement>("[data-lever-text]")!;
+        box.classList.toggle("bg-acid", applied);
+        text.classList.toggle("text-ink", applied);
+        text.classList.toggle("text-ink-3", !applied);
+      });
+    }
+
+    let frame: number | null = null;
+    let progress = 0;
+
+    /** Animate toward a preset so the numbers visibly tick over. */
+    function animateTo(target: number) {
+      if (frame !== null) cancelAnimationFrame(frame);
+
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        progress = target;
+        slider.value = String(Math.round(target * 100));
+        render(target);
+        return;
+      }
+
+      const from = progress;
+      const startedAt = performance.now();
+
+      const step = (now: number) => {
+        const t = Math.min((now - startedAt) / TRANSITION_MS, 1);
+        progress = lerp(from, target, easeOutCubic(t));
+        slider.value = String(Math.round(progress * 100));
+        render(progress);
+        frame = t < 1 ? requestAnimationFrame(step) : null;
+      };
+
+      frame = requestAnimationFrame(step);
+    }
+
+    slider.addEventListener("input", () => {
+      if (frame !== null) {
+        cancelAnimationFrame(frame);
+        frame = null;
+      }
+      progress = Number(slider.value) / 100;
+      render(progress);
+    });
+
+    for (const button of root.querySelectorAll<HTMLButtonElement>("[data-preset]")) {
+      button.addEventListener("click", () => {
+        animateTo(Number(button.dataset.preset) / 100);
+      });
+    }
+
+    render(0);
+  }
+</script>

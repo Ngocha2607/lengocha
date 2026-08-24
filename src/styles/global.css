@@ -1,0 +1,123 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+/*
+  Brutalist system: paper-white ground, black ink, hard 2px rules, zero radius,
+  offset shadows instead of blur, mono for anything structural.
+
+  The acid accent is a SURFACE colour, never a text colour. #27FF0B on white is
+  about 1.4:1 — unreadable. It fills blocks that carry black text on top, which
+  is also the more honest brutalist use of it.
+*/
+@theme {
+  --color-paper: oklch(99.7% 0 0);
+  --color-ink: oklch(0% 0 0);
+  --color-ink-2: oklch(38% 0 0);
+  /*
+    Muted text. 55% cleared 4.5:1 on paper but only reached 4.35:1 on `hush`,
+    which is the background it sits on inside the performance card — so it is
+    set against the darker of the two grounds, not the lighter.
+  */
+  --color-ink-3: oklch(48% 0 0);
+  --color-rule: oklch(0% 0 0);
+  --color-hush: oklch(96% 0 0);
+  --color-acid: oklch(86.89% 0.29 142.02);
+
+  /*
+    Data colours. Deliberately darker than the usual teal/rose so they clear
+    4.5:1 on paper — the metric strips are the one place on the page where
+    colour carries meaning, so it has to survive a print-contrast check.
+  */
+  --color-pass: oklch(45% 0.13 150);
+  --color-fail: oklch(48% 0.19 25);
+  --color-warn: oklch(50% 0.12 70);
+
+  --font-mono: var(--font-plex), ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, "Segoe UI",
+    sans-serif;
+
+  --radius-none: 0;
+}
+
+@layer base {
+  html {
+    @apply scroll-smooth;
+  }
+
+  body {
+    @apply bg-paper text-ink-2 font-sans antialiased;
+    @apply selection:bg-acid selection:text-ink;
+  }
+
+  /* Nothing on this page is rounded. Kill it at the source. */
+  *,
+  *::before,
+  *::after {
+    border-radius: 0;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply text-ink font-mono font-bold tracking-tight;
+  }
+
+  code,
+  kbd,
+  samp {
+    @apply font-mono;
+  }
+
+  :focus-visible {
+    @apply outline-ink outline-2 outline-offset-2;
+  }
+}
+
+@layer components {
+  /* The structural label: uppercase mono, wide tracking, small. */
+  .label {
+    @apply text-ink font-mono text-xs font-bold tracking-[0.14em] uppercase;
+  }
+
+  /* Inline chip for tags and stack items. */
+  .chip {
+    @apply border-rule text-ink font-mono border px-2 py-0.5 text-xs;
+  }
+
+  /* Editorial link: underlined by default, acid highlight on hover. */
+  .link {
+    @apply text-ink decoration-ink-3 underline decoration-1 underline-offset-4;
+    @apply hover:bg-acid hover:decoration-ink focus-visible:bg-acid;
+  }
+}
+
+/* Long-form article body on /writing/[slug]. */
+.prose-brutal {
+  @apply prose prose-neutral max-w-none;
+  @apply prose-headings:font-mono prose-headings:text-ink prose-headings:tracking-tight;
+  @apply prose-p:text-ink-2 prose-li:text-ink-2;
+  @apply prose-strong:text-ink prose-strong:font-bold;
+  @apply prose-a:text-ink prose-a:decoration-ink-3 prose-a:underline-offset-4;
+  @apply prose-code:font-mono prose-code:text-ink prose-code:before:content-none prose-code:after:content-none;
+  @apply prose-pre:border-2 prose-pre:border-rule prose-pre:bg-hush prose-pre:text-ink;
+  @apply prose-blockquote:border-l-4 prose-blockquote:border-ink prose-blockquote:text-ink-2 prose-blockquote:not-italic;
+  @apply prose-th:text-ink prose-th:font-mono prose-table:border-2 prose-table:border-rule;
+  @apply prose-img:border-2 prose-img:border-rule;
+}
+
+/*
+  Everything animated on this page is a transition, and every one of them is
+  opt-out. There is no animation library — a site arguing about bundle size
+  cannot ship 40KB to move a bar.
+*/
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

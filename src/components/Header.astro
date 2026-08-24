@@ -1,0 +1,132 @@
+---
+import { SITE, SOCIAL, SECTIONS } from "../consts";
+---
+
+<header class="border-b-2 border-rule">
+  <div class="px-4 py-10 sm:px-6 md:py-14">
+    <p class="label mb-4 flex flex-wrap items-center gap-x-3 gap-y-2">
+      <span class="inline-flex items-center gap-2 border-2 border-rule bg-acid px-2 py-1">
+        <span class="h-2 w-2 bg-ink" aria-hidden="true"></span>
+        {SITE.availability}
+      </span>
+      <span class="text-ink-3">{SITE.location}</span>
+    </p>
+
+    <h1 class="text-[clamp(2.5rem,11vw,5.5rem)] leading-[0.95] tracking-[-0.03em]">
+      <a href="/" class="hover:bg-acid focus-visible:bg-acid">{SITE.name}</a>
+    </h1>
+
+    <div class="mt-6 grid gap-6 border-t-2 border-rule pt-6 md:grid-cols-2">
+      <div>
+        <p class="font-mono text-base font-semibold text-ink sm:text-lg">
+          {SITE.role}
+        </p>
+        <p class="label mt-2 text-ink-3">{SITE.stack}</p>
+      </div>
+      <p class="max-w-[46ch] text-ink-2">
+        Building scalable frontend platforms — architecture, performance, and
+        the developer experience that keeps a team shipping.
+      </p>
+    </div>
+
+    <ul class="mt-6 flex flex-wrap gap-2" aria-label="Elsewhere">
+      {
+        SOCIAL.map(({ label, href }) => (
+          <li>
+            <a
+              class="label border-2 border-rule px-3 py-1.5 hover:bg-acid focus-visible:bg-acid"
+              href={href}
+              target={href.startsWith("mailto:") ? undefined : "_blank"}
+              rel={href.startsWith("mailto:") ? undefined : "noreferrer noopener"}
+            >
+              {label}
+            </a>
+          </li>
+        ))
+      }
+      <li>
+        <a
+          class="label border-2 border-rule bg-ink px-3 py-1.5 text-paper hover:bg-acid hover:text-ink focus-visible:bg-acid focus-visible:text-ink"
+          href="/resume.pdf"
+          target="_blank"
+          rel="noreferrer noopener"
+        >
+          Résumé ↓
+        </a>
+      </li>
+    </ul>
+  </div>
+
+  {/*
+    Sticky spine. `overflow-x-auto` is scoped to this strip so a narrow screen
+    scrolls the nav, never the page — 100vw-style full-bleed tricks are what
+    gave the old build a horizontal scrollbar.
+  */}
+  <nav
+    id="section-nav"
+    class="sticky top-0 z-30 border-t-2 border-rule bg-paper/95 backdrop-blur"
+    aria-label="Sections"
+  >
+    <ul class="flex overflow-x-auto">
+      {
+        SECTIONS.map(({ id, label }, i) => (
+          <li class="shrink-0 border-r-2 border-rule last:border-r-0">
+            <a
+              class="label flex items-center gap-2 px-3 py-3 hover:bg-acid focus-visible:bg-acid sm:px-4"
+              href={`#${id}`}
+              data-nav-link={id}
+            >
+              <span class="text-ink-3 tabular-nums">
+                {String(i + 1).padStart(2, "0")}
+              </span>
+              {label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </nav>
+</header>
+
+<script>
+  /**
+   * Scroll spy. Marks the nav link for the section currently in view — the
+   * only piece of JS the page shell needs, and it costs well under a kilobyte
+   * because there is no framework under it.
+   */
+  const links = Array.from(
+    document.querySelectorAll<HTMLAnchorElement>("[data-nav-link]"),
+  );
+
+  const sections = links
+    .map((link) => document.getElementById(link.dataset.navLink!))
+    .filter((el): el is HTMLElement => el !== null);
+
+  const ACTIVE = ["bg-ink", "text-paper"];
+
+  function setActive(id: string) {
+    for (const link of links) {
+      const on = link.dataset.navLink === id;
+      link.classList.toggle(ACTIVE[0], on);
+      link.classList.toggle(ACTIVE[1], on);
+      if (on) {
+        link.setAttribute("aria-current", "true");
+      } else {
+        link.removeAttribute("aria-current");
+      }
+    }
+  }
+
+  if (sections.length > 0) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) setActive(entry.target.id);
+        }
+      },
+      { rootMargin: "-20% 0px -60% 0px" },
+    );
+
+    for (const section of sections) observer.observe(section);
+  }
+</script>

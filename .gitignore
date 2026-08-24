@@ -4,7 +4,7 @@ node_modules/
 .pnp.js
 
 # Build
-.next/
+.astro/
 out/
 build/
 dist/
@@ -33,7 +33,6 @@ Thumbs.db
 
 # TypeScript
 *.tsbuildinfo
-next-env.d.ts
 
 # Vercel
 .vercel

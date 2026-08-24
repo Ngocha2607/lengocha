@@ -1,0 +1,40 @@
+---
+import WebVitals from "./WebVitals.astro";
+import { SITE, SOCIAL } from "../consts";
+---
+
+<footer class="border-t-2 border-rule">
+  <div class="px-4 py-10 sm:px-6">
+    <WebVitals />
+
+    <div class="mt-10 grid gap-6 border-t-2 border-rule pt-6 md:grid-cols-2">
+      <div>
+        <p class="label">{SITE.name}</p>
+        <p class="mt-2 max-w-[46ch] text-sm text-ink-3">
+          Built with <a class="link" href="https://astro.build/" target="_blank" rel="noreferrer noopener">Astro</a>
+          and <a class="link" href="https://tailwindcss.com/" target="_blank" rel="noreferrer noopener">Tailwind CSS</a>,
+          deployed on <a class="link" href="https://vercel.com/" target="_blank" rel="noreferrer noopener">Vercel</a>.
+          No framework JavaScript ships to your browser — the interactive pieces
+          on this page are plain DOM work.
+        </p>
+      </div>
+
+      <ul class="flex flex-wrap gap-2 md:justify-end" aria-label="Elsewhere">
+        {
+          SOCIAL.map(({ label, href }) => (
+            <li>
+              <a
+                class="label border-2 border-rule px-3 py-1.5 hover:bg-acid focus-visible:bg-acid"
+                href={href}
+                target={href.startsWith("mailto:") ? undefined : "_blank"}
+                rel={href.startsWith("mailto:") ? undefined : "noreferrer noopener"}
+              >
+                {label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+</footer>

@@ -1,0 +1,21 @@
+{
+  "name": "Lê Ngọc Hà — Senior Frontend Engineer",
+  "short_name": "Lê Ngọc Hà",
+  "description": "Lê Ngọc Hà is a frontend tech lead who builds fast, scalable web experiences with React, Next.js, and TypeScript.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fefefe",
+  "theme_color": "#27FF0B",
+  "icons": [
+    {
+      "src": "/seo/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/seo/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

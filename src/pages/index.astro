@@ -1,0 +1,38 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import AboutSection from "../components/AboutSection.astro";
+import PerformanceSection from "../components/PerformanceSection.astro";
+import ExperienceSection from "../components/ExperienceSection.astro";
+import ProjectsSection from "../components/ProjectsSection.astro";
+import WritingSection from "../components/WritingSection.astro";
+import Footer from "../components/Footer.astro";
+import FloatingCTA from "../components/FloatingCTA.astro";
+
+/**
+ * On-demand rendered so the Writing list picks up newly published Notion posts.
+ * The Vercel adapter caches the result for an hour (`isr.expiration`), which is
+ * the same contract the Next build had with `revalidate = 3600`.
+ */
+export const prerender = false;
+---
+
+<Layout canonical="/" personSchema>
+  <div class="mx-auto max-w-5xl border-x-2 border-rule">
+    <Header />
+
+    <main id="content" class="px-4 py-12 sm:px-6 md:py-16">
+      <div class="space-y-20 md:space-y-28">
+        <AboutSection />
+        <PerformanceSection />
+        <ExperienceSection />
+        <ProjectsSection />
+        <WritingSection />
+      </div>
+    </main>
+
+    <Footer />
+  </div>
+
+  <FloatingCTA />
+</Layout>

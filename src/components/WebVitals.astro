@@ -1,0 +1,138 @@
+---
+/**
+ * Live LCP/FCP/TTFB/INP/CLS for the page the visitor is on, measured with
+ * web-vitals and rendered locally. Nothing is sent anywhere.
+ *
+ * It mirrors the five metrics the Performance section quotes as lab data, so
+ * the two strips read as a pair — `plain` must stay word-for-word identical to
+ * FIELD_METRICS over there.
+ *
+ * Unmeasured metrics show an em dash, never a placeholder number, and every
+ * state occupies the same number of lines so filling in cannot cause the
+ * layout shift the widget is reporting on.
+ *
+ * Measure it against a production build (`LOCAL_PROD=1 npm run build` then
+ * `npm run preview`): the dev server reports a wildly inflated FCP.
+ */
+const METRICS = [
+  { name: "LCP", plain: "main content appears", good: "< 2.5s", pending: "measuring" },
+  { name: "FCP", plain: "page starts drawing", good: "< 1.8s", pending: "measuring" },
+  { name: "TTFB", plain: "server answers", good: "< 0.8s", pending: "measuring" },
+  // INP cannot exist until the visitor interacts, so say so rather than sit blank.
+  { name: "INP", plain: "taps respond", good: "< 200ms", pending: "needs a click" },
+  { name: "CLS", plain: "layout holds still", good: "< 0.1", pending: "measuring" },
+];
+---
+
+<section aria-labelledby="vitals-title" data-vitals>
+  <p class="label mb-2 inline-block border-2 border-rule bg-acid px-2 py-1">Live</p>
+  <h2 id="vitals-title" class="text-xl">
+    This page, measured in your browser right now
+  </h2>
+  <p class="mt-2 max-w-[68ch] text-ink-2">
+    The same five checks the Performance section reports on the LMS — run
+    against this page, on your device, as you read it.
+  </p>
+
+  <ul class="mt-5 grid grid-cols-2 border-t-2 border-l-2 border-rule sm:grid-cols-5">
+    {
+      METRICS.map((metric) => (
+        <li
+          class="border-r-2 border-b-2 border-rule px-3 py-3"
+          data-metric={metric.name}
+          data-good={metric.good}
+          data-pending={metric.pending}
+        >
+          <p class="label flex items-center gap-2">
+            <span
+              class="h-2.5 w-2.5 shrink-0 border-2 border-rule"
+              aria-hidden="true"
+              data-box
+            />
+            {metric.name}
+          </p>
+          <p class="mt-1 min-h-8 text-xs leading-tight text-ink-3">{metric.plain}</p>
+          <p class="font-mono text-xl font-bold tabular-nums text-ink-3" data-value>
+            —
+          </p>
+          <p class="font-mono text-xs tabular-nums text-ink-3" data-note>
+            {metric.pending}
+          </p>
+        </li>
+      ))
+    }
+  </ul>
+
+  <p class="mt-4 max-w-[70ch] text-sm text-ink-3">
+    Measured with
+    <a
+      class="link"
+      href="https://github.com/GoogleChrome/web-vitals"
+      target="_blank"
+      rel="noreferrer noopener">web-vitals</a
+    >
+    in your browser and rendered here, against the Core Web Vitals thresholds —
+    nothing leaves the page. It is one sample on your device and your network,
+    not a p75, so read it as a spot check rather than a score. Everything in the
+    Performance section is lab data from a codebase you can&apos;t open; this is
+    the one reading on the site you can take yourself.
+  </p>
+</section>
+
+<script>
+  import { onCLS, onFCP, onINP, onLCP, onTTFB, type Metric } from "web-vitals";
+
+  const root = document.querySelector<HTMLElement>("[data-vitals]");
+
+  if (root) {
+    const cells = new Map<string, HTMLElement>();
+    for (const cell of root.querySelectorAll<HTMLElement>("[data-metric]")) {
+      cells.set(cell.dataset.metric!, cell);
+    }
+
+    const seconds = (value: number) => `${(value / 1000).toFixed(2)}s`;
+    const format: Record<string, (value: number) => string> = {
+      LCP: seconds,
+      FCP: seconds,
+      TTFB: seconds,
+      INP: (value) => `${Math.round(value)}ms`,
+      CLS: (value) => value.toFixed(3),
+    };
+
+    /** Rating -> how the box and the number read. Green fills, red crosses. */
+    const TONE: Record<Metric["rating"], string> = {
+      good: "text-pass",
+      "needs-improvement": "text-warn",
+      poor: "text-fail",
+    };
+
+    const record = (metric: Metric) => {
+      const cell = cells.get(metric.name);
+      if (!cell) return;
+
+      const value = cell.querySelector<HTMLElement>("[data-value]")!;
+      const note = cell.querySelector<HTMLElement>("[data-note]")!;
+      const box = cell.querySelector<HTMLElement>("[data-box]")!;
+
+      value.textContent = (format[metric.name] ?? String)(metric.value);
+      value.classList.remove("text-ink-3");
+      for (const tone of Object.values(TONE)) {
+        value.classList.toggle(tone, tone === TONE[metric.rating]);
+      }
+
+      note.textContent = cell.dataset.good!;
+      box.classList.toggle("bg-ink", metric.rating === "good");
+      box.classList.toggle("bg-acid", metric.rating === "needs-improvement");
+      box.classList.toggle("bg-paper", metric.rating === "poor");
+    };
+
+    // reportAllChanges keeps the readout live. The default only reports once the
+    // page is hidden, which is useless for something rendered on screen.
+    const options = { reportAllChanges: true };
+    onLCP(record, options);
+    onFCP(record, options);
+    onTTFB(record, options);
+    onINP(record, options);
+    onCLS(record, options);
+  }
+</script>

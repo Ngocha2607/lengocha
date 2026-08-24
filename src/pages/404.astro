@@ -1,0 +1,9 @@
+---
+import Layout from "../layouts/Layout.astro";
+import NotFound from "../components/NotFound.astro";
+import { SITE } from "../consts";
+---
+
+<Layout title={`Not found — ${SITE.name}`} canonical="/404">
+  <NotFound />
+</Layout>

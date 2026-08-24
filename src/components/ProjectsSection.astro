@@ -1,0 +1,23 @@
+---
+import SectionHeading from "./SectionHeading.astro";
+import WorkspaceExplorer from "./WorkspaceExplorer.astro";
+---
+
+<section id="projects" class="scroll-mt-16" aria-labelledby="projects-title">
+  <SectionHeading
+    id="projects"
+    index="04"
+    eyebrow="Projects"
+    title="What I've shipped"
+    lead="Every project, laid out the way a real codebase is organised rather than as a grid of cards. If you are not an engineer, open anything in the apps/ folder — those are the products people actually log into."
+  />
+
+  <p class="mb-6 max-w-[68ch]">
+    Click a name on the left to open it. Products sit under <code>apps/</code>,
+    the shared code that stops them drifting apart under <code>libs/</code>, the
+    pipeline under <code>tooling/</code>. Different employers, one way of
+    thinking about structure.
+  </p>
+
+  <WorkspaceExplorer />
+</section>
