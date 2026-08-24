@@ -1,0 +1,149 @@
+---
+import { SITE, SOCIALS } from "../consts";
+
+/**
+ * Contact, in the template's shape: a big heading, a short pitch and socials on
+ * the left, a floating-label form on the right.
+ *
+ * The template's form posts nowhere. This one has no backend either — the site
+ * is static plus ISR, and adding a form service for a portfolio is a
+ * dependency with an outage. So submitting composes a mail draft in the
+ * visitor's own client instead of pretending to send. The address is printed
+ * next to the form, so the form is a convenience rather than the only route.
+ */
+---
+
+<section
+  id="contact"
+  class="container mx-auto my-28 scroll-mt-24 space-y-12 p-6 md:p-10"
+  aria-labelledby="contact-title"
+>
+  <h2 id="contact-title" class="section-title">Get in touch</h2>
+
+  <div class="grid grid-cols-1 items-start gap-10 md:grid-cols-2">
+    <div class="space-y-8">
+      <p class="max-w-xl text-xl lg:text-3xl">
+        Got a frontend that has outgrown its structure, a product that is slower
+        than the team can explain, or a group that needs standards it cannot
+        skip? Those are the three conversations where I&apos;m most useful.
+      </p>
+
+      <div class="space-y-4">
+        <p class="text-xl">
+          <a class="link" href={`mailto:${SITE.email}`}>{SITE.email}</a>
+        </p>
+        <ul class="space-y-2 text-xl">
+          {
+            SOCIALS.filter((social) => !social.href.startsWith("mailto:")).map(
+              (social) => (
+                <li>
+                  <a
+                    class="link"
+                    href={social.href}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                  >
+                    {social.name}
+                  </a>
+                </li>
+              ),
+            )
+          }
+        </ul>
+      </div>
+
+      <ul class="flex flex-wrap gap-3">
+        <li class="pill text-sm">{SITE.availability}</li>
+        <li class="pill text-sm">{SITE.location} · {SITE.timezone}</li>
+        <li class="pill text-sm">Vietnamese · English</li>
+      </ul>
+    </div>
+
+    <form class="space-y-6" data-mail-form>
+      <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+        <div class="relative">
+          <input
+            type="text"
+            id="name"
+            name="name"
+            class="peer w-full rounded-3xl border border-dashed border-secondary p-4 text-xl placeholder-transparent focus:outline-none"
+            placeholder="Name"
+            autocomplete="name"
+            required
+          />
+          <label
+            for="name"
+            class="absolute top-4 left-4 text-xl text-secondary transition-all peer-focus:-top-3 peer-focus:bg-background peer-focus:px-2 peer-focus:text-sm peer-[:not(:placeholder-shown)]:-top-3 peer-[:not(:placeholder-shown)]:bg-background peer-[:not(:placeholder-shown)]:px-2 peer-[:not(:placeholder-shown)]:text-sm"
+          >
+            Name
+          </label>
+        </div>
+
+        <div class="relative">
+          <input
+            type="email"
+            id="email"
+            name="email"
+            class="peer w-full rounded-3xl border border-dashed border-secondary p-4 text-xl placeholder-transparent focus:outline-none"
+            placeholder="Email"
+            autocomplete="email"
+            required
+          />
+          <label
+            for="email"
+            class="absolute top-4 left-4 text-xl text-secondary transition-all peer-focus:-top-3 peer-focus:bg-background peer-focus:px-2 peer-focus:text-sm peer-[:not(:placeholder-shown)]:-top-3 peer-[:not(:placeholder-shown)]:bg-background peer-[:not(:placeholder-shown)]:px-2 peer-[:not(:placeholder-shown)]:text-sm"
+          >
+            Email
+          </label>
+        </div>
+      </div>
+
+      <div class="relative">
+        <textarea
+          id="message"
+          name="message"
+          rows="6"
+          class="peer w-full resize-none rounded-3xl border border-dashed border-secondary p-4 text-xl placeholder-transparent focus:outline-none"
+          placeholder="Message"
+          required></textarea>
+        <label
+          for="message"
+          class="absolute top-4 left-4 text-xl text-secondary transition-all peer-focus:-top-3 peer-focus:bg-background peer-focus:px-2 peer-focus:text-sm peer-[:not(:placeholder-shown)]:-top-3 peer-[:not(:placeholder-shown)]:bg-background peer-[:not(:placeholder-shown)]:px-2 peer-[:not(:placeholder-shown)]:text-sm"
+        >
+          Message
+        </label>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-4">
+        <button type="submit" class="btn-primary">Compose email</button>
+        <p class="text-sm text-secondary">
+          Opens your mail app with this filled in — nothing is sent from the page.
+        </p>
+      </div>
+    </form>
+  </div>
+</section>
+
+<script>
+  import { SITE } from "../consts";
+
+  for (const form of document.querySelectorAll<HTMLFormElement>("[data-mail-form]")) {
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+
+      const data = new FormData(form);
+      const name = String(data.get("name") ?? "").trim();
+      const email = String(data.get("email") ?? "").trim();
+      const message = String(data.get("message") ?? "").trim();
+
+      const subject = name ? `Portfolio enquiry — ${name}` : "Portfolio enquiry";
+      const body = [message, "", `— ${name}`, email].filter(Boolean).join("\n");
+
+      // encodeURIComponent, not a template literal: an ampersand or a newline in
+      // the message would otherwise truncate the mailto URL.
+      window.location.href =
+        `mailto:${SITE.email}?subject=${encodeURIComponent(subject)}` +
+        `&body=${encodeURIComponent(body)}`;
+    });
+  }
+</script>

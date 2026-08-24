@@ -1,47 +1,49 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import Masthead from "../components/Masthead.astro";
-import LeadSection from "../components/LeadSection.astro";
+import Header from "../components/Header.astro";
+import Hero from "../components/Hero.astro";
+import AboutSection from "../components/AboutSection.astro";
+import CareerSection from "../components/CareerSection.astro";
+import WorkSection from "../components/WorkSection.astro";
 import DecisionsSection from "../components/DecisionsSection.astro";
 import PerformanceSection from "../components/PerformanceSection.astro";
 import LeadingSection from "../components/LeadingSection.astro";
-import WorkSection from "../components/WorkSection.astro";
-import ProjectsSection from "../components/ProjectsSection.astro";
-import ToolboxSection from "../components/ToolboxSection.astro";
-import WritingSection from "../components/WritingSection.astro";
-import HiringSection from "../components/HiringSection.astro";
+import PostsSection from "../components/PostsSection.astro";
+import ContactSection from "../components/ContactSection.astro";
+import WebVitals from "../components/WebVitals.astro";
 import Footer from "../components/Footer.astro";
 
 /**
- * On-demand rendered so the Writing list picks up newly published Notion posts.
- * The Vercel adapter caches the result for an hour (`isr.expiration`), which is
- * the same contract the Next build had with `revalidate = 3600`.
+ * On-demand rendered so the Posts list picks up newly published Notion posts.
+ * The Vercel adapter caches the result for an hour (`isr.expiration`), the same
+ * contract the Next build had with `revalidate = 3600`.
  */
 export const prerender = false;
 ---
 
 <Layout canonical="/" personSchema>
-  <div class="mx-auto max-w-6xl border-x-2 border-rule">
-    <Masthead />
+  <Header />
+
+  <main id="content">
+    {/* The template's own sections, carrying Hà's material. */}
+    <Hero />
+    <AboutSection />
 
     {/*
-      Sections are divided by their own top rules rather than by uniform gaps,
-      so the page reads as a continuous document instead of a stack of cards.
-      The order is an argument: who I am, then the evidence, then the practice,
-      then the record, then how to start.
+      Career, Decisions, Performance, How I lead and the live vitals strip have
+      no counterpart in the template — a portfolio for a freelancer does not
+      need a record of roles, a decision log, or an audit. They are built in
+      the same language so the page still reads as one design.
     */}
-    <main id="content" class="space-y-16 px-4 pt-8 pb-12 sm:px-6 md:space-y-20 md:pt-10 md:pb-14">
-      <LeadSection />
-      <DecisionsSection />
-      <PerformanceSection />
-      <LeadingSection />
-      <WorkSection />
-      <ProjectsSection />
-      <ToolboxSection />
-      <WritingSection />
-      <HiringSection />
-    </main>
+    <CareerSection />
+    <WorkSection />
+    <DecisionsSection />
+    <PerformanceSection />
+    <LeadingSection />
+    <PostsSection />
+    <ContactSection />
+    <WebVitals />
+  </main>
 
-    <Footer />
-  </div>
+  <Footer />
 </Layout>

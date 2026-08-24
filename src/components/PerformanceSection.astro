@@ -1,5 +1,4 @@
 ---
-import SectionRule from "./SectionRule.astro";
 import PerformanceCase from "./PerformanceCase.astro";
 import PipelineTerminal from "./PipelineTerminal.astro";
 
@@ -41,15 +40,21 @@ const ROOT_CAUSES = [
 ];
 ---
 
-<section id="performance" class="scroll-mt-14" aria-labelledby="performance-title">
-  <SectionRule
-    id="performance"
-    kicker="Evidence"
-    title="Making a slow product fast — and knowing when not to ship"
-    lead="A page in SAPP's learning platform took 15 seconds to open. Without the jargon: I measured why, got it down to 6, and one fix that worked is still deliberately not in production. Slow pages lose learners, so this is the work I'd want to be judged on."
-  />
+<section
+  id="performance"
+  class="container mx-auto mb-28 scroll-mt-24 p-6"
+  aria-labelledby="performance-title"
+>
+  <h2 id="performance-title" class="section-title">Performance</h2>
 
-  <p class="mb-6 max-w-[68ch]">
+  <p class="mt-8 mb-6 max-w-3xl text-lg text-secondary md:text-2xl">
+    A page in SAPP&apos;s learning platform took 15 seconds to open. Without the
+    jargon: I measured why, got it down to 6, and one fix that worked is still
+    deliberately not in production. Slow pages lose learners, so this is the work
+    I&apos;d want to be judged on.
+  </p>
+
+  <p class="mb-8 max-w-3xl text-secondary">
     The pass covered 15 routes. Drag the slider to replay it — the scores are
     the audit, not a marketing round-up. Further down is the change I measured,
     proved out, and then chose not to ship; that is the one I&apos;d rather talk
@@ -58,7 +63,7 @@ const ROOT_CAUSES = [
 
   <PerformanceCase />
 
-  <h3 class="mt-12 mb-3 text-xl">Reading the numbers before touching the code</h3>
+  <h3 class="heading mt-14 mb-4 text-2xl uppercase md:text-3xl">Reading the numbers before touching the code</h3>
   <p class="mb-5 max-w-[68ch]">
     Field data first, so the work follows real users rather than a lab score.
     Thresholds are the Core Web Vitals targets — Google&apos;s industry-standard
@@ -66,22 +71,22 @@ const ROOT_CAUSES = [
     than that; a filled box means it passed.
   </p>
 
-  <ul class="mb-6 grid grid-cols-2 border-t-2 border-l-2 border-rule sm:grid-cols-5">
+  <ul class="mb-6 grid grid-cols-2 border-t border-l border-dashed border-secondary sm:grid-cols-5">
     {
       FIELD_METRICS.map((metric) => (
-        <li class="border-r-2 border-b-2 border-rule px-3 py-3">
+        <li class="border-r border-b border-dashed border-secondary px-3 py-3">
           <p class="label flex items-center gap-2">
             <span
               class:list={[
-                "h-2.5 w-2.5 shrink-0 border-2 border-rule",
-                metric.pass ? "bg-ink" : "bg-paper",
+                "h-2.5 w-2.5 shrink-0 border border-dashed border-secondary",
+                metric.pass ? "bg-foreground" : "bg-background",
               ]}
               aria-hidden="true"
             />
             {metric.name}
           </p>
           {/* Reserve two lines so the values stay aligned across the row. */}
-          <p class="mt-1 min-h-8 text-xs leading-tight text-ink-3">
+          <p class="mt-1 min-h-8 text-xs leading-tight text-secondary">
             {metric.plain}
           </p>
           <p
@@ -92,7 +97,7 @@ const ROOT_CAUSES = [
           >
             {metric.value}
           </p>
-          <p class="font-mono text-xs tabular-nums text-ink-3">{metric.good}</p>
+          <p class="font-mono text-xs tabular-nums text-secondary">{metric.good}</p>
         </li>
       ))
     }
@@ -101,47 +106,47 @@ const ROOT_CAUSES = [
   <p class="mb-8 max-w-[68ch]">
     Every loading metric failed and both interaction metrics passed. That
     combination is the whole diagnosis: the app is bound by
-    <strong class="font-semibold text-ink">loading</strong>, not by
+    <strong class="font-semibold text-foreground">loading</strong>, not by
     interactivity or layout stability. So re-render and animation work — the
     usual reflex — went to the bottom of the queue, and server rendering, bundle
     size, CSS and images went to the top.
   </p>
 
-  <p class="label mb-3 text-ink-3">Four causes underneath it</p>
-  <ol class="mb-12 border-l-4 border-ink">
+  <p class="label mb-3 text-secondary">Four causes underneath it</p>
+  <ol class="mb-12 border-l-2 border-dashed border-secondary">
     {
       ROOT_CAUSES.map((item, index) => (
-        <li class="border-b-2 border-rule px-5 py-3 last:border-b-0">
-          <span class="mr-2 font-mono text-xs font-bold text-ink-3 tabular-nums">
+        <li class="border-b border-dashed border-secondary px-5 py-3 last:border-b-0">
+          <span class="mr-2 font-mono text-xs font-bold text-secondary tabular-nums">
             {String(index + 1).padStart(2, "0")}
           </span>
-          <span class="font-semibold text-ink">{item.cause}.</span>{" "}
-          <span class="text-ink-2">{item.effect}</span>
+          <span class="font-semibold text-foreground">{item.cause}.</span>{" "}
+          <span class="text-secondary">{item.effect}</span>
         </li>
       ))
     }
   </ol>
 
-  <h3 class="mb-3 text-xl">The fix I measured, then deliberately did not ship</h3>
-  <div class="border-2 border-rule" style="box-shadow:4px 4px 0 0 var(--color-ink)">
-    <p class="border-b-2 border-rule bg-acid px-5 py-4 font-medium text-ink">
+  <h3 class="heading mb-4 text-2xl uppercase md:text-3xl">The fix I measured, then deliberately did not ship</h3>
+  <div class="panel overflow-hidden">
+    <p class="border-b border-dashed border-secondary bg-primary px-6 py-5 text-lg">
       In plain terms: it made one server-side number look dramatically better
       without making the page feel any faster to a single user. So it sits in a
       branch until the work that has to come first is done. The detail, for
       anyone who wants to check it:
     </p>
-    <div class="space-y-3 px-5 py-5">
+    <div class="space-y-4 px-6 py-6 text-secondary">
       <p>
-        Dropping <code class="font-semibold text-ink">revalidate = 0</code> and
+        Dropping <code class="font-semibold text-foreground">revalidate = 0</code> and
         wrapping the provider tree in
-        <code class="font-semibold text-ink">&lt;Suspense&gt;</code> let 20 routes
+        <code class="font-semibold text-foreground">&lt;Suspense&gt;</code> let 20 routes
         static-generate. TTFB on the main routes fell from roughly 60ms to 3ms
-        locally, with a year-long <code class="font-semibold text-ink">s-maxage</code>
+        locally, with a year-long <code class="font-semibold text-foreground">s-maxage</code>
         and a cache hit. The mechanism worked exactly as expected.
       </p>
       <p>
         It stayed in the working tree anyway. The static HTML is only a shell —
-        <code class="font-semibold text-ink">useSearchParams()</code> sits at the
+        <code class="font-semibold text-foreground">useSearchParams()</code> sits at the
         top of the provider tree, so the whole thing bails out to client-side
         rendering and the real content still arrives after hydrate. TTFB moves;
         LCP does not. On top of that, a shell cached at the CDN has to be
@@ -156,7 +161,7 @@ const ROOT_CAUSES = [
     </div>
   </div>
 
-  <h3 class="mt-12 mb-3 text-xl">Keeping it fast, and shut</h3>
+  <h3 class="heading mt-14 mb-4 text-2xl uppercase md:text-3xl">Keeping it fast, and shut</h3>
   <p class="mb-6 max-w-[68ch]">
     A one-off audit decays in a sprint, so performance is tracked per route per
     release rather than re-discovered. The same pipeline blocks leaked secrets,

@@ -28,31 +28,31 @@ const STEPS = [
 ];
 ---
 
-<figure class="border-2 border-rule" data-terminal data-steps={STEPS.length}>
+<figure class="panel overflow-hidden" data-terminal data-steps={STEPS.length}>
   <div
-    class="flex items-center gap-3 border-b-2 border-rule bg-ink px-4 py-2.5 text-paper"
+    class="flex items-center gap-3 border-b border-dashed border-secondary bg-foreground px-4 py-2.5 text-background"
   >
     <p class="font-mono text-xs tracking-[0.14em] uppercase">
       ci · merge-request pipeline
     </p>
     <span
-      class="ml-auto border border-paper px-2 py-0.5 font-mono text-[10px] font-bold tracking-[0.14em] uppercase opacity-0 transition-opacity duration-500"
+      class="ml-auto border border-background px-2 py-0.5 font-mono text-[10px] font-bold tracking-[0.14em] uppercase opacity-0 transition-opacity duration-500"
       data-badge
     >
       passed
     </span>
   </div>
 
-  <ol class="space-y-3 bg-ink px-4 py-4 font-mono text-xs leading-relaxed text-paper">
+  <ol class="space-y-3 bg-foreground px-4 py-4 font-mono text-xs leading-relaxed text-background">
     {
       STEPS.map((step) => (
         <li class="translate-y-1 opacity-0 transition-all duration-300" data-step>
           <p class="break-all">
-            <span class="mr-1.5 select-none text-acid">$</span>
+            <span class="mr-1.5 select-none text-primary">$</span>
             {step.command}
           </p>
           <p class="mt-1 pl-4 opacity-70">
-            <span class="mr-1.5 text-acid" aria-hidden="true">
+            <span class="mr-1.5 text-primary" aria-hidden="true">
               ✓
             </span>
             {step.result}
@@ -62,7 +62,7 @@ const STEPS = [
     }
   </ol>
 
-  <figcaption class="border-t-2 border-rule px-4 py-3 text-sm text-ink-3">
+  <figcaption class="border-t border-dashed border-secondary px-4 py-3 text-sm text-secondary">
     A replay of the security pipeline I wired into GitLab CI at SAPP — Gitleaks,
     Trivy, Semgrep and ZAP gate every merge request. Not a live scan of this
     page.

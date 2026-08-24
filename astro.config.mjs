@@ -55,7 +55,7 @@ export default defineConfig({
     {
       // Headings, labels and every number. Carries the brutalist voice.
       name: "IBM Plex Mono",
-      cssVariable: "--font-plex",
+      cssVariable: "--font-mono-face",
       provider: fontProviders.google(),
       weights: [400, 700],
       // Vietnamese is not optional here: article titles and the site owner's
@@ -66,7 +66,7 @@ export default defineConfig({
     {
       // Body copy. Long prose in a mono face is hostile to read.
       name: "Geist",
-      cssVariable: "--font-geist",
+      cssVariable: "--font-sans-face",
       provider: fontProviders.google(),
       weights: [400, 700],
       subsets: ["latin", "latin-ext", "vietnamese"],

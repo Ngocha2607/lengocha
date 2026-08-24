@@ -1,0 +1,109 @@
+---
+import Marquee from "./Marquee.astro";
+import { getPublishedPosts, type PostMeta } from "../lib/notion";
+
+/**
+ * Writing, in the template's post-list shape: a marquee band, then rows with a
+ * block on the left and the title and description on the right. The template's
+ * posts have no images either — it renders a placeholder with the title in it,
+ * which is what the block below does.
+ */
+
+interface ArticleCard {
+  key: string;
+  year: string;
+  title: string;
+  description: string;
+  tags: string[];
+  href: string;
+  internal: boolean;
+}
+
+/**
+ * Shown when the Notion integration is not configured, so the section is never
+ * empty. Once NOTION_TOKEN + NOTION_WRITING_DB_ID are set, published Notion
+ * posts take over automatically.
+ */
+const FALLBACK: ArticleCard[] = [
+  {
+    key: "appsec-handbook",
+    year: "2026",
+    title: "Sổ tay AppSec cho Frontend — Gitleaks · Trivy · Semgrep",
+    description:
+      "A hands-on AppSec handbook for frontend engineers with no security background: three classes of risk mapped to three tools, wired into pre-commit and GitLab CI, plus a runbook for when the pipeline goes red.",
+    tags: ["AppSec", "Gitleaks", "Trivy", "Semgrep", "CI/CD"],
+    href: "https://app.notion.com/p/S-tay-AppSec-cho-Frontend-Gitleaks-Trivy-Semgrep-3a5b7b727ddd81abb32ff56df403c846?source=copy_link",
+    internal: false,
+  },
+];
+
+function toCard(post: PostMeta): ArticleCard {
+  return {
+    key: post.id,
+    year: post.date.slice(0, 4),
+    title: post.title,
+    description: post.description,
+    tags: post.tags,
+    href: `/writing/${post.slug}`,
+    internal: true,
+  };
+}
+
+const posts = await getPublishedPosts();
+const articles = posts.length > 0 ? posts.map(toCard) : FALLBACK;
+---
+
+<section
+  id="writing"
+  class="container mx-auto mb-28 scroll-mt-24 px-6"
+  aria-labelledby="writing-title"
+>
+  <Marquee word="posts" id="writing-title" />
+
+  <p class="mb-12 max-w-3xl text-lg text-secondary md:text-2xl">
+    Write-ups I publish for my team, and for anyone reviewing me. They cover the
+    reasoning behind a decision rather than just the result — the closest thing
+    to seeing how I work before you talk to me.
+  </p>
+
+  {
+    articles.map((article) => (
+      <a
+        class="group relative mb-8 flex flex-col items-center justify-between gap-8 pb-8 md:flex-row md:gap-12 rule-dashed cursor-pointer"
+        href={article.href}
+        target={article.internal ? undefined : "_blank"}
+        rel={article.internal ? undefined : "noreferrer noopener"}
+      >
+        <div
+          class="grid aspect-[610/400] w-full place-items-center overflow-hidden rounded-3xl border border-dashed border-secondary bg-primary/10 p-8 transition group-hover:bg-primary/25 md:max-w-[610px]"
+          aria-hidden="true"
+        >
+          <span class="heading text-center text-xl text-secondary md:text-3xl">
+            {article.title}
+          </span>
+        </div>
+
+        <div class="space-y-4 text-center md:text-left">
+          <p class="text-sm tabular-nums text-secondary">{article.year}</p>
+          <h3 class="heading max-w-xl text-2xl uppercase md:text-4xl">
+            {article.title}
+          </h3>
+          {article.description && (
+            <p class="mx-auto max-w-xl text-lg text-secondary md:mx-0 md:text-2xl">
+              {article.description}
+            </p>
+          )}
+          <ul class="flex flex-wrap justify-center gap-2 md:justify-start">
+            {article.tags.map((tag) => (
+              <li class="pill px-3 py-1 text-sm">{tag}</li>
+            ))}
+          </ul>
+          <p class="text-sm text-secondary underline group-hover:text-foreground">
+            {article.internal ? "Read the post ↗" : "Read on Notion ↗"}
+            {!article.internal && <span class="sr-only"> (opens in a new tab)</span>}
+          </p>
+        </div>
+      </a>
+    ))
+  }
+</section>

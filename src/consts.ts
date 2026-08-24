@@ -1,56 +1,49 @@
-/** Single source of truth for identity, SEO strings and the page's spine. */
+/** Single source of truth for identity, SEO strings and navigation. */
 
 export const SITE = {
   url: process.env.SITE_URL ?? "https://le-ngoc-ha.vercel.app",
+  /** The hero wordmark and the footer wordmark both render this, uppercased. */
   name: "Lê Ngọc Hà",
   title: "Lê Ngọc Hà — Senior Frontend Engineer",
   role: "Senior Frontend Engineer · Frontend Tech Lead",
-  stack: "React · Next.js · TypeScript",
   description:
     "Lê Ngọc Hà is a frontend tech lead who builds fast, scalable web experiences with React, Next.js, and TypeScript.",
+  /** The hero standfirst. Plain language, for a reader who is not an engineer. */
+  tagline:
+    "A frontend tech lead who owns the architecture of a learning platform used every day — and makes it measurably faster.",
+  /** The line printed across the footer block. */
+  motto:
+    "Measure before you touch anything. Then write down what you chose not to do.",
   locale: "en",
   location: "Hanoi, Vietnam",
   timezone: "UTC+7",
   availability: "Available for remote",
   email: "ngocha2k0.ln@gmail.com",
-  /** Where the front page's own claims come from. Shown in the colophon. */
-  edition: "2026",
 } as const;
 
-export const SOCIAL = [
-  { label: "GitHub", href: "https://github.com/Ngocha2607" },
+export const SOCIALS = [
+  { name: "GitHub", href: "https://github.com/Ngocha2607" },
   {
-    label: "LinkedIn",
+    name: "LinkedIn",
     href: "https://www.linkedin.com/in/ng%E1%BB%8Dc-h%C3%A0-l%C3%AA-886aa3228/",
   },
-  { label: "Email", href: `mailto:${SITE.email}` },
+  { name: "Email", href: `mailto:${SITE.email}` },
 ] as const;
 
 /**
- * The page's spine, in render order. Drives the masthead index, the sticky
- * rail and the scroll spy, so adding a section here is the only place a
- * number has to change.
- *
- * `kicker` is the newspaper-style category above a section title; `label` is
- * what the index and the rail show.
+ * In-page navigation. This is a single-page portfolio rather than the
+ * template's five routes, so the header links are anchors and every section id
+ * lives here.
  */
-export const SECTIONS = [
-  { id: "lead", label: "The short version", kicker: "Lead" },
-  { id: "decisions", label: "Decision log", kicker: "Evidence" },
-  { id: "performance", label: "Performance case", kicker: "Evidence" },
-  { id: "leading", label: "How I run a team", kicker: "Practice" },
-  { id: "work", label: "Where I've worked", kicker: "Record" },
-  { id: "projects", label: "What I've shipped", kicker: "Record" },
-  { id: "toolbox", label: "Toolbox", kicker: "Reference" },
-  { id: "writing", label: "Writing", kicker: "Reference" },
-  { id: "hiring", label: "Working together", kicker: "Contact" },
+export const NAV = [
+  { name: "About", href: "#about" },
+  { name: "Career", href: "#career" },
+  { name: "Work", href: "#work" },
+  { name: "Decisions", href: "#decisions" },
+  { name: "Performance", href: "#performance" },
+  { name: "Writing", href: "#writing" },
+  { name: "Contact", href: "#contact" },
 ] as const;
-
-/** Two-digit index for a section id, matching the masthead numbering. */
-export function sectionIndex(id: string): string {
-  const i = SECTIONS.findIndex((section) => section.id === id);
-  return String(i + 1).padStart(2, "0");
-}
 
 export const PERSON_SCHEMA = {
   "@context": "https://schema.org",

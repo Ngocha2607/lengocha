@@ -1,0 +1,189 @@
+---
+import { Image } from "astro:assets";
+import type { ImageMetadata } from "astro";
+
+/**
+ * A Work row, ported from the template's Card: screenshot on the left, title
+ * and description on the right, dashed hairline underneath, and an acid circle
+ * that trails the cursor across the card.
+ *
+ * The template wraps the whole row in an anchor. Not every project here has
+ * somewhere to send you — internal platforms have no public URL — so a card
+ * without `href` renders as a plain row and never grows a hover affordance it
+ * cannot honour.
+ */
+interface Props {
+  title: string;
+  description: string;
+  period: string;
+  tags: string[];
+  image?: ImageMetadata;
+  imageAlt?: string;
+  href?: string;
+  /** Text for the placeholder block when there is no screenshot. */
+  placeholder?: string;
+}
+
+const { title, description, period, tags, image, imageAlt, href, placeholder } =
+  Astro.props;
+
+const external = Boolean(href && /^https?:\/\//.test(href));
+const Tag = href ? "a" : "div";
+---
+
+<Tag
+  class:list={[
+    "group relative mb-8 flex flex-col items-center justify-between gap-8 pb-8 md:flex-row md:gap-12",
+    "rule-dashed",
+    href && "cursor-pointer",
+  ]}
+  {...href
+    ? {
+        href,
+        target: external ? "_blank" : undefined,
+        rel: external ? "noreferrer noopener" : undefined,
+        "data-cursor-card": "",
+      }
+    : {}}
+>
+  {
+    href && (
+      <span
+        class="pointer-events-none absolute hidden h-[75px] w-[75px] -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-dashed border-secondary bg-primary opacity-0 transition-opacity group-hover:grid"
+        aria-hidden="true"
+        data-cursor-circle
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          class="h-10 w-10"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M7 7h10v10" />
+          <path d="M7 17 17 7" />
+        </svg>
+      </span>
+    )
+  }
+
+  <div
+    class="aspect-[610/400] w-full overflow-hidden rounded-3xl md:max-w-[610px]"
+  >
+    {
+      image ? (
+        <Image
+          src={image}
+          alt={imageAlt ?? ""}
+          widths={[480, 800]}
+          width={800}
+          sizes="(min-width: 768px) 610px, 100vw"
+          quality={80}
+          class="h-full w-full object-cover"
+          loading="lazy"
+          decoding="async"
+        />
+      ) : (
+        <div
+          class="grid h-full w-full place-items-center border border-dashed border-secondary p-6"
+          aria-hidden="true"
+        >
+          <span class="heading text-center text-2xl text-secondary md:text-3xl">
+            {placeholder ?? title}
+          </span>
+        </div>
+      )
+    }
+  </div>
+
+  <div class="space-y-4 text-center md:text-left">
+    <p class="text-sm tabular-nums text-secondary">{period}</p>
+    {/*
+      No inline arrow in the heading: with a long title it wrapped onto a line
+      of its own. The cue goes under the tags, where it can also say what the
+      link actually opens.
+    */}
+    <h3 class="heading max-w-xl text-2xl uppercase md:text-4xl">{title}</h3>
+    <p class="mx-auto max-w-xl text-lg text-secondary md:mx-0 md:text-2xl">
+      {description}
+    </p>
+    <ul class="flex flex-wrap justify-center gap-2 md:justify-start">
+      {tags.map((tag) => <li class="pill px-3 py-1 text-sm">{tag}</li>)}
+    </ul>
+    {/*
+      No aria-label on the anchor. The whole card is the link, so its visible
+      text is its label; overriding that with just the title made the accessible
+      name narrower than what is on screen, which fails WCAG 2.5.3. The new-tab
+      warning is appended as screen-reader-only text instead.
+    */}
+    {
+      href && (
+        <p class="text-sm text-secondary underline group-hover:text-foreground">
+          {external ? "Visit the site ↗" : "Read the write-up ↗"}
+          {external && <span class="sr-only"> (opens in a new tab)</span>}
+        </p>
+      )
+    }
+  </div>
+</Tag>
+
+<script>
+  /**
+   * The cursor circle. Ported from the template and then scoped: it attaches
+   * only to cards that opted in, only where the pointer is actually fine (a
+   * touch device has no cursor to follow), and not at all under reduced
+   * motion. rAF-eased so it trails rather than snaps.
+   */
+  const fine = window.matchMedia("(pointer: fine)").matches;
+  const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  if (fine && !still) {
+    for (const card of document.querySelectorAll<HTMLElement>("[data-cursor-card]")) {
+      const circle = card.querySelector<HTMLElement>("[data-cursor-circle]");
+      if (!circle) continue;
+
+      let targetX = 0;
+      let targetY = 0;
+      let x = 0;
+      let y = 0;
+      let frame: number | null = null;
+
+      const step = () => {
+        x += (targetX - x) * 0.14;
+        y += (targetY - y) * 0.14;
+        circle.style.left = `${x}px`;
+        circle.style.top = `${y}px`;
+        frame = requestAnimationFrame(step);
+      };
+
+      const track = (event: MouseEvent) => {
+        const rect = card.getBoundingClientRect();
+        targetX = event.clientX - rect.left;
+        targetY = event.clientY - rect.top;
+      };
+
+      card.addEventListener("mouseenter", (event) => {
+        track(event);
+        x = targetX;
+        y = targetY;
+        circle.style.left = `${x}px`;
+        circle.style.top = `${y}px`;
+        circle.style.opacity = "1";
+        frame ??= requestAnimationFrame(step);
+      });
+
+      card.addEventListener("mousemove", track);
+
+      card.addEventListener("mouseleave", () => {
+        circle.style.opacity = "0";
+        if (frame !== null) {
+          cancelAnimationFrame(frame);
+          frame = null;
+        }
+      });
+    }
+  }
+</script>

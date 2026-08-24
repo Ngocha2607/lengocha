@@ -1,0 +1,128 @@
+---
+import { SITE, NAV } from "../consts";
+
+/**
+ * Fixed header, ported from the template: initial + full stop as the mark, a
+ * light nav on the right, a hamburger below md. The nav points at in-page
+ * anchors rather than routes, because this is one page.
+ */
+const mark = `${SITE.name.charAt(0).toUpperCase()}.`;
+---
+
+<header class="fixed top-0 z-50 w-full bg-background/85 backdrop-blur">
+  <div class="container mx-auto flex items-center justify-between p-6">
+    <a href="#top" class="heading text-4xl" aria-label={`${SITE.name} — top of page`}>
+      {mark}
+    </a>
+
+    <nav class="hidden space-x-4 text-secondary md:block" aria-label="Sections">
+      {
+        NAV.map((link) => (
+          <a
+            href={link.href}
+            class="pb-0.5 hover:border-b-2 hover:border-dashed hover:border-secondary"
+          >
+            {link.name}
+          </a>
+        ))
+      }
+    </nav>
+
+    <button
+      id="menu-toggle"
+      class="hamburger flex focus:outline-none md:hidden"
+      aria-label="Toggle navigation"
+      aria-expanded="false"
+      aria-controls="menu-mobile"
+    >
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
+  </div>
+
+  <div id="menu-mobile" class="hidden bg-background p-6 md:hidden">
+    <nav class="flex flex-col gap-4 text-2xl text-secondary" aria-label="Sections">
+      {
+        NAV.map((link) => (
+          <a
+            href={link.href}
+            class="w-max pb-0.5 hover:border-b-2 hover:border-dashed hover:border-secondary"
+            data-mobile-link
+          >
+            {link.name}
+          </a>
+        ))
+      }
+    </nav>
+  </div>
+</header>
+
+<style>
+  .hamburger {
+    position: relative;
+    width: 24px;
+    height: 21px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .hamburger-line {
+    position: absolute;
+    left: 0;
+    width: 24px;
+    height: 3px;
+    background-color: var(--color-foreground);
+    transition: all 0.3s ease;
+  }
+
+  .hamburger-line:nth-child(1) {
+    top: 0;
+  }
+  .hamburger-line:nth-child(2) {
+    top: 9px;
+  }
+  .hamburger-line:nth-child(3) {
+    top: 18px;
+  }
+
+  .hamburger.active .hamburger-line:nth-child(1) {
+    top: 9px;
+    transform: rotate(45deg);
+  }
+  .hamburger.active .hamburger-line:nth-child(2) {
+    opacity: 0;
+  }
+  .hamburger.active .hamburger-line:nth-child(3) {
+    top: 9px;
+    transform: rotate(-45deg);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hamburger-line {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  const toggle = document.getElementById("menu-toggle");
+  const menu = document.getElementById("menu-mobile");
+
+  function setOpen(open: boolean) {
+    menu?.classList.toggle("hidden", !open);
+    toggle?.classList.toggle("active", open);
+    toggle?.setAttribute("aria-expanded", String(open));
+  }
+
+  toggle?.addEventListener("click", () => {
+    setOpen(menu?.classList.contains("hidden") ?? false);
+  });
+
+  // Tapping a link should close the sheet, or the anchor lands behind it.
+  for (const link of document.querySelectorAll("[data-mobile-link]")) {
+    link.addEventListener("click", () => setOpen(false));
+  }
+</script>

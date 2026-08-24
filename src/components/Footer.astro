@@ -1,40 +1,81 @@
 ---
-import WebVitals from "./WebVitals.astro";
-import { SITE, SOCIAL } from "../consts";
+import { SITE, SOCIALS, NAV } from "../consts";
+
+/**
+ * The template's closing block: an acid panel with a big rounded top edge, the
+ * wordmark, a line of philosophy, then four columns of links.
+ *
+ * Text on the acid fill is always black — the accent is a surface colour, and
+ * #27FF0B behind white type is about 1.4:1.
+ */
+const year = 2026;
 ---
 
-<footer class="border-t-2 border-rule">
-  <div class="px-4 py-10 sm:px-6">
-    <WebVitals />
+<footer class="container mx-auto space-y-10 rounded-t-[48px] bg-primary p-8 text-foreground md:rounded-t-[80px] md:p-12">
+  <div class="flex flex-col items-start justify-between gap-6 lg:flex-row lg:items-center">
+    {/* Same looser leading as the hero: stacked Vietnamese diacritics collide. */}
+    <h2 class="heading text-5xl leading-[1.08] uppercase lg:text-8xl">
+      {SITE.name}
+    </h2>
+    <p class="max-w-[620px] text-xl lg:text-3xl">{SITE.motto}</p>
+  </div>
 
-    <div class="mt-10 grid gap-6 border-t-2 border-rule pt-6 md:grid-cols-2">
-      <div>
-        <p class="label">{SITE.name}</p>
-        <p class="mt-2 max-w-[46ch] text-sm text-ink-3">
-          Built with <a class="link" href="https://astro.build/" target="_blank" rel="noreferrer noopener">Astro</a>
-          and <a class="link" href="https://tailwindcss.com/" target="_blank" rel="noreferrer noopener">Tailwind CSS</a>,
-          deployed on <a class="link" href="https://vercel.com/" target="_blank" rel="noreferrer noopener">Vercel</a>.
-          No framework JavaScript ships to your browser — the interactive pieces
-          on this page are plain DOM work.
-        </p>
-      </div>
+  <div class="flex flex-col justify-between gap-10 sm:flex-row sm:flex-wrap">
+    <div>
+      <h3 class="heading mb-3 text-lg uppercase">Contact</h3>
+      <ul class="space-y-1">
+        <li><a class="link" href={`mailto:${SITE.email}`}>{SITE.email}</a></li>
+        <li>{SITE.location} · {SITE.timezone}</li>
+        <li>{SITE.availability}</li>
+      </ul>
+    </div>
 
-      <ul class="flex flex-wrap gap-2 md:justify-end" aria-label="Elsewhere">
+    <div>
+      <h3 class="heading mb-3 text-lg uppercase">Navigation</h3>
+      <ul class="space-y-1">
+        {NAV.map((link) => <li><a class="link" href={link.href}>{link.name}</a></li>)}
+      </ul>
+    </div>
+
+    <div>
+      <h3 class="heading mb-3 text-lg uppercase">Elsewhere</h3>
+      <ul class="space-y-1">
         {
-          SOCIAL.map(({ label, href }) => (
+          SOCIALS.map((social) => (
             <li>
               <a
-                class="label border-2 border-rule px-3 py-1.5 hover:bg-acid focus-visible:bg-acid"
-                href={href}
-                target={href.startsWith("mailto:") ? undefined : "_blank"}
-                rel={href.startsWith("mailto:") ? undefined : "noreferrer noopener"}
+                class="link"
+                href={social.href}
+                target={social.href.startsWith("mailto:") ? undefined : "_blank"}
+                rel={
+                  social.href.startsWith("mailto:") ? undefined : "noreferrer noopener"
+                }
               >
-                {label}
+                {social.name}
               </a>
             </li>
           ))
         }
+        <li>
+          <a class="link" href="/resume.pdf" target="_blank" rel="noreferrer noopener">
+            Résumé, PDF
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <div>
+      <h3 class="heading mb-3 text-lg uppercase">This site</h3>
+      <ul class="space-y-1">
+        <li>Astro · Tailwind CSS v4</li>
+        <li>No framework JavaScript</li>
+        <li>Writing from Notion, hourly</li>
+        <li>Deployed on Vercel</li>
       </ul>
     </div>
   </div>
+
+  <p class="text-center text-sm opacity-70">
+    © {year} {SITE.name}. Built with Astro. Design adapted from Mono Lume (MIT).
+  </p>
 </footer>

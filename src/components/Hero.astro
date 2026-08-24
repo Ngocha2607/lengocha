@@ -1,0 +1,34 @@
+---
+import { SITE } from "../consts";
+---
+
+<section
+  id="top"
+  class="container mx-auto grid min-h-screen grid-cols-1 items-center gap-8 p-6 pt-24 md:gap-16 lg:grid-cols-2"
+>
+  {/*
+    The wordmark. Vietnamese uppercase stacks diacritics above the cap height,
+    so this needs looser leading than the template's default or the Ê and the
+    Ọ clip into the line above.
+  */}
+  <h1 class="heading text-[clamp(3.5rem,13vw,9rem)] leading-[1.06] uppercase">
+    {SITE.name}
+  </h1>
+
+  <div class="space-y-8">
+    <p class="text-xl text-secondary md:text-2xl">{SITE.tagline}</p>
+
+    <div class="flex flex-col gap-2.5 md:flex-row">
+      <a class="btn-primary w-full sm:w-auto" href="#work">View work</a>
+      <a class="btn-invert w-full sm:w-auto" href="#contact">Hire me</a>
+    </div>
+
+    <p class="flex flex-wrap items-center gap-x-3 gap-y-2 text-secondary">
+      <span class="pill gap-2 text-sm">
+        <span class="h-2 w-2 rounded-full bg-primary" aria-hidden="true"></span>
+        {SITE.availability}
+      </span>
+      <span class="text-sm">{SITE.location} · {SITE.timezone}</span>
+    </p>
+  </div>
+</section>

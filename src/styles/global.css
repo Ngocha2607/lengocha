@@ -2,41 +2,30 @@
 @plugin "@tailwindcss/typography";
 
 /*
-  Brutalist system: paper-white ground, black ink, hard 2px rules, zero radius,
-  offset shadows instead of blur, mono for anything structural.
-
-  The acid accent is a SURFACE colour, never a text colour. #27FF0B on white is
-  about 1.4:1 — unreadable. It fills blocks that carry black text on top, which
-  is also the more honest brutalist use of it.
+  Design system ported from heshify/monolume (MIT): mono display type, a
+  near-white ground, an acid-green accent used as a surface, and dashed hairline
+  outlines instead of solid borders. Token names follow the template's so the
+  markup reads the same way its components do.
 */
 @theme {
-  --color-paper: oklch(99.7% 0 0);
-  --color-ink: oklch(0% 0 0);
-  --color-ink-2: oklch(38% 0 0);
-  /*
-    Muted text. 55% cleared 4.5:1 on paper but only reached 4.35:1 on `hush`,
-    which is the background it sits on inside the performance card — so it is
-    set against the darker of the two grounds, not the lighter.
-  */
-  --color-ink-3: oklch(48% 0 0);
-  --color-rule: oklch(0% 0 0);
-  --color-hush: oklch(96% 0 0);
-  --color-acid: oklch(86.89% 0.29 142.02);
+  --color-primary: oklch(86.89% 0.29 142.02); /* #27FF0B */
+  --color-background: oklch(99.7% 0 0); /* #fefefe */
+  --color-foreground: oklch(0% 0 0); /* #000000 */
+  --color-secondary: oklch(38% 0 0); /* #434343 */
 
   /*
-    Data colours. Deliberately darker than the usual teal/rose so they clear
-    4.5:1 on paper — the metric strips are the one place on the page where
-    colour carries meaning, so it has to survive a print-contrast check.
+    Data colours for the performance strips — the one place on the page where
+    colour carries meaning. Darker than the usual teal/rose so each clears
+    4.5:1 on the background, and checked against the muted grey too.
   */
   --color-pass: oklch(45% 0.13 150);
   --color-fail: oklch(48% 0.19 25);
-  --color-warn: oklch(50% 0.12 70);
+  --color-warn: oklch(46% 0.11 70);
 
-  --font-mono: var(--font-plex), ui-monospace, SFMono-Regular, Menlo, monospace;
-  --font-sans: var(--font-geist), ui-sans-serif, system-ui, "Segoe UI",
+  --font-plex: var(--font-mono-face), ui-monospace, SFMono-Regular, Menlo,
+    monospace;
+  --font-geist: var(--font-sans-face), ui-sans-serif, system-ui, "Segoe UI",
     sans-serif;
-
-  --radius-none: 0;
 }
 
 @layer base {
@@ -45,104 +34,109 @@
   }
 
   body {
-    @apply bg-paper text-ink-2 font-sans antialiased;
-    @apply selection:bg-acid selection:text-ink;
-  }
-
-  /* Nothing on this page is rounded. Kill it at the source. */
-  *,
-  *::before,
-  *::after {
-    border-radius: 0;
-  }
-
-  h1,
-  h2,
-  h3,
-  h4 {
-    @apply text-ink font-mono font-bold tracking-tight;
-  }
-
-  code,
-  kbd,
-  samp {
-    @apply font-mono;
+    @apply bg-background text-foreground font-geist antialiased;
+    @apply selection:bg-primary selection:text-foreground;
   }
 
   :focus-visible {
-    @apply outline-ink outline-2 outline-offset-2;
+    @apply outline-foreground outline-2 outline-offset-2;
   }
-}
-
-@layer components {
-  /* The structural label: uppercase mono, wide tracking, small. */
-  .label {
-    @apply text-ink font-mono text-xs font-bold tracking-[0.14em] uppercase;
-  }
-
-  /* Inline chip for tags and stack items. */
-  .chip {
-    @apply border-rule text-ink font-mono border px-2 py-0.5 text-xs;
-  }
-
-  /* Editorial link: underlined by default, acid highlight on hover. */
-  .link {
-    @apply text-ink decoration-ink-3 underline decoration-1 underline-offset-4;
-    @apply hover:bg-acid hover:decoration-ink focus-visible:bg-acid;
-  }
-
-  /*
-    Broadsheet furniture. The page is laid out as a front page rather than a
-    stack of equal cards: a nameplate, a dateline, a lead story with a
-    standfirst, boxed sidebars, and section rules that read as datelines.
-  */
-
-  /* The category above a headline. Smaller and lighter than .label. */
-  .kicker {
-    @apply text-ink-2 font-mono text-[0.6875rem] font-bold tracking-[0.2em] uppercase;
-  }
-
-  /* The lead paragraph under a headline: bigger than body, still sans. */
-  .standfirst {
-    @apply text-ink text-lg leading-snug sm:text-xl;
-  }
-
-  /*
-    Headline. Mono at display sizes needs negative tracking or the words drift
-    apart; `text-balance` keeps two-line headlines from orphaning a word.
-  */
-  .headline {
-    @apply text-ink font-mono font-bold tracking-[-0.03em] text-balance;
-  }
-
-  /*
-    A boxed aside, the way a newspaper breaks out a table from the story.
-    Bottom-heavy border so a stack of them reads as one ruled block.
-  */
-  .breakout {
-    @apply border-rule border-2 bg-hush;
-  }
-}
-
-/* Long-form article body on /writing/[slug]. */
-.prose-brutal {
-  @apply prose prose-neutral max-w-none;
-  @apply prose-headings:font-mono prose-headings:text-ink prose-headings:tracking-tight;
-  @apply prose-p:text-ink-2 prose-li:text-ink-2;
-  @apply prose-strong:text-ink prose-strong:font-bold;
-  @apply prose-a:text-ink prose-a:decoration-ink-3 prose-a:underline-offset-4;
-  @apply prose-code:font-mono prose-code:text-ink prose-code:before:content-none prose-code:after:content-none;
-  @apply prose-pre:border-2 prose-pre:border-rule prose-pre:bg-hush prose-pre:text-ink;
-  @apply prose-blockquote:border-l-4 prose-blockquote:border-ink prose-blockquote:text-ink-2 prose-blockquote:not-italic;
-  @apply prose-th:text-ink prose-th:font-mono prose-table:border-2 prose-table:border-rule;
-  @apply prose-img:border-2 prose-img:border-rule;
 }
 
 /*
-  Everything animated on this page is a transition, and every one of them is
-  opt-out. There is no animation library — a site arguing about bundle size
-  cannot ship 40KB to move a bar.
+  Declared with `@utility`, not inside `@layer components`. Tailwind v4 only
+  lets `@apply` reach real utilities, so `.section-title { @apply heading }`
+  fails with "Cannot apply unknown utility class" when `heading` is a plain
+  component class. `@utility` makes them first-class, so they compose.
 */
+
+/* The display face. Every heading on the page uses it. */
+@utility heading {
+  @apply font-plex font-bold tracking-[-0.02em];
+}
+
+/*
+  Section heading. The template sets these enormous and uppercase; the size is
+  the section divider, which is why there are almost no rules on the page.
+*/
+@utility section-title {
+  @apply heading text-5xl uppercase md:text-8xl lg:text-9xl;
+}
+
+/* Primary action: acid fill, inverting to a dashed outline on hover. */
+@utility btn {
+  @apply flex cursor-pointer items-center justify-center rounded-2xl px-6 py-3 transition sm:px-10 sm:py-4;
+  @apply hover:bg-background hover:text-foreground hover:outline hover:outline-dashed hover:outline-secondary;
+}
+
+@utility btn-primary {
+  @apply btn bg-primary;
+}
+
+@utility btn-invert {
+  @apply btn bg-foreground text-background;
+}
+
+/* Dashed pill, used for skills and tags. */
+@utility pill {
+  @apply outline-secondary inline-flex items-center justify-center gap-2 rounded-4xl px-5 py-2.5 outline-1 outline-dashed;
+}
+
+/* Dashed card surface. The page's only container treatment. */
+@utility panel {
+  @apply border-secondary rounded-3xl border border-dashed;
+}
+
+/* Row separator, matching the project and post lists. */
+@utility rule-dashed {
+  @apply border-b-secondary border-b border-dashed;
+}
+
+@utility link {
+  @apply hover:text-secondary underline transition;
+}
+
+/*
+  Small structural label. The template has no equivalent because it has no data
+  to label; the performance strips do, and an acronym needs to read as a caption
+  rather than as body copy.
+*/
+@utility label {
+  @apply font-plex text-xs font-bold tracking-[0.12em] uppercase;
+}
+
+/* Long-form article body on /writing/[slug]. */
+.prose-mono {
+  @apply prose prose-neutral max-w-none;
+  @apply prose-headings:font-plex prose-headings:text-foreground prose-headings:tracking-[-0.02em];
+  @apply prose-p:text-secondary prose-li:text-secondary;
+  @apply prose-strong:text-foreground prose-strong:font-bold;
+  @apply prose-a:text-foreground prose-a:underline-offset-4;
+  @apply prose-code:font-plex prose-code:text-foreground prose-code:before:content-none prose-code:after:content-none;
+  @apply prose-pre:border prose-pre:border-dashed prose-pre:border-secondary prose-pre:bg-background prose-pre:text-foreground prose-pre:rounded-3xl;
+  @apply prose-blockquote:border-l-2 prose-blockquote:border-dashed prose-blockquote:border-secondary prose-blockquote:text-secondary prose-blockquote:not-italic;
+  @apply prose-th:text-foreground prose-th:font-plex;
+  @apply prose-img:rounded-3xl;
+}
+
+/*
+  The marquee bands over Work and Posts. Pure CSS, and the global
+  reduced-motion block below parks it — there is no animation library on this
+  site, and a page that argues about bundle size is not going to add one.
+*/
+@keyframes marquee-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee-scroll 20s linear infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -151,5 +145,10 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+
+  .animate-marquee {
+    animation: none !important;
+    transform: none !important;
   }
 }
