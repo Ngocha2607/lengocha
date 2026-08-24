@@ -1,0 +1,35 @@
+---
+/**
+ * Shared by the static /404 page and by /writing/[slug] when the slug does not
+ * match a published post. The article route cannot `Astro.rewrite("/404")` —
+ * the 404 page is prerendered, so there is no server component to rewrite
+ * into and the attempt throws a 500. Rendering this directly and setting
+ * `Astro.response.status = 404` returns the right status with the right body.
+ */
+interface Props {
+  /** Shown under the heading. The article route explains the Notion case. */
+  detail?: string;
+}
+
+const {
+  detail = "The link may be stale, or the page may have moved.",
+} = Astro.props;
+---
+
+<div
+  class="mx-auto flex min-h-screen max-w-3xl flex-col justify-center border-x border-dashed border-secondary px-4 py-16 sm:px-6"
+>
+  <p class="label mb-4 inline-block w-max border border-dashed border-secondary bg-primary px-2 py-1">
+    404
+  </p>
+  <h1 class="text-4xl leading-[1.05] sm:text-5xl">That page isn&apos;t here.</h1>
+  <p class="mt-4 max-w-[52ch]">{detail}</p>
+  <p class="mt-8">
+    <a
+      class="label inline-block w-max border border-dashed border-secondary bg-foreground px-4 py-2.5 text-background hover:bg-primary hover:text-foreground focus-visible:bg-primary focus-visible:text-foreground"
+      href="/"
+    >
+      ← Back to the start
+    </a>
+  </p>
+</div>

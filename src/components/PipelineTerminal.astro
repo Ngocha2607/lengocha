@@ -1,0 +1,119 @@
+---
+/**
+ * A replay of the CI pipeline I set up at SAPP — not a live scan of this page.
+ * Results stay qualitative ("no secrets committed") rather than inventing
+ * counts, so nothing here can be contradicted in an interview.
+ *
+ * Inverted block: the one place on the page that goes black, because a terminal
+ * reads as a terminal and it punctuates a long white page.
+ */
+const STEPS = [
+  {
+    command: "pnpm turbo run lint typecheck build",
+    result: "workspace green — unchanged packages restored from cache",
+  },
+  { command: "gitleaks detect --redact", result: "no secrets committed" },
+  {
+    command: "trivy fs --severity HIGH,CRITICAL .",
+    result: "no high or critical CVEs in the dependency tree",
+  },
+  {
+    command: "semgrep --config p/react --config p/typescript",
+    result: "no insecure patterns flagged",
+  },
+  {
+    command: "zap-baseline.py -t $STAGING_URL",
+    result: "no medium-or-above alerts on staging",
+  },
+];
+---
+
+<figure class="panel overflow-hidden" data-terminal data-steps={STEPS.length}>
+  <div
+    class="flex items-center gap-3 border-b border-dashed border-secondary bg-foreground px-4 py-2.5 text-background"
+  >
+    <p class="font-mono text-xs tracking-[0.14em] uppercase">
+      ci · merge-request pipeline
+    </p>
+    <span
+      class="ml-auto border border-background px-2 py-0.5 font-mono text-[10px] font-bold tracking-[0.14em] uppercase opacity-0 transition-opacity duration-500"
+      data-badge
+    >
+      passed
+    </span>
+  </div>
+
+  <ol class="space-y-3 bg-foreground px-4 py-4 font-mono text-xs leading-relaxed text-background">
+    {
+      STEPS.map((step) => (
+        <li class="translate-y-1 opacity-0 transition-all duration-300" data-step>
+          <p class="break-all">
+            <span class="mr-1.5 select-none text-primary">$</span>
+            {step.command}
+          </p>
+          <p class="mt-1 pl-4 opacity-70">
+            <span class="mr-1.5 text-primary" aria-hidden="true">
+              ✓
+            </span>
+            {step.result}
+          </p>
+        </li>
+      ))
+    }
+  </ol>
+
+  <figcaption class="border-t border-dashed border-secondary px-4 py-3 text-sm text-secondary">
+    A replay of the security pipeline I wired into GitLab CI at SAPP — Gitleaks,
+    Trivy, Semgrep and ZAP gate every merge request. Not a live scan of this
+    page.
+  </figcaption>
+</figure>
+
+<script>
+  const STEP_DELAY_MS = 380;
+
+  for (const root of document.querySelectorAll<HTMLElement>("[data-terminal]")) {
+    const steps = Array.from(root.querySelectorAll<HTMLElement>("[data-step]"));
+    const badge = root.querySelector<HTMLElement>("[data-badge]")!;
+
+    const reveal = (step: HTMLElement) => {
+      step.classList.remove("translate-y-1", "opacity-0");
+    };
+
+    const finish = () => badge.classList.replace("opacity-0", "opacity-100");
+
+    const play = () => {
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        steps.forEach(reveal);
+        finish();
+        return;
+      }
+
+      let shown = 0;
+      const timer = setInterval(() => {
+        reveal(steps[shown]);
+        shown += 1;
+        if (shown >= steps.length) {
+          clearInterval(timer);
+          finish();
+        }
+      }, STEP_DELAY_MS);
+    };
+
+    // Only replay once the block is actually on screen, so a visitor who never
+    // scrolls this far never pays for the timer.
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            observer.disconnect();
+            play();
+          }
+        }
+      },
+      { rootMargin: "0px 0px -20% 0px" },
+    );
+
+    observer.observe(root);
+  }
+</script>

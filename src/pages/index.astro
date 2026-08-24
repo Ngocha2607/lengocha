@@ -1,0 +1,49 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import Hero from "../components/Hero.astro";
+import AboutSection from "../components/AboutSection.astro";
+import CareerSection from "../components/CareerSection.astro";
+import WorkSection from "../components/WorkSection.astro";
+import DecisionsSection from "../components/DecisionsSection.astro";
+import PerformanceSection from "../components/PerformanceSection.astro";
+import LeadingSection from "../components/LeadingSection.astro";
+import PostsSection from "../components/PostsSection.astro";
+import ContactSection from "../components/ContactSection.astro";
+import WebVitals from "../components/WebVitals.astro";
+import Footer from "../components/Footer.astro";
+
+/**
+ * On-demand rendered so the Posts list picks up newly published Notion posts.
+ * The Vercel adapter caches the result for an hour (`isr.expiration`), the same
+ * contract the Next build had with `revalidate = 3600`.
+ */
+export const prerender = false;
+---
+
+<Layout canonical="/" personSchema>
+  <Header />
+
+  <main id="content">
+    {/* The template's own sections, carrying Hà's material. */}
+    <Hero />
+    <AboutSection />
+
+    {/*
+      Career, Decisions, Performance, How I lead and the live vitals strip have
+      no counterpart in the template — a portfolio for a freelancer does not
+      need a record of roles, a decision log, or an audit. They are built in
+      the same language so the page still reads as one design.
+    */}
+    <CareerSection />
+    <WorkSection />
+    <DecisionsSection />
+    <PerformanceSection />
+    <LeadingSection />
+    <PostsSection />
+    <ContactSection />
+    <WebVitals />
+  </main>
+
+  <Footer />
+</Layout>

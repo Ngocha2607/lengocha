@@ -1,0 +1,84 @@
+---
+import { Font } from "astro:assets";
+import { SITE, PERSON_SCHEMA } from "../consts";
+import "../styles/global.css";
+
+interface Props {
+  title?: string;
+  description?: string;
+  /** Path-only canonical, e.g. "/writing/some-slug". Defaults to the request path. */
+  canonical?: string;
+  ogType?: "website" | "article";
+  /** Emit the Person JSON-LD. Only the homepage should. */
+  personSchema?: boolean;
+}
+
+const {
+  title = SITE.title,
+  description = SITE.description,
+  canonical = Astro.url.pathname,
+  ogType = "website",
+  personSchema = false,
+} = Astro.props;
+
+const canonicalUrl = new URL(canonical, SITE.url).href;
+const ogImage = new URL("/seo/og.png", SITE.url).href;
+---
+
+<!doctype html>
+<html lang={SITE.locale}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalUrl} />
+    <meta name="author" content={SITE.name} />
+
+    <link rel="icon" href="/seo/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/seo/apple-touch-icon.png" />
+    <link rel="manifest" href="/seo/site.webmanifest" />
+    <link rel="sitemap" href="/sitemap.xml" />
+
+    <meta property="og:type" content={ogType} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:site_name" content={SITE.name} />
+    <meta property="og:image" content={ogImage} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+
+    {/*
+      Preload only the two faces that actually paint above the fold: bold mono
+      for the masthead and headings, regular sans for body copy. Preloading
+      every declared face pulled 24 files and ~250KB ahead of first paint and
+      pushed FCP past four seconds. The rest are still declared, and the browser
+      fetches them on demand when a weight or a unicode-range is first used.
+    */}
+    <Font cssVariable="--font-mono-face" preload={[{ weight: 700, subset: "latin" }]} />
+    <Font cssVariable="--font-sans-face" preload={[{ weight: 400, subset: "latin" }]} />
+
+    {
+      personSchema && (
+        <script
+          type="application/ld+json"
+          is:inline
+          set:html={JSON.stringify(PERSON_SCHEMA)}
+        />
+      )
+    }
+  </head>
+
+  <body class="leading-relaxed">
+    <a
+      href="#content"
+      class="label sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:rounded-2xl focus:bg-primary focus:px-4 focus:py-2"
+    >
+      Skip to content
+    </a>
+    <slot />
+  </body>
+</html>

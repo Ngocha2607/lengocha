@@ -1,0 +1,182 @@
+---
+import PerformanceCase from "./PerformanceCase.astro";
+import PipelineTerminal from "./PipelineTerminal.astro";
+
+/**
+ * Field data, Vercel Speed Insights, P75 desktop on UAT, taken before the
+ * optimization pass. `good` is the Core Web Vitals threshold, not my target.
+ * `plain` is the same wording WebVitals.astro uses, so the two strips can be
+ * read side by side by someone who does not know the acronyms.
+ */
+const FIELD_METRICS = [
+  { name: "LCP", plain: "main content appears", value: "3.92s", good: "< 2.5s", pass: false },
+  { name: "FCP", plain: "page starts drawing", value: "2.55s", good: "< 1.8s", pass: false },
+  { name: "TTFB", plain: "server answers", value: "1.51s", good: "< 0.8s", pass: false },
+  { name: "INP", plain: "taps respond", value: "112ms", good: "< 200ms", pass: true },
+  { name: "CLS", plain: "layout holds still", value: "0.01", good: "< 0.1", pass: true },
+];
+
+const ROOT_CAUSES = [
+  {
+    cause: "An App Router app rendering almost entirely on the client",
+    effect:
+      "~270 files carry a use-client directive, so data only starts fetching after hydrate — LCP waits on a chain of download, hydrate, call, render.",
+  },
+  {
+    cause: "revalidate = 0 on the root layout",
+    effect:
+      "Forces a dynamic render on every request and switches off the Full Route Cache, so TTFB cannot come down however well the client behaves.",
+  },
+  {
+    cause: "Heavy libraries imported statically",
+    effect:
+      "Editor, document viewer, spreadsheet and charts land in the initial bundle, with the animation libraries riding along on every route.",
+  },
+  {
+    cause: "Duplicate libraries doing the same job",
+    effect:
+      "echarts alongside recharts, dayjs alongside date-fns, firebase compat — double the bytes for none of the value.",
+  },
+];
+---
+
+<section
+  id="performance"
+  class="container mx-auto mb-28 scroll-mt-24 p-6"
+  aria-labelledby="performance-title"
+>
+  <h2 id="performance-title" class="section-title">Performance</h2>
+
+  <p class="mt-8 mb-6 max-w-3xl text-lg text-secondary md:text-2xl">
+    A page in SAPP&apos;s learning platform took 15 seconds to open. Without the
+    jargon: I measured why, got it down to 6, and one fix that worked is still
+    deliberately not in production. Slow pages lose learners, so this is the work
+    I&apos;d want to be judged on.
+  </p>
+
+  <p class="mb-8 max-w-3xl text-secondary">
+    The pass covered 15 routes. Drag the slider to replay it — the scores are
+    the audit, not a marketing round-up. Further down is the change I measured,
+    proved out, and then chose not to ship; that is the one I&apos;d rather talk
+    about.
+  </p>
+
+  <PerformanceCase />
+
+  <h3 class="heading mt-14 mb-4 text-2xl uppercase md:text-3xl">Reading the numbers before touching the code</h3>
+  <p class="mb-5 max-w-[68ch]">
+    Field data first, so the work follows real users rather than a lab score.
+    Thresholds are the Core Web Vitals targets — Google&apos;s industry-standard
+    pass mark for each one. A crossed box means most users were getting worse
+    than that; a filled box means it passed.
+  </p>
+
+  <ul class="mb-6 grid grid-cols-2 border-t border-l border-dashed border-secondary sm:grid-cols-5">
+    {
+      FIELD_METRICS.map((metric) => (
+        <li class="border-r border-b border-dashed border-secondary px-3 py-3">
+          <p class="label flex items-center gap-2">
+            <span
+              class:list={[
+                "h-2.5 w-2.5 shrink-0 border border-dashed border-secondary",
+                metric.pass ? "bg-foreground" : "bg-background",
+              ]}
+              aria-hidden="true"
+            />
+            {metric.name}
+          </p>
+          {/* Reserve two lines so the values stay aligned across the row. */}
+          <p class="mt-1 min-h-8 text-xs leading-tight text-secondary">
+            {metric.plain}
+          </p>
+          <p
+            class:list={[
+              "font-mono text-xl font-bold tabular-nums",
+              metric.pass ? "text-pass" : "text-fail",
+            ]}
+          >
+            {metric.value}
+          </p>
+          <p class="font-mono text-xs tabular-nums text-secondary">{metric.good}</p>
+        </li>
+      ))
+    }
+  </ul>
+
+  <p class="mb-8 max-w-[68ch]">
+    Every loading metric failed and both interaction metrics passed. That
+    combination is the whole diagnosis: the app is bound by
+    <strong class="font-semibold text-foreground">loading</strong>, not by
+    interactivity or layout stability. So re-render and animation work — the
+    usual reflex — went to the bottom of the queue, and server rendering, bundle
+    size, CSS and images went to the top.
+  </p>
+
+  <p class="label mb-3 text-secondary">Four causes underneath it</p>
+  <ol class="mb-12 border-l-2 border-dashed border-secondary">
+    {
+      ROOT_CAUSES.map((item, index) => (
+        <li class="border-b border-dashed border-secondary px-5 py-3 last:border-b-0">
+          <span class="mr-2 font-mono text-xs font-bold text-secondary tabular-nums">
+            {String(index + 1).padStart(2, "0")}
+          </span>
+          <span class="font-semibold text-foreground">{item.cause}.</span>{" "}
+          <span class="text-secondary">{item.effect}</span>
+        </li>
+      ))
+    }
+  </ol>
+
+  <h3 class="heading mb-4 text-2xl uppercase md:text-3xl">The fix I measured, then deliberately did not ship</h3>
+  <div class="panel overflow-hidden">
+    <p class="border-b border-dashed border-secondary bg-primary px-6 py-5 text-lg">
+      In plain terms: it made one server-side number look dramatically better
+      without making the page feel any faster to a single user. So it sits in a
+      branch until the work that has to come first is done. The detail, for
+      anyone who wants to check it:
+    </p>
+    <div class="space-y-4 px-6 py-6 text-secondary">
+      <p>
+        Dropping <code class="font-semibold text-foreground">revalidate = 0</code> and
+        wrapping the provider tree in
+        <code class="font-semibold text-foreground">&lt;Suspense&gt;</code> let 20 routes
+        static-generate. TTFB on the main routes fell from roughly 60ms to 3ms
+        locally, with a year-long <code class="font-semibold text-foreground">s-maxage</code>
+        and a cache hit. The mechanism worked exactly as expected.
+      </p>
+      <p>
+        It stayed in the working tree anyway. The static HTML is only a shell —
+        <code class="font-semibold text-foreground">useSearchParams()</code> sits at the
+        top of the provider tree, so the whole thing bails out to client-side
+        rendering and the real content still arrives after hydrate. TTFB moves;
+        LCP does not. On top of that, a shell cached at the CDN has to be
+        provably free of user-specific data before it can go anywhere near
+        production.
+      </p>
+      <p>
+        It is a good change in the wrong order. It ships after the client
+        boundary moves down to the leaves and the critical pages fetch on the
+        server — otherwise it is a 15× win on a number no user feels.
+      </p>
+    </div>
+  </div>
+
+  <h3 class="heading mt-14 mb-4 text-2xl uppercase md:text-3xl">Keeping it fast, and shut</h3>
+  <p class="mb-6 max-w-[68ch]">
+    A one-off audit decays in a sprint, so performance is tracked per route per
+    release rather than re-discovered. The same pipeline blocks leaked secrets,
+    vulnerable dependencies and insecure patterns before review ever sees them —
+    in plain terms, every code change is automatically checked for passwords
+    committed by accident, libraries with known security holes, risky code, and
+    problems visible on the running site, and the change is blocked until it is
+    clean.
+  </p>
+
+  <PipelineTerminal />
+
+  <p class="mt-5">
+    <a class="link" href="/writing/so-tay-appsec-cho-frontend-gitleaks-trivy-semgrep">
+      I wrote the whole setup up as an AppSec handbook →
+    </a>
+  </p>
+</section>

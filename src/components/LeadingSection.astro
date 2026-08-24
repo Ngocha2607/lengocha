@@ -1,0 +1,141 @@
+---
+/**
+ * How the lead half of the job gets done. New section — the template assumes a
+ * solo freelancer, so it has nothing about running a team, and this site had
+ * only a single bullet about mentoring.
+ *
+ * Each practice names its mechanism, because "I care about quality" is not a
+ * practice and cannot be checked. Framed from the CV; the wording is editorial.
+ */
+
+const practices = [
+  {
+    title: "Standards live in the pipeline, not in a document",
+    body: "A rule everyone agrees with decays in a sprint; a rule the pipeline enforces does not. Coding standards, the security gate and the build config are defined once in the workspace and inherited by every app in it.",
+    mechanism: "Shared GitLab CI config · Turborepo task graph",
+  },
+  {
+    title: "Measure before touching anything",
+    body: "The LMS pass started with field data, not a lab score. Every loading metric was failing and both interaction metrics were passing, which put re-render and animation work — the usual reflex — at the bottom of the queue.",
+    mechanism: "Field CWV first · per-route, per-release tracking",
+  },
+  {
+    title: "Automate the hygiene so review can be about design",
+    body: "Leaked secrets, vulnerable dependencies and insecure patterns are caught before a human opens the branch. That buys back the review conversation for architecture, naming and edge cases.",
+    mechanism: "Gitleaks · Trivy · Semgrep · ZAP on every merge request",
+  },
+  {
+    title: "Say no in public, with the numbers attached",
+    body: "The most useful thing I did to the LMS this year was not ship a change. Writing up why — with the measurements next to it — teaches the team more than another green graph, and stops the same idea coming back untested.",
+    mechanism: "Decision records, kept with the evidence",
+  },
+  {
+    title: "Write it down so it outlives me",
+    body: "Two junior engineers should not have to ask me the same question twice, and the answer should survive my leaving. Setups I introduce get a handbook; architecture that took a week to reason about gets a write-up.",
+    mechanism: "Internal handbooks · published architecture write-ups",
+  },
+  {
+    title: "Give the team leverage, not answers",
+    body: "The largest single productivity change was not a library choice. It was designing AI workflows around the work the team was already doing, then measuring what came back.",
+    mechanism: "~30% productivity gain · ~10 hours/week returned",
+  },
+];
+
+const mentoring = [
+  { count: "2", who: "junior engineers", where: "SAPP Academy", when: "2025 —" },
+  {
+    count: "3",
+    who: "junior engineers",
+    where: "Tweet World Travel",
+    when: "2023 — 2025",
+  },
+];
+
+const artifacts = [
+  "Coding standards covering four frontends in one workspace",
+  "A security gate any new app inherits on day one",
+  "An AppSec handbook for engineers with no security background",
+  "Architecture write-ups on the monorepo and the module system",
+];
+---
+
+<section
+  id="leading"
+  class="container mx-auto mb-28 scroll-mt-24 p-6"
+  aria-labelledby="leading-title"
+>
+  <h2 id="leading-title" class="section-title">How I lead</h2>
+
+  <p class="mt-8 mb-12 max-w-3xl text-lg text-secondary md:text-2xl">
+    Six practices, each with the mechanism that makes it real rather than
+    aspirational. The short version: put the standard somewhere it cannot be
+    skipped, measure before deciding, and write things down so the answer
+    outlives whoever found it.
+  </p>
+
+  <div class="grid gap-10 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+    <ol>
+      {
+        practices.map((practice, i) => (
+          <li class="rule-dashed mb-6 flex gap-4 pb-6 md:gap-6">
+            <span class="heading shrink-0 text-lg tabular-nums text-secondary">
+              {String(i + 1).padStart(2, "0")}
+            </span>
+            <div class="min-w-0">
+              <h3 class="heading text-xl uppercase md:text-2xl">{practice.title}</h3>
+              <p class="mt-3 max-w-2xl text-secondary md:text-lg">{practice.body}</p>
+              <p class="pill mt-4 px-3 py-1 text-sm text-secondary">
+                {practice.mechanism}
+              </p>
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+
+    <div class="space-y-8">
+      <aside class="panel p-6" aria-labelledby="mentoring-title">
+        <h3 id="mentoring-title" class="heading text-lg uppercase text-secondary">
+          People I&apos;ve brought on
+        </h3>
+        <ul class="mt-5 space-y-5">
+          {
+            mentoring.map((entry) => (
+              <li class="flex items-baseline gap-4">
+                <span class="heading text-4xl tabular-nums">{entry.count}</span>
+                <div class="min-w-0">
+                  <p class="leading-tight">{entry.who}</p>
+                  <p class="mt-0.5 text-sm text-secondary">
+                    {entry.where} · {entry.when}
+                  </p>
+                </div>
+              </li>
+            ))
+          }
+        </ul>
+      </aside>
+
+      <aside class="panel overflow-hidden" aria-labelledby="artifacts-title">
+        <h3
+          id="artifacts-title"
+          class="heading border-b border-dashed border-secondary bg-primary px-6 py-4 text-lg uppercase"
+        >
+          What I leave behind
+        </h3>
+        <ul>
+          {
+            artifacts.map((artifact) => (
+              <li class="flex gap-3 border-b border-dashed border-secondary px-6 py-4 text-secondary last:border-b-0">
+                <span
+                  class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-foreground"
+                  aria-hidden="true"
+                />
+                {artifact}
+              </li>
+            ))
+          }
+        </ul>
+      </aside>
+    </div>
+  </div>
+</section>

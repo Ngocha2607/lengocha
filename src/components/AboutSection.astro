@@ -1,0 +1,107 @@
+---
+/**
+ * About, in the template's two-column shape. The template puts a portrait in
+ * the left slot; there is no photograph to use here, so the slot carries the
+ * numbers instead — same rhythm, and more use to a reader than a stock image.
+ *
+ * Skills carry the year each tool first appeared in shipped work rather than a
+ * self-scored rating. A year is derivable from the career list below it, so a
+ * reviewer can line the two up; a five-star bar cannot be checked by anyone.
+ */
+
+const numbers = [
+  { value: "~5", label: "Years in frontend", note: "Since 2021" },
+  { value: "4", label: "Frontends, one monorepo", note: "lms-fe" },
+  { value: "15", label: "LMS routes audited", note: "Lab + field" },
+  { value: "5", label: "B2B/B2C products", note: "Tweet World" },
+  { value: "1K+", label: "Monthly users served", note: "Travel ERP" },
+  { value: "5", label: "Engineers mentored", note: "Two teams" },
+];
+
+const skills = [
+  { name: "React", since: "2021", core: true },
+  { name: "TypeScript", since: "2023", core: true },
+  { name: "Next.js", since: "2023", core: true },
+  { name: "Turborepo", since: "2025", core: true },
+  { name: "pnpm workspace", since: "2025", core: true },
+  { name: "Tailwind CSS", since: "2023", core: true },
+  { name: "Ant Design", since: "2021", core: true },
+  { name: "Redux Toolkit", since: "2021", core: true },
+  { name: "TanStack Query", since: "2025", core: true },
+  { name: "Tiptap", since: "2025", core: true },
+  { name: "Spring Boot", since: "2023", core: true },
+  { name: "GitLab CI", since: "2025", core: true },
+  { name: "Astro", since: "2026" },
+  { name: "Zustand", since: "2023" },
+  { name: "Vite", since: "2025" },
+  { name: "Material UI", since: "2023" },
+  { name: "Semgrep", since: "2025" },
+  { name: "Trivy", since: "2025" },
+];
+---
+
+<section id="about" class="container mx-auto mb-28 scroll-mt-24 p-6">
+  <h2 id="about-title" class="section-title">About me</h2>
+
+  <div class="mt-8 grid grid-cols-1 items-start gap-8 md:grid-cols-2 md:gap-12">
+    <div class="panel p-6 md:p-8">
+      <h3 class="heading mb-6 text-xl uppercase text-secondary">By the numbers</h3>
+      <dl class="grid grid-cols-2 gap-x-6 gap-y-7">
+        {
+          numbers.map((item) => (
+            <div>
+              <dt class="sr-only">{item.label}</dt>
+              <dd>
+                <span class="heading block text-4xl tabular-nums md:text-5xl">
+                  {item.value}
+                </span>
+                <span class="mt-1 block leading-tight">{item.label}</span>
+                <span class="mt-0.5 block text-sm text-secondary">{item.note}</span>
+              </dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+
+    <div>
+      <div class="space-y-4 text-lg text-secondary md:text-2xl">
+        <p>
+          I&apos;m Hà, a frontend tech lead at SAPP Academy — an accountancy and
+          finance training provider whose learning platform is the product
+          students and teachers open every day. I own its technical direction:
+          the architecture, the coding standards, the code review, and two
+          junior engineers.
+        </p>
+        <p>
+          Before that, two years at a travel group working both sides of the
+          wire — Spring Boot services and the React clients in front of them —
+          across five B2B/B2C products and a multilingual ERP. I started in
+          operational software, where a mis-read screen has consequences a
+          marketing page never does.
+        </p>
+        <p>
+          Architecture, performance and developer experience are the part
+          I&apos;m actually hired for. The rest of this page is the evidence,
+          including the decisions that went the other way.
+        </p>
+      </div>
+
+      <h3 class="heading my-8 text-2xl uppercase text-secondary">My skills</h3>
+      <ul class="flex flex-wrap gap-3">
+        {
+          skills.map((skill) => (
+            <li class:list={["pill text-sm", skill.core && "bg-primary/15"]}>
+              {skill.name}
+              <span class="text-secondary tabular-nums">{skill.since}</span>
+            </li>
+          ))
+        }
+      </ul>
+      <p class="mt-4 text-sm text-secondary">
+        Tinted = depth I&apos;d defend in an interview. The year is when it
+        first shipped in something real.
+      </p>
+    </div>
+  </div>
+</section>

@@ -1,4 +1,3 @@
-import { cache } from "react";
 import { Client, isFullPage } from "@notionhq/client";
 import { NotionToMarkdown } from "notion-to-md";
 import type { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints";
@@ -20,7 +19,7 @@ import type { PageObjectResponse } from "@notionhq/client/build/src/api-endpoint
  *
  * Every function degrades gracefully: if the integration is not configured or
  * Notion errors, it returns empty/null so the site still builds and renders the
- * hardcoded fallback in WritingSection.
+ * hardcoded fallback in the Writing section.
  */
 
 export interface PostMeta {
@@ -36,8 +35,9 @@ export interface Post extends PostMeta {
   markdown: string;
 }
 
-const NOTION_TOKEN = process.env.NOTION_TOKEN;
-const NOTION_WRITING_DB_ID = process.env.NOTION_WRITING_DB_ID;
+const NOTION_TOKEN = import.meta.env.NOTION_TOKEN ?? process.env.NOTION_TOKEN;
+const NOTION_WRITING_DB_ID =
+  import.meta.env.NOTION_WRITING_DB_ID ?? process.env.NOTION_WRITING_DB_ID;
 
 export function isNotionConfigured(): boolean {
   return Boolean(NOTION_TOKEN && NOTION_WRITING_DB_ID);
@@ -64,7 +64,10 @@ function slugify(input: string): string {
 function readTitle(page: PageObjectResponse): string {
   for (const prop of Object.values(page.properties)) {
     if (prop.type === "title") {
-      const text = prop.title.map((t) => t.plain_text).join("").trim();
+      const text = prop.title
+        .map((t) => t.plain_text)
+        .join("")
+        .trim();
       if (text) return text;
     }
   }
@@ -74,7 +77,10 @@ function readTitle(page: PageObjectResponse): string {
 function readRichText(page: PageObjectResponse, name: string): string {
   const prop = page.properties[name];
   if (prop?.type === "rich_text") {
-    return prop.rich_text.map((t) => t.plain_text).join("").trim();
+    return prop.rich_text
+      .map((t) => t.plain_text)
+      .join("")
+      .trim();
   }
   return "";
 }
@@ -117,11 +123,15 @@ function toMeta(page: PageObjectResponse): PostMeta {
 }
 
 /**
- * All published posts, newest first. Empty when Notion is not configured or on
- * error. Wrapped in React `cache` so repeated calls within one request (e.g.
- * generateMetadata + the page body) hit Notion only once.
+ * Request-scoped memo, replacing React's `cache()`. One render of `/` asks for
+ * the post list from the Writing section and again for the sitemap, and one
+ * render of an article asks for it in the head and in the body — this keeps
+ * that to a single Notion round trip. It is intentionally not a long-lived
+ * cache: ISR already owns how long a rendered page is reused.
  */
-export const getPublishedPosts = cache(async (): Promise<PostMeta[]> => {
+let postsPromise: Promise<PostMeta[]> | null = null;
+
+async function fetchPublishedPosts(): Promise<PostMeta[]> {
   if (!isNotionConfigured()) return [];
   try {
     const notion = getClient();
@@ -138,7 +148,7 @@ export const getPublishedPosts = cache(async (): Promise<PostMeta[]> => {
           pages.push(result);
         }
       }
-      cursor = response.has_more ? response.next_cursor ?? undefined : undefined;
+      cursor = response.has_more ? (response.next_cursor ?? undefined) : undefined;
     } while (cursor);
 
     return pages
@@ -148,25 +158,31 @@ export const getPublishedPosts = cache(async (): Promise<PostMeta[]> => {
     console.error("[notion] getPublishedPosts failed:", error);
     return [];
   }
-});
+}
 
-/** A single published post with rendered Markdown, or null if not found. */
-export const getPostBySlug = cache(
-  async (slug: string): Promise<Post | null> => {
-    if (!isNotionConfigured()) return null;
-    try {
-      const meta = (await getPublishedPosts()).find((p) => p.slug === slug);
-      if (!meta) return null;
+/** All published posts, newest first. Empty when unconfigured or on error. */
+export function getPublishedPosts(): Promise<PostMeta[]> {
+  if (!postsPromise) {
+    postsPromise = fetchPublishedPosts();
+  }
+  return postsPromise;
+}
 
-      const notion = getClient();
-      const n2m = new NotionToMarkdown({ notionClient: notion });
-      const blocks = await n2m.pageToMarkdown(meta.id);
-      const { parent } = n2m.toMarkdownString(blocks);
+/** A single published post with its Markdown body, or null if not found. */
+export async function getPostBySlug(slug: string): Promise<Post | null> {
+  if (!isNotionConfigured()) return null;
+  try {
+    const meta = (await getPublishedPosts()).find((p) => p.slug === slug);
+    if (!meta) return null;
 
-      return { ...meta, markdown: parent ?? "" };
-    } catch (error) {
-      console.error(`[notion] getPostBySlug("${slug}") failed:`, error);
-      return null;
-    }
-  },
-);
+    const notion = getClient();
+    const n2m = new NotionToMarkdown({ notionClient: notion });
+    const blocks = await n2m.pageToMarkdown(meta.id);
+    const { parent } = n2m.toMarkdownString(blocks);
+
+    return { ...meta, markdown: parent ?? "" };
+  } catch (error) {
+    console.error(`[notion] getPostBySlug("${slug}") failed:`, error);
+    return null;
+  }
+}

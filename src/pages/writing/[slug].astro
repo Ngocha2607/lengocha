@@ -1,0 +1,81 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import NotFound from "../../components/NotFound.astro";
+import { getPostBySlug } from "../../lib/notion";
+import { renderMarkdown } from "../../lib/markdown";
+import { SITE } from "../../consts";
+
+/**
+ * On-demand rendered with ISR, so a post published in Notion appears within the
+ * hour without a redeploy — the contract the Next version had via
+ * `revalidate = 3600` plus `generateStaticParams`.
+ */
+export const prerender = false;
+
+const { slug } = Astro.params;
+const post = slug ? await getPostBySlug(slug) : null;
+
+/**
+ * A missing slug renders the shared not-found body with a real 404 status.
+ * `Astro.rewrite("/404")` cannot be used here: the 404 page is prerendered, so
+ * there is no server component to rewrite into and the attempt throws a 500.
+ */
+if (!post) {
+  Astro.response.status = 404;
+}
+
+function formatDate(iso: string): string {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return "";
+  return new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  }).format(date);
+}
+---
+
+{
+  post ? (
+    <Layout
+      title={`${post.title} — ${SITE.name}`}
+      description={post.description || SITE.description}
+      canonical={`/writing/${post.slug}`}
+      ogType="article"
+    >
+      <div class="mx-auto max-w-3xl border-x border-dashed border-secondary">
+        <div class="border-b border-dashed border-secondary px-4 py-4 sm:px-6">
+          <a class="label hover:bg-primary focus-visible:bg-primary" href="/#writing">
+            ← Writing
+          </a>
+        </div>
+
+        <article class="px-4 py-10 sm:px-6 md:py-14">
+          <header class="mb-10 border-b border-dashed border-secondary pb-6">
+            <h1 class="text-3xl leading-[1.15] text-balance sm:text-4xl">
+              {post.title}
+            </h1>
+            {formatDate(post.date) && (
+              <p class="label mt-4 text-secondary">
+                <time datetime={post.date}>{formatDate(post.date)}</time>
+              </p>
+            )}
+            {post.tags.length > 0 && (
+              <ul class="mt-4 flex flex-wrap gap-1.5" aria-label="Topics">
+                {post.tags.map((tag) => (
+                  <li class="chip">{tag}</li>
+                ))}
+              </ul>
+            )}
+          </header>
+
+          <div class="prose-mono" set:html={renderMarkdown(post.markdown)} />
+        </article>
+      </div>
+    </Layout>
+  ) : (
+    <Layout title={`Not found — ${SITE.name}`}>
+      <NotFound detail="This article isn't published. The Writing list is driven from a Notion database and only shows published posts, so a draft or a renamed slug lands here." />
+    </Layout>
+  )
+}
