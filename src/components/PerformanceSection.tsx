@@ -2,17 +2,50 @@ import Link from "next/link";
 import { ArrowRightIcon } from "@/components/icons";
 import { PerformanceCase } from "@/components/PerformanceCase";
 import { PipelineTerminal } from "@/components/PipelineTerminal";
+import { SectionHeading } from "@/components/SectionHeading";
 
 /**
  * Field data, Vercel Speed Insights, P75 desktop on UAT, taken before the
  * optimization pass. `good` is the Core Web Vitals threshold, not my target.
+ * `plain` is the same wording WebVitalsMonitor uses, so the two strips can be
+ * read side by side by someone who does not know the acronyms.
  */
 const FIELD_METRICS = [
-  { name: "LCP", value: "3.92s", good: "< 2.5s", pass: false },
-  { name: "FCP", value: "2.55s", good: "< 1.8s", pass: false },
-  { name: "TTFB", value: "1.51s", good: "< 0.8s", pass: false },
-  { name: "INP", value: "112ms", good: "< 200ms", pass: true },
-  { name: "CLS", value: "0.01", good: "< 0.1", pass: true },
+  {
+    name: "LCP",
+    plain: "main content appears",
+    value: "3.92s",
+    good: "< 2.5s",
+    pass: false,
+  },
+  {
+    name: "FCP",
+    plain: "page starts drawing",
+    value: "2.55s",
+    good: "< 1.8s",
+    pass: false,
+  },
+  {
+    name: "TTFB",
+    plain: "server answers",
+    value: "1.51s",
+    good: "< 0.8s",
+    pass: false,
+  },
+  {
+    name: "INP",
+    plain: "taps respond",
+    value: "112ms",
+    good: "< 200ms",
+    pass: true,
+  },
+  {
+    name: "CLS",
+    plain: "layout holds still",
+    value: "0.01",
+    good: "< 0.1",
+    pass: true,
+  },
 ];
 
 const ROOT_CAUSES = [
@@ -43,19 +76,20 @@ export function PerformanceSection() {
     <section
       id="performance"
       className="mb-16 scroll-mt-16 md:mb-24 lg:mb-36 lg:scroll-mt-24"
-      aria-label="Performance and delivery"
+      aria-labelledby="performance-title"
     >
-      <div className="sticky top-0 z-20 -mx-6 mb-4 w-screen bg-slate-900/75 px-6 py-5 backdrop-blur md:-mx-12 md:px-12 lg:sr-only lg:relative lg:top-auto lg:mx-auto lg:w-full lg:px-0 lg:py-0 lg:opacity-0">
-        <h2 className="text-sm font-bold uppercase tracking-widest text-slate-200 lg:sr-only">
-          Performance
-        </h2>
-      </div>
+      <SectionHeading
+        id="performance"
+        eyebrow="Performance"
+        title="Making a slow product fast — and knowing when not to ship"
+        lead="A page in SAPP's learning platform took 15 seconds to open. Without the jargon: I measured why, got it down to 6, and one fix that worked is still deliberately not in production. Slow pages lose learners, so this is the work I'd want to be judged on."
+      />
 
       <p className="mb-6 text-sm leading-normal">
-        I ran a performance pass over the LMS across 15 routes. Drag the slider
-        to replay it — the scores are the audit, not a marketing round-up.
-        Further down is the change I measured, proved out, and then chose not to
-        ship; that is the one I&apos;d rather talk about.
+        The pass covered 15 routes. Drag the slider to replay it — the scores
+        are the audit, not a marketing round-up. Further down is the change I
+        measured, proved out, and then chose not to ship; that is the one
+        I&apos;d rather talk about.
       </p>
 
       <PerformanceCase />
@@ -65,7 +99,9 @@ export function PerformanceSection() {
       </h3>
       <p className="mb-4 text-sm leading-normal">
         Field data first, so the work follows real users rather than a lab
-        score. Thresholds are the Core Web Vitals targets:
+        score. Thresholds are the Core Web Vitals targets — Google&apos;s
+        industry-standard pass mark for each one. Red means most users were
+        getting worse than that; teal means it passed.
       </p>
 
       <ul className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-5">
@@ -82,6 +118,9 @@ export function PerformanceSection() {
                 aria-hidden="true"
               />
               {metric.name}
+            </p>
+            <p className="mt-0.5 min-h-7 text-[11px] leading-tight text-slate-500">
+              {metric.plain}
             </p>
             <p
               className={`mt-1 text-lg font-bold tabular-nums ${
@@ -125,6 +164,12 @@ export function PerformanceSection() {
         The fix I measured, then deliberately did not ship
       </h3>
       <div className="rounded-lg border border-amber-300/20 bg-amber-300/4 p-5">
+        <p className="mb-4 border-b border-amber-300/15 pb-4 text-sm font-medium leading-normal text-amber-100/90">
+          In plain terms: it made one server-side number look dramatically
+          better without making the page feel any faster to a single user. So it
+          sits in a branch until the work that has to come first is done. The
+          detail, for anyone who wants to check it:
+        </p>
         <p className="text-sm leading-normal text-slate-300">
           Dropping <code className="text-teal-300">revalidate = 0</code> and
           wrapping the provider tree in{" "}
@@ -157,7 +202,10 @@ export function PerformanceSection() {
         A one-off audit decays in a sprint, so performance is tracked per route
         per release rather than re-discovered. The same pipeline blocks leaked
         secrets, vulnerable dependencies and insecure patterns before review
-        ever sees them.
+        ever sees them — in plain terms, every code change is automatically
+        checked for passwords committed by accident, libraries with known
+        security holes, risky code, and problems visible on the running site,
+        and the change is blocked until it is clean.
       </p>
 
       <PipelineTerminal />

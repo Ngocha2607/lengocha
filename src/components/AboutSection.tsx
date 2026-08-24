@@ -1,3 +1,5 @@
+import { SectionHeading } from "@/components/SectionHeading";
+
 const stats = [
   { value: "~5", label: "Years Experience" },
   { value: "5", label: "B2B/B2C Products" },
@@ -12,20 +14,24 @@ export function AboutSection() {
     <section
       id="about"
       className="mb-16 scroll-mt-16 md:mb-24 lg:mb-36 lg:scroll-mt-24"
-      aria-label="About me"
+      aria-labelledby="about-title"
     >
-      <div className="sticky top-0 z-20 -mx-6 mb-4 w-screen bg-slate-900/75 px-6 py-5 backdrop-blur md:-mx-12 md:px-12 lg:sr-only lg:relative lg:top-auto lg:mx-auto lg:w-full lg:px-0 lg:py-0 lg:opacity-0">
-        <h2 className="text-sm font-bold uppercase tracking-widest text-slate-200 lg:sr-only">
-          About
-        </h2>
-      </div>
+      <SectionHeading
+        id="about"
+        eyebrow="About"
+        title="What I do, and the numbers behind it"
+        lead="Nearly five years of frontend work in education and travel tech, the last two leading a team. In short: I build the web side of large products, make them faster, and set the standards the other engineers work to."
+      />
       <div>
         <p className="mb-4">
-          Hi there! I&apos;m Hà, a Senior Frontend Engineer and Frontend Tech
-          Lead with nearly 5 years of experience building scalable web
-          applications across EdTech and TravelTech. I specialize in React,
-          Next.js, TypeScript, frontend architecture, performance optimization,
-          and developer experience.
+          Hi there! I&apos;m Hà. I lead frontend at SAPP Academy, where I own
+          the architecture of a learning platform students and teachers use
+          every day — the technical direction, the coding standards, the code
+          reviews, and two junior engineers. Before that, five B2B/B2C products
+          at a travel group, working both the React frontend and the Spring Boot
+          services behind it. React, Next.js and TypeScript are the day-to-day;
+          architecture, performance and developer experience are the part
+          I&apos;m actually hired for.
         </p>
 
         <ul className="mb-6 grid grid-cols-2 gap-4 border-y border-slate-800 py-5 sm:grid-cols-3">

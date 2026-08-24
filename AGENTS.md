@@ -40,7 +40,7 @@ unsure about an API or convention, check the docs bundled in
 src/
   app/              # Next.js routes, root layout, global CSS
     writing/[slug]/ # Notion-backed article pages (ISR)
-  components/       # React components (Header, About, Performance, Experience, Projects, Writing, Footer)
+  components/       # React components (Header, SectionHeading, About, Performance, Experience, Projects, Writing, Footer)
     ui/             # shadcn/ui primitives
     icons.tsx       # SVG icons as React components
   lib/utils.ts      # cn() utility
@@ -52,6 +52,32 @@ public/
   seo/              # Favicons, OG images, webmanifest
   resume.pdf        # Downloadable CV
 ```
+
+## Two audiences per section
+
+The page is read by engineers who will probe the claims and by recruiters and
+hiring managers who will not. Every section therefore carries a visible title
+and a plain-language lead before any depth, via `SectionHeading`:
+
+- Each section renders exactly one `SectionHeading` and points its
+  `aria-labelledby` at the `${id}-title` heading — no `aria-label`, no second
+  copy of the section name. The eyebrow is `aria-hidden`, since the `<h2>`
+  underneath already names the section.
+- `SectionHeading` returns a **fragment** on purpose. `position: sticky` is
+  bounded by its containing block, so the mobile wayfinder has to be a direct
+  child of the `<section>` to stay pinned for the section's full height.
+- The bar uses negative margins to reach full-bleed, never `w-screen`: `100vw`
+  includes the scrollbar and gives the whole page a horizontal scroll.
+- Section headings are visible at every breakpoint. Earlier versions hid them
+  with `lg:sr-only`, which left the desktop content column with no titles at
+  all — do not reintroduce that.
+- Jargon gets a plain-English gloss next to it rather than being removed: metric
+  acronyms carry a `plain` label (`FIELD_METRICS` and `WebVitalsMonitor`'s
+  `METRICS` must keep the same wording, since the two strips are read as a
+  pair), the Lighthouse donuts explain the 0–100 banding, and the unshipped-fix
+  callout opens with an "In plain terms" line before the detail. Glosses have a
+  reserved two-line height (`min-h-7`) so the values below them stay aligned
+  across the row.
 
 ## Interactive sections
 

@@ -14,20 +14,28 @@ const seconds = (value: number) => `${(value / 1000).toFixed(2)}s`;
 
 /**
  * The same five metrics the Performance section quotes as lab data, so the two
- * strips can be compared directly. `good` is the Core Web Vitals threshold.
+ * strips can be compared directly. `good` is the Core Web Vitals threshold and
+ * `plain` is the same wording FIELD_METRICS uses over there — the acronyms mean
+ * nothing to most readers, and the pair only works if both sides match.
  */
 const METRICS = [
-  { name: "LCP", good: "< 2.5s", format: seconds },
-  { name: "FCP", good: "< 1.8s", format: seconds },
-  { name: "TTFB", good: "< 0.8s", format: seconds },
+  { name: "LCP", plain: "main content appears", good: "< 2.5s", format: seconds },
+  { name: "FCP", plain: "page starts drawing", good: "< 1.8s", format: seconds },
+  { name: "TTFB", plain: "server answers", good: "< 0.8s", format: seconds },
   {
     name: "INP",
+    plain: "taps respond",
     good: "< 200ms",
     format: (value: number) => `${Math.round(value)}ms`,
     /** INP cannot exist until the visitor interacts, so say so rather than sit blank. */
     pending: "needs a click",
   },
-  { name: "CLS", good: "< 0.1", format: (value: number) => value.toFixed(3) },
+  {
+    name: "CLS",
+    plain: "layout holds still",
+    good: "< 0.1",
+    format: (value: number) => value.toFixed(3),
+  },
 ] as const;
 
 const TEXT_TONE: Record<Rating, string> = {
@@ -63,12 +71,22 @@ export function WebVitalsMonitor() {
   }, []);
 
   return (
-    <section aria-label="Live Core Web Vitals for this page">
-      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-        This page · your browser
+    <section aria-labelledby="vitals-title">
+      <p className="text-xs font-bold uppercase tracking-widest text-teal-300">
+        Live
+      </p>
+      <h2
+        id="vitals-title"
+        className="mt-2 text-lg font-semibold tracking-tight text-slate-200"
+      >
+        This page, measured in your browser right now
+      </h2>
+      <p className="mt-2 text-sm leading-normal text-slate-400">
+        The same five checks the Performance section reports on the LMS — run
+        against this page, on your device, as you read it.
       </p>
 
-      <ul className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-5">
+      <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-5">
         {METRICS.map((metric) => {
           const reading = readings[metric.name];
           const pending = "pending" in metric ? metric.pending : "measuring";
@@ -85,6 +103,9 @@ export function WebVitalsMonitor() {
                   aria-hidden="true"
                 />
                 {metric.name}
+              </p>
+              <p className="mt-0.5 min-h-7 text-[11px] leading-tight text-slate-500">
+                {metric.plain}
               </p>
               {/*
                 Both states occupy one line, so the readout filling in cannot

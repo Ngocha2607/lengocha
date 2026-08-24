@@ -151,6 +151,11 @@ export function PerformanceCase() {
       <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
         Lighthouse performance · lms-pro
       </p>
+      {/* The donuts are meaningless to anyone who has not run Lighthouse. */}
+      <p className="mt-1 text-xs leading-relaxed text-slate-600">
+        Google&apos;s page-quality score out of 100 — higher is better.
+        Lighthouse bands it red under 50, amber under 90, green above.
+      </p>
 
       <div className="mt-4 grid gap-5 sm:grid-cols-2">
         {GROUPS.map((group) => {

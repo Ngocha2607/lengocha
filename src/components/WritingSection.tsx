@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowUpRightIcon } from "@/components/icons";
+import { SectionHeading } from "@/components/SectionHeading";
 import { getPublishedPosts, type PostMeta } from "@/lib/notion";
 
 interface ArticleCard {
@@ -51,13 +52,14 @@ export async function WritingSection() {
     <section
       id="writing"
       className="mb-16 scroll-mt-16 md:mb-24 lg:mb-36 lg:scroll-mt-24"
-      aria-label="Writing"
+      aria-labelledby="writing-title"
     >
-      <div className="sticky top-0 z-20 -mx-6 mb-4 w-screen bg-slate-900/75 px-6 py-5 backdrop-blur md:-mx-12 md:px-12 lg:sr-only lg:relative lg:top-auto lg:mx-auto lg:w-full lg:px-0 lg:py-0 lg:opacity-0">
-        <h2 className="text-sm font-bold uppercase tracking-widest text-slate-200 lg:sr-only">
-          Writing
-        </h2>
-      </div>
+      <SectionHeading
+        id="writing"
+        eyebrow="Writing"
+        title="What I write about"
+        lead="Write-ups I publish for my team, and for anyone reviewing me. They cover the reasoning behind a decision rather than just the result — the closest thing to seeing how I work before you talk to me."
+      />
       <ul className="group/list">
         {articles.map((article) => (
           <li key={article.key} className="mb-12">
