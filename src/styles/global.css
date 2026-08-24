@@ -90,6 +90,38 @@
     @apply text-ink decoration-ink-3 underline decoration-1 underline-offset-4;
     @apply hover:bg-acid hover:decoration-ink focus-visible:bg-acid;
   }
+
+  /*
+    Broadsheet furniture. The page is laid out as a front page rather than a
+    stack of equal cards: a nameplate, a dateline, a lead story with a
+    standfirst, boxed sidebars, and section rules that read as datelines.
+  */
+
+  /* The category above a headline. Smaller and lighter than .label. */
+  .kicker {
+    @apply text-ink-2 font-mono text-[0.6875rem] font-bold tracking-[0.2em] uppercase;
+  }
+
+  /* The lead paragraph under a headline: bigger than body, still sans. */
+  .standfirst {
+    @apply text-ink text-lg leading-snug sm:text-xl;
+  }
+
+  /*
+    Headline. Mono at display sizes needs negative tracking or the words drift
+    apart; `text-balance` keeps two-line headlines from orphaning a word.
+  */
+  .headline {
+    @apply text-ink font-mono font-bold tracking-[-0.03em] text-balance;
+  }
+
+  /*
+    A boxed aside, the way a newspaper breaks out a table from the story.
+    Bottom-heavy border so a stack of them reads as one ruled block.
+  */
+  .breakout {
+    @apply border-rule border-2 bg-hush;
+  }
 }
 
 /* Long-form article body on /writing/[slug]. */

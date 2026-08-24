@@ -1,13 +1,16 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import Header from "../components/Header.astro";
-import AboutSection from "../components/AboutSection.astro";
+import Masthead from "../components/Masthead.astro";
+import LeadSection from "../components/LeadSection.astro";
+import DecisionsSection from "../components/DecisionsSection.astro";
 import PerformanceSection from "../components/PerformanceSection.astro";
-import ExperienceSection from "../components/ExperienceSection.astro";
+import LeadingSection from "../components/LeadingSection.astro";
+import WorkSection from "../components/WorkSection.astro";
 import ProjectsSection from "../components/ProjectsSection.astro";
+import ToolboxSection from "../components/ToolboxSection.astro";
 import WritingSection from "../components/WritingSection.astro";
+import HiringSection from "../components/HiringSection.astro";
 import Footer from "../components/Footer.astro";
-import FloatingCTA from "../components/FloatingCTA.astro";
 
 /**
  * On-demand rendered so the Writing list picks up newly published Notion posts.
@@ -18,21 +21,27 @@ export const prerender = false;
 ---
 
 <Layout canonical="/" personSchema>
-  <div class="mx-auto max-w-5xl border-x-2 border-rule">
-    <Header />
+  <div class="mx-auto max-w-6xl border-x-2 border-rule">
+    <Masthead />
 
-    <main id="content" class="px-4 py-12 sm:px-6 md:py-16">
-      <div class="space-y-20 md:space-y-28">
-        <AboutSection />
-        <PerformanceSection />
-        <ExperienceSection />
-        <ProjectsSection />
-        <WritingSection />
-      </div>
+    {/*
+      Sections are divided by their own top rules rather than by uniform gaps,
+      so the page reads as a continuous document instead of a stack of cards.
+      The order is an argument: who I am, then the evidence, then the practice,
+      then the record, then how to start.
+    */}
+    <main id="content" class="space-y-16 px-4 pt-8 pb-12 sm:px-6 md:space-y-20 md:pt-10 md:pb-14">
+      <LeadSection />
+      <DecisionsSection />
+      <PerformanceSection />
+      <LeadingSection />
+      <WorkSection />
+      <ProjectsSection />
+      <ToolboxSection />
+      <WritingSection />
+      <HiringSection />
     </main>
 
     <Footer />
   </div>
-
-  <FloatingCTA />
 </Layout>

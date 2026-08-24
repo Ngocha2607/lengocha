@@ -1,0 +1,271 @@
+---
+import SectionRule from "./SectionRule.astro";
+
+/**
+ * The toolbox, indexed by the year each tool first appeared in shipped work.
+ *
+ * Deliberately not a proficiency chart. Self-assessed star ratings are the
+ * thing engineers mock in portfolios, and they cannot be checked. A first-used
+ * year can: every one of these is derivable from the roles in the record
+ * below, so a reviewer can line the two up.
+ *
+ * Two views over the same data, both rendered server-side and both left in the
+ * DOM: by domain (what can I do) and by year (how did I get here). Toggling is
+ * a class change, so nothing is fetched and nothing is lost to crawlers.
+ */
+
+interface Tool {
+  name: string;
+  /** First year it appeared in shipped work, per the record below. */
+  since: string;
+  /** Marks the handful I'd claim depth in rather than familiarity. */
+  core?: boolean;
+}
+
+interface Group {
+  title: string;
+  /** Says plainly what this row of the matrix means. */
+  note: string;
+  tools: Tool[];
+}
+
+const GROUPS: Group[] = [
+  {
+    title: "Language & framework",
+    note: "The daily surface",
+    tools: [
+      { name: "React", since: "2021", core: true },
+      { name: "TypeScript", since: "2023", core: true },
+      { name: "Next.js", since: "2023", core: true },
+      { name: "Astro", since: "2026" },
+    ],
+  },
+  {
+    title: "Interface",
+    note: "Design systems and styling",
+    tools: [
+      { name: "Ant Design", since: "2021", core: true },
+      { name: "SCSS / CSS Modules", since: "2021" },
+      { name: "Tailwind CSS", since: "2023", core: true },
+      { name: "Material UI", since: "2023" },
+      { name: "Shadcn/ui", since: "2023" },
+    ],
+  },
+  {
+    title: "State & data",
+    note: "Client state and server cache",
+    tools: [
+      { name: "Redux Toolkit", since: "2021", core: true },
+      { name: "Zustand", since: "2023" },
+      { name: "TanStack Query", since: "2025", core: true },
+    ],
+  },
+  {
+    title: "Workspace & build",
+    note: "How four frontends stay one codebase",
+    tools: [
+      { name: "pnpm workspace", since: "2025", core: true },
+      { name: "Turborepo", since: "2025", core: true },
+      { name: "Vite", since: "2025" },
+      { name: "Code splitting", since: "2025", core: true },
+    ],
+  },
+  {
+    title: "Content & editors",
+    note: "The heavy components I own",
+    tools: [
+      { name: "Tiptap / ProseMirror", since: "2025", core: true },
+      { name: "GrapeJS", since: "2023" },
+      { name: "Notion API", since: "2026" },
+    ],
+  },
+  {
+    title: "Quality & security",
+    note: "The gate on every merge request",
+    tools: [
+      { name: "GitLab CI", since: "2025", core: true },
+      { name: "Gitleaks", since: "2025" },
+      { name: "Trivy", since: "2025" },
+      { name: "Semgrep", since: "2025" },
+      { name: "OWASP ZAP", since: "2025" },
+    ],
+  },
+  {
+    title: "Services I've written",
+    note: "Not just consumed — shipped",
+    tools: [
+      { name: "Spring Boot", since: "2023", core: true },
+      { name: "Java", since: "2023" },
+      { name: "C++", since: "2021" },
+    ],
+  },
+  {
+    title: "APIs I've built against",
+    note: "Integrated, not authored",
+    tools: [
+      { name: ".NET Core API", since: "2022" },
+      { name: "Laravel API", since: "2023" },
+      { name: "RESTful API design", since: "2021" },
+    ],
+  },
+];
+
+/** Same tools, regrouped by the year they first appeared. */
+const byYear = [...GROUPS]
+  .flatMap((group) => group.tools.map((tool) => ({ ...tool, group: group.title })))
+  .reduce<Map<string, { name: string; group: string; core?: boolean }[]>>(
+    (acc, tool) => {
+      const list = acc.get(tool.since) ?? [];
+      list.push({ name: tool.name, group: tool.group, core: tool.core });
+      acc.set(tool.since, list);
+      return acc;
+    },
+    new Map(),
+  );
+
+/** What was happening in each year, so the tooling has a reason attached. */
+const YEAR_CONTEXT: Record<string, string> = {
+  "2021": "First React roles — operational data grids, Agile delivery",
+  "2022": "Onsite at 3S Intersoft on EVN Hanoi's power-management modules",
+  "2023": "Travel group: Spring Boot services behind React and Next.js clients",
+  "2025": "Tech lead at SAPP — the monorepo, the editor, the security gate",
+  "2026": "This site",
+};
+
+const years = [...byYear.keys()].sort();
+const total = GROUPS.reduce((n, group) => n + group.tools.length, 0);
+---
+
+<section id="toolbox" class="scroll-mt-14" aria-labelledby="toolbox-title">
+  <SectionRule
+    id="toolbox"
+    kicker="Reference"
+    title="Toolbox"
+    lead="What I work with, indexed by the year it first appeared in something I shipped — not by a self-scored proficiency bar, because that is the one number in a portfolio nobody can check. A filled marker means depth I'd defend in an interview; an outline means I've shipped with it."
+    note={`${total} tools · first used 2021—2026`}
+  />
+
+  <div data-toolbox>
+    <div
+      class="mb-6 flex flex-wrap items-center gap-2 border-y-2 border-rule py-3"
+      role="group"
+      aria-label="Toolbox view"
+    >
+      <span class="kicker mr-1">Index by</span>
+      <button
+        type="button"
+        class="label border-2 border-rule px-2.5 py-1 hover:bg-acid focus-visible:bg-acid aria-pressed:bg-ink aria-pressed:text-paper"
+        data-view="domain"
+        aria-pressed="true"
+      >
+        Domain
+      </button>
+      <button
+        type="button"
+        class="label border-2 border-rule px-2.5 py-1 hover:bg-acid focus-visible:bg-acid aria-pressed:bg-ink aria-pressed:text-paper"
+        data-view="year"
+        aria-pressed="false"
+      >
+        Year picked up
+      </button>
+      <p class="kicker ml-auto flex items-center gap-2 text-ink-3">
+        <span class="h-2.5 w-2.5 border-2 border-rule bg-ink" aria-hidden="true"></span>
+        Depth
+        <span class="ml-2 h-2.5 w-2.5 border-2 border-rule" aria-hidden="true"></span>
+        Shipped with
+      </p>
+    </div>
+
+    {/*
+      View 1: by domain. A plain list rather than a <dl> — each group has a real
+      heading, and a <dt> is not allowed to contain heading content.
+    */}
+    <div data-panel="domain">
+      <ul class="grid gap-x-8 sm:grid-cols-2">
+        {
+          GROUPS.map((group) => (
+            <li class="border-t-2 border-rule py-4">
+              <h3 class="font-mono text-sm">{group.title}</h3>
+              <p class="kicker mt-1 text-ink-3">{group.note}</p>
+              <ul class="mt-3 flex flex-wrap gap-1.5">
+                {group.tools.map((tool) => (
+                  <li class="flex items-center gap-1.5 border-2 border-rule px-2 py-0.5">
+                    <span
+                      class:list={[
+                        "h-2 w-2 shrink-0 border-2 border-rule",
+                        tool.core && "bg-ink",
+                      ]}
+                      aria-hidden="true"
+                    />
+                    <span class="font-mono text-xs">{tool.name}</span>
+                    <span class="font-mono text-[0.625rem] text-ink-3 tabular-nums">
+                      {tool.since}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+
+    {/* View 2: by year — the same data, read as a career shape. */}
+    <div data-panel="year" hidden>
+      <ol class="border-t-2 border-rule">
+        {
+          years.map((year) => (
+            <li class="border-b-2 border-rule py-4">
+              <div class="grid gap-3 md:grid-cols-[7rem_minmax(0,1fr)] md:gap-6">
+                <div>
+                  <p class="font-mono text-2xl font-bold tabular-nums text-ink">
+                    {year}
+                  </p>
+                  <p class="kicker mt-1 text-ink-3">
+                    {byYear.get(year)!.length} picked up
+                  </p>
+                </div>
+                <div class="min-w-0">
+                  <p class="text-sm text-ink-2">{YEAR_CONTEXT[year]}</p>
+                  <ul class="mt-3 flex flex-wrap gap-1.5">
+                    {byYear.get(year)!.map((tool) => (
+                      <li class="flex items-center gap-1.5 border-2 border-rule px-2 py-0.5">
+                        <span
+                          class:list={[
+                            "h-2 w-2 shrink-0 border-2 border-rule",
+                            tool.core && "bg-ink",
+                          ]}
+                          aria-hidden="true"
+                        />
+                        <span class="font-mono text-xs">{tool.name}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </div>
+</section>
+
+<script>
+  for (const root of document.querySelectorAll<HTMLElement>("[data-toolbox]")) {
+    const buttons = Array.from(
+      root.querySelectorAll<HTMLButtonElement>("[data-view]"),
+    );
+    const panels = Array.from(root.querySelectorAll<HTMLElement>("[data-panel]"));
+
+    for (const button of buttons) {
+      button.addEventListener("click", () => {
+        const view = button.dataset.view!;
+        for (const panel of panels) panel.hidden = panel.dataset.panel !== view;
+        for (const other of buttons) {
+          other.setAttribute("aria-pressed", String(other.dataset.view === view));
+        }
+      });
+    }
+  }
+</script>

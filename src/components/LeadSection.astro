@@ -1,0 +1,131 @@
+---
+import SectionRule from "./SectionRule.astro";
+
+/**
+ * The lead story. Previously this section repeated the Experience list almost
+ * verbatim — the same three roles, the same bullets — which is why the page
+ * read long without saying more. It now does what a front page does: the short
+ * version, the numbers, and pointers to where the evidence is.
+ */
+
+const numbers = [
+  { value: "~5", label: "Years in frontend", note: "Since 2021" },
+  { value: "4", label: "Frontends in one monorepo", note: "lms-fe" },
+  { value: "15", label: "LMS routes audited", note: "Lab + field" },
+  { value: "5", label: "B2B/B2C products shipped", note: "Tweet World" },
+  { value: "1K+", label: "Monthly users served", note: "Travel ERP" },
+  { value: "~30%", label: "Team productivity gain", note: "AI workflows" },
+];
+
+/** The three things the job actually is, each pointing at its own evidence. */
+const owns = [
+  {
+    title: "Architecture",
+    body: "Frontend technical direction for SAPP's product ecosystem: a pnpm + Turborepo monorepo behind four frontends, a shared component layer, and a module registry that ships each customer only the features they bought.",
+    href: "#projects",
+    cta: "See the workspace",
+  },
+  {
+    title: "Performance",
+    body: "A measured pass over 15 LMS routes, worst route from 15.2s to 6.1s — including the one change I proved out and then chose not to ship, which is the more useful half of the story.",
+    href: "#performance",
+    cta: "Read the audit",
+  },
+  {
+    title: "Developer experience",
+    body: "Coding standards, code review, and a security pipeline that blocks leaked secrets and vulnerable dependencies before a human ever reviews the branch. Two junior engineers to raise.",
+    href: "#leading",
+    cta: "How I run a team",
+  },
+];
+---
+
+<section id="lead" class="scroll-mt-4" aria-labelledby="lead-title">
+  <SectionRule
+    id="lead"
+    kicker="Lead"
+    title="I own the frontend of a learning platform, and the standards around it"
+    lead="Nearly five years of frontend work in education and travel tech, the last two leading. In plain terms: I build the web side of large products, make them measurably faster, and set the engineering standards other developers work to."
+    note="Hanoi · Frontend Tech Lead"
+  />
+
+  <div class="grid gap-8 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)] lg:gap-10">
+    <div>
+      {/*
+        Drop cap. One per page — it marks where the reading starts, which is
+        the job a hero image usually does badly.
+      */}
+      <p
+        class="text-ink-2 [&>span:first-child]:float-left [&>span:first-child]:mt-1 [&>span:first-child]:mr-2 [&>span:first-child]:border-2 [&>span:first-child]:border-rule [&>span:first-child]:bg-acid [&>span:first-child]:px-2.5 [&>span:first-child]:font-mono [&>span:first-child]:text-4xl [&>span:first-child]:leading-[1.1] [&>span:first-child]:font-bold [&>span:first-child]:text-ink"
+      >
+        <span aria-hidden="true">H</span>
+        i there — I&apos;m Hà. I lead frontend at SAPP Academy, an accountancy
+        and finance training provider, where the learning platform is the
+        product students and teachers open every day. I own its technical
+        direction: the architecture, the coding standards, the code review, and
+        two junior engineers.
+      </p>
+
+      <p class="mt-4 text-ink-2">
+        Before that I spent two years at a travel group working both sides of
+        the wire — Spring Boot services and the React clients in front of them —
+        across five B2B/B2C products and a multilingual ERP. I started in
+        operational software: dense data grids for a power company, where a
+        mis-read screen has consequences a marketing page never does. That is
+        still how I pick what to work on.
+      </p>
+
+      <p class="mt-4 text-ink-2">
+        React, Next.js and TypeScript are the day-to-day. Architecture,
+        performance and developer experience are the part I&apos;m actually
+        hired for — so the rest of this page is evidence for those three,
+        including the decisions that went the other way.
+      </p>
+
+      <ul class="mt-8 border-t-2 border-rule">
+        {
+          owns.map((item) => (
+            <li class="border-b-2 border-rule py-4">
+              <div class="flex flex-wrap items-baseline gap-x-3">
+                <h3 class="font-mono text-base">{item.title}</h3>
+                <a class="link ml-auto text-sm" href={item.href}>
+                  {item.cta} →
+                </a>
+              </div>
+              <p class="mt-2 max-w-[62ch] text-sm text-ink-2">{item.body}</p>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+
+    {/* By the numbers — the recruiter's column. */}
+    <aside class="breakout h-max lg:sticky lg:top-14" aria-labelledby="numbers-title">
+      <h3 id="numbers-title" class="label border-b-2 border-rule px-4 py-2.5">
+        By the numbers
+      </h3>
+      {/*
+        A <div> inside a <dl> has to hold its <dt> before its <dd>, and a <dt>
+        cannot be buried in another wrapper. The number reads first visually, so
+        the order is flipped with `order-*` rather than by reordering the DOM.
+      */}
+      <dl>
+        {
+          numbers.map((item) => (
+            <div class="flex items-baseline gap-3 border-b-2 border-rule px-4 py-3 last:border-b-0">
+              <dt class="order-2 min-w-0">
+                <span class="block text-sm leading-tight text-ink">
+                  {item.label}
+                </span>
+                <span class="kicker mt-0.5 block text-ink-3">{item.note}</span>
+              </dt>
+              <dd class="order-1 font-mono text-2xl font-bold tabular-nums text-ink">
+                {item.value}
+              </dd>
+            </div>
+          ))
+        }
+      </dl>
+    </aside>
+  </div>
+</section>

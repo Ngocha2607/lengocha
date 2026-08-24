@@ -1,0 +1,46 @@
+---
+import { sectionIndex } from "../consts";
+
+/**
+ * A section opener, set as a dateline rather than a card: thick rule, a numbered
+ * kicker line, headline, standfirst. Replaces the old boxed heading — a page of
+ * identical bordered boxes reads as a template, and the box was doing no work
+ * that a rule does not do better.
+ *
+ * The standfirst is not optional. The page is read by engineers who will probe
+ * the claims and by recruiters who will not, and the standfirst is the whole of
+ * what the second group takes away, so it has to stand alone.
+ */
+interface Props {
+  /** Section id; the heading renders as `${id}-title` for aria-labelledby. */
+  id: string;
+  /** Newspaper category above the headline, e.g. "Evidence". */
+  kicker: string;
+  title: string;
+  lead: string;
+  /** Optional right-hand note on the kicker line, e.g. a source or a count. */
+  note?: string;
+}
+
+const { id, kicker, title, lead, note } = Astro.props;
+const index = sectionIndex(id);
+---
+
+<div class="mb-8 border-t-4 border-rule pt-3">
+  <p class="flex flex-wrap items-center gap-x-3 gap-y-1">
+    <span class="label border-2 border-rule bg-acid px-1.5 tabular-nums">
+      {index}
+    </span>
+    <span class="kicker">{kicker}</span>
+    {note && <span class="kicker ml-auto text-ink-3">{note}</span>}
+  </p>
+
+  <h2
+    id={`${id}-title`}
+    class="headline mt-3 text-3xl leading-[1.05] sm:text-4xl md:text-5xl"
+  >
+    {title}
+  </h2>
+
+  <p class="standfirst mt-4 max-w-[54ch]">{lead}</p>
+</div>

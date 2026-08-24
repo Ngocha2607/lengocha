@@ -1,5 +1,5 @@
 ---
-import SectionHeading from "./SectionHeading.astro";
+import SectionRule from "./SectionRule.astro";
 import PerformanceCase from "./PerformanceCase.astro";
 import PipelineTerminal from "./PipelineTerminal.astro";
 
@@ -41,11 +41,10 @@ const ROOT_CAUSES = [
 ];
 ---
 
-<section id="performance" class="scroll-mt-16" aria-labelledby="performance-title">
-  <SectionHeading
+<section id="performance" class="scroll-mt-14" aria-labelledby="performance-title">
+  <SectionRule
     id="performance"
-    index="02"
-    eyebrow="Performance"
+    kicker="Evidence"
     title="Making a slow product fast — and knowing when not to ship"
     lead="A page in SAPP's learning platform took 15 seconds to open. Without the jargon: I measured why, got it down to 6, and one fix that worked is still deliberately not in production. Slow pages lose learners, so this is the work I'd want to be judged on."
   />

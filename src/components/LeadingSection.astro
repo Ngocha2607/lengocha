@@ -1,0 +1,136 @@
+---
+import SectionRule from "./SectionRule.astro";
+
+/**
+ * How the lead half of the job actually gets done. The page had architecture
+ * and performance evidence but nothing on running a team, which is the part a
+ * lead role is hired for — it existed only as one bullet about mentoring.
+ *
+ * Each practice names its mechanism, because "I care about quality" is not a
+ * practice and cannot be checked. Everything here is traceable to the CV or to
+ * a decision in the log above.
+ */
+
+const practices = [
+  {
+    title: "Standards live in the pipeline, not in a document",
+    body: "A rule everyone agrees with decays in a sprint; a rule the pipeline enforces does not. Coding standards, the security gate and the build config are defined once in the workspace and inherited by every app in it.",
+    mechanism: "Shared GitLab CI config · Turborepo task graph",
+  },
+  {
+    title: "Measure before touching anything",
+    body: "The LMS pass started with field data, not a lab score. Every loading metric was failing and both interaction metrics were passing, which put re-render and animation work — the usual reflex — at the bottom of the queue.",
+    mechanism: "Field CWV first · per-route, per-release tracking",
+  },
+  {
+    title: "Automate the hygiene so review can be about design",
+    body: "Leaked secrets, vulnerable dependencies and insecure patterns are caught before a human opens the branch. That buys back the review conversation for architecture, naming and edge cases.",
+    mechanism: "Gitleaks · Trivy · Semgrep · ZAP, gating every merge request",
+  },
+  {
+    title: "Say no in public, with the numbers attached",
+    body: "The most useful thing I did to the LMS this year was not ship a change. Writing up why — with the measurements next to it — teaches the team more than another green graph, and it stops the same idea coming back untested.",
+    mechanism: "Decision records, kept with the evidence",
+  },
+  {
+    title: "Write it down so it outlives me",
+    body: "Two junior engineers should not have to ask me the same question twice, and the answer should survive my leaving. Setups I introduce get a handbook, and architecture that took a week to reason about gets a write-up.",
+    mechanism: "Internal handbooks · published architecture write-ups",
+  },
+  {
+    title: "Give the team leverage, not answers",
+    body: "The largest single productivity change was not a library choice. It was designing AI workflows around the work the team was already doing, then measuring what came back.",
+    mechanism: "~30% productivity gain · ~10 hours/week returned",
+  },
+];
+
+const mentoring = [
+  { count: "2", who: "junior engineers", where: "SAPP Academy", when: "2025 —" },
+  {
+    count: "3",
+    who: "junior engineers",
+    where: "Tweet World Travel",
+    when: "2023 — 2025",
+  },
+];
+
+const artifacts = [
+  "Coding standards covering four frontends in one workspace",
+  "A security gate any new app inherits on day one",
+  "An AppSec handbook written for engineers with no security background",
+  "Architecture write-ups on the monorepo and the module system",
+];
+---
+
+<section id="leading" class="scroll-mt-14" aria-labelledby="leading-title">
+  <SectionRule
+    id="leading"
+    kicker="Practice"
+    title="How I run a team"
+    lead="Six practices, each with the mechanism that makes it real rather than aspirational. The short version: put the standard somewhere it cannot be skipped, measure before deciding, and write things down so the answer outlives the person who found it."
+    note="5 engineers mentored"
+  />
+
+  <div class="grid gap-8 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] lg:gap-10">
+    {/* Practices, as a numbered ledger rather than a card grid. */}
+    <ol class="border-t-2 border-rule">
+      {
+        practices.map((practice, i) => (
+          <li class="border-b-2 border-rule py-4">
+            <div class="flex gap-3 sm:gap-4">
+              <span class="label shrink-0 pt-0.5 text-ink-3 tabular-nums">
+                {String(i + 1).padStart(2, "0")}
+              </span>
+              <div class="min-w-0">
+                <h3 class="font-mono text-base leading-snug">{practice.title}</h3>
+                <p class="mt-2 max-w-[62ch] text-sm text-ink-2">{practice.body}</p>
+                <p class="kicker mt-3 inline-block border-2 border-rule px-2 py-0.5 text-ink-2">
+                  {practice.mechanism}
+                </p>
+              </div>
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+
+    <div class="space-y-6">
+      <aside class="breakout" aria-labelledby="mentoring-title">
+        <h3 id="mentoring-title" class="label border-b-2 border-rule px-4 py-2.5">
+          People I&apos;ve brought on
+        </h3>
+        {
+          mentoring.map((entry) => (
+            <div class="flex items-baseline gap-3 border-b-2 border-rule px-4 py-3 last:border-b-0">
+              <span class="font-mono text-2xl font-bold tabular-nums text-ink">
+                {entry.count}
+              </span>
+              <div class="min-w-0">
+                <p class="text-sm leading-tight text-ink">{entry.who}</p>
+                <p class="kicker mt-0.5 text-ink-3">
+                  {entry.where} · {entry.when}
+                </p>
+              </div>
+            </div>
+          ))
+        }
+      </aside>
+
+      <aside class="border-2 border-rule" aria-labelledby="artifacts-title">
+        <h3 id="artifacts-title" class="label border-b-2 border-rule bg-acid px-4 py-2.5">
+          What I leave behind
+        </h3>
+        <ul>
+          {
+            artifacts.map((artifact) => (
+              <li class="flex gap-3 border-b-2 border-rule px-4 py-3 text-sm text-ink-2 last:border-b-0">
+                <span class="mt-1.5 h-2 w-2 shrink-0 bg-ink" aria-hidden="true" />
+                {artifact}
+              </li>
+            ))
+          }
+        </ul>
+      </aside>
+    </div>
+  </div>
+</section>

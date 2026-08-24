@@ -1,0 +1,424 @@
+---
+import SectionRule from "./SectionRule.astro";
+
+/**
+ * A decision log, written as architecture decision records.
+ *
+ * This is the section the portfolio was missing. A list of shipped features
+ * says what happened; it does not say what the alternatives were, what was
+ * given up, or what was deliberately refused — which is the part of a tech
+ * lead's job someone is actually hiring for.
+ *
+ * Every entry here is traceable to the Confluence performance audit, a
+ * published Writing post, or the CV. Two of the seven are a "no", and they stay
+ * in: a log with no rejections is a brag sheet, not a log.
+ *
+ * Zero JavaScript for the expansion — native <details>, so the content is in
+ * the DOM, crawlable, findable with Ctrl-F and keyboard-operable for free. The
+ * only script is the status filter.
+ */
+
+type Status = "shipped" | "held" | "reverted";
+
+interface Decision {
+  id: string;
+  status: Status;
+  year: string;
+  title: string;
+  /** One line a non-engineer can take away without opening the entry. */
+  upshot: string;
+  context: string;
+  options: string[];
+  /** Index into `options` of the one taken, so the choice is unambiguous. */
+  chosen: number;
+  decision: string;
+  consequences: string[];
+  link?: { href: string; label: string };
+}
+
+const STATUS_META: Record<Status, { label: string; tone: string; blurb: string }> = {
+  shipped: {
+    label: "Shipped",
+    tone: "border-rule bg-ink text-paper",
+    blurb: "In production",
+  },
+  held: {
+    label: "Held",
+    tone: "border-warn text-warn",
+    blurb: "Proved out, deliberately not shipped",
+  },
+  reverted: {
+    label: "Reverted",
+    tone: "border-fail text-fail",
+    blurb: "Shipped, then deliberately undone",
+  },
+};
+
+const DECISIONS: Decision[] = [
+  {
+    id: "editor-licence",
+    status: "shipped",
+    year: "2025",
+    title: "Rebuild the rich-text editor rather than renew a per-seat licence",
+    upshot:
+      "A cost that grew with student numbers became a one-off piece of engineering.",
+    context:
+      "The editor sits in front of every student and every teacher, and TinyMCE is licensed per seat — so the bill tracked enrolment. Enrolment is the one number nobody can forecast a year out, and an unforecastable seat count is an unbudgetable line item.",
+    options: [
+      "Renew, and negotiate the seat count each year",
+      "Restrict the editor to fewer roles to hold seats down",
+      "Rebuild on an open-source core (Tiptap / ProseMirror)",
+    ],
+    chosen: 2,
+    decision:
+      "Rebuild on Tiptap, matched feature for feature against what the product was already paying for, and ship it as a package across the lms-fe monorepo.",
+    consequences: [
+      "A variable licence became fixed engineering cost, and the monthly spend came down with it.",
+      "The monorepo no longer loads TinyMCE anywhere.",
+      "We own editor bugs now. That is the price of the decision, and it was worth paying — but it is a real cost, not a free win.",
+    ],
+  },
+  {
+    id: "revalidate",
+    status: "held",
+    year: "2025",
+    title: "Prove out the server-response fix, then keep it out of production",
+    upshot:
+      "It made one server number look dramatically better without making the page feel faster to a single user, so it waits.",
+    context:
+      "revalidate = 0 on the root layout forced a dynamic render on every request and switched off the Full Route Cache, so TTFB could not come down however well the client behaved. It was the most obvious item in the audit.",
+    options: [
+      "Ship it — the mechanism demonstrably works",
+      "Ship it behind a flag on a few low-risk routes",
+      "Hold it until the client boundary moves down to the leaves",
+    ],
+    chosen: 2,
+    decision:
+      "Hold it. The change stayed in the working tree with the measurements written up next to it.",
+    consequences: [
+      "Dropping revalidate = 0 and wrapping the provider tree in Suspense let 20 routes static-generate; TTFB on the main routes fell from roughly 60ms to 3ms locally, with a year-long s-maxage and a cache hit.",
+      "But useSearchParams() sits at the top of the provider tree, so the whole thing bails out to client-side rendering and the real content still arrives after hydrate. TTFB moves; LCP does not.",
+      "A shell cached at the CDN also has to be provably free of user-specific data before it goes anywhere near production.",
+      "It is a good change in the wrong order. It ships after the client boundary moves down and the critical pages fetch on the server — otherwise it is a 15× win on a number no user feels.",
+    ],
+    link: { href: "#performance", label: "The audit it came out of" },
+  },
+  {
+    id: "monorepo",
+    status: "shipped",
+    year: "2025",
+    title: "One monorepo for four frontends, with a shared layer that can be enforced",
+    upshot:
+      "Four products stopped re-implementing the same interface four times.",
+    context:
+      "lms-pro, lms-test and lms-finhub, plus the operations back-office, were drifting apart — the same components, editor and stylesheets rebuilt per app, and no single place to fix anything.",
+    options: [
+      "Separate repos with a published component package",
+      "One monorepo with a task graph over a shared layer",
+      "One application with per-customer feature flags",
+    ],
+    chosen: 1,
+    decision:
+      "A pnpm workspace with Turborepo running the task graph: apps/ over a shared libs/ (ui, editor, styles), with the CI gate defined once.",
+    consequences: [
+      "A new app inherits the shared layer and the whole security gate on day one, instead of negotiating both later.",
+      "Unchanged packages restore from cache, so the pipeline stays usable as apps are added.",
+      "The shared layer becomes where code-splitting decisions have to be made, because it is where the heavy things live — editor, document viewer, spreadsheet, charts.",
+    ],
+    link: { href: "#projects", label: "Walk the workspace" },
+  },
+  {
+    id: "module-registry",
+    status: "shipped",
+    year: "2025",
+    title: "Sell the platform by module, and strip what isn't bought at build time",
+    upshot:
+      "Each customer's build contains only the features they paid for, rather than all of them with some hidden.",
+    context:
+      "Customers buy different feature sets. Hiding a feature behind a runtime flag still ships its code to every one of them.",
+    options: [
+      "Runtime feature flags per customer",
+      "A branch per customer",
+      "A module registry plus a codegen step before the build",
+    ],
+    chosen: 2,
+    decision:
+      "A module registry plus a codegen step that strips unpurchased features before the build runs.",
+    consequences: [
+      "Per-customer white-label builds come out of one repository.",
+      "The build gains a generation step, so the registry is now load-bearing — if it lies, a customer ships with the wrong feature set.",
+    ],
+    link: {
+      href: "/writing/ban-lms-theo-module-kien-truc-plugin-trong-monorepo-next-js",
+      label: "Written up in full",
+    },
+  },
+  {
+    id: "appsec",
+    status: "shipped",
+    year: "2025",
+    title: "Put application security in the pipeline, not in a training session",
+    upshot:
+      "Every code change is checked automatically before a person reviews it.",
+    context:
+      "Frontend engineers rarely get security training, and the knowledge does not arrive by asking people to be careful.",
+    options: [
+      "Run a training session and hand out a checklist",
+      "Book an external audit each release",
+      "Gate every merge request automatically, from shared config",
+    ],
+    chosen: 2,
+    decision:
+      "Gitleaks, Trivy, Semgrep and OWASP ZAP wired into GitLab CI, gating every merge request from configuration the whole workspace shares.",
+    consequences: [
+      "Leaked secrets, vulnerable dependencies and insecure patterns are caught before review, so review time goes on design instead of on hygiene.",
+      "The pipeline carries the knowledge the team does not have yet — a new engineer inherits it without being taught it.",
+      "Qualitative by design: the gate reports pass or fail, and I do not quote scan counts I cannot reproduce in an interview.",
+    ],
+    link: {
+      href: "/writing/so-tay-appsec-cho-frontend-gitleaks-trivy-semgrep",
+      label: "The handbook I wrote for the team",
+    },
+  },
+  {
+    id: "spreadsheet",
+    status: "reverted",
+    year: "2025",
+    title: "Take the lazy wrapper back off the spreadsheet",
+    upshot:
+      "A rule that made every other route faster made one route worse, so that route keeps the old behaviour.",
+    context:
+      "The shared component layer is being moved onto load-on-demand: video and audio pull dashjs on demand, the Word preview pulls docx-preview on demand. The spreadsheet got the same treatment as a matter of consistency.",
+    options: [
+      "Keep it lazy, for consistency across the library",
+      "Keep it lazy and cover the gap with a skeleton",
+      "Revert to a static import on the one route that needs it",
+    ],
+    chosen: 2,
+    decision:
+      "Revert. The essay-answer form needs the spreadsheet immediately, so the lazy wrapper was removed rather than kept for tidiness.",
+    consequences: [
+      "That one route carries the weight; every other route stopped loading the spreadsheet at all.",
+      "The rule is load-on-demand where it pays, not load-on-demand everywhere. Consistency lost to measurement, which is the right way round.",
+    ],
+  },
+  {
+    id: "zero-js",
+    status: "shipped",
+    year: "2026",
+    title: "Ship this page with no framework JavaScript at all",
+    upshot:
+      "The site's argument about page weight is one you can verify on the site itself.",
+    context:
+      "This page spends three sections arguing about bundle size. Shipping a framework runtime to move a slider would have been the exact mistake it criticises, and a reviewer would find it in one look at the network tab.",
+    options: [
+      "A component island per interactive block (~45KB of runtime)",
+      "A small animation library for the moving parts",
+      "Plain DOM work in Astro scripts",
+    ],
+    chosen: 2,
+    decision:
+      "Plain DOM. The performance slider, the workspace tree, the pipeline replay and the live vitals strip are all hand-written.",
+    consequences: [
+      "One external script at 9.4KB, and that script is the web-vitals library itself. LCP 187ms, CLS 0.00, Lighthouse accessibility, best practices and SEO all 100.",
+      "There is no component library to lean on, so every interactive block is written and checked by hand.",
+      "The claim is checkable rather than asserted — the live strip in the footer measures the page you are reading.",
+    ],
+    link: { href: "#hiring", label: "The colophon, with the numbers" },
+  },
+];
+
+const counts = {
+  all: DECISIONS.length,
+  shipped: DECISIONS.filter((d) => d.status === "shipped").length,
+  held: DECISIONS.filter((d) => d.status === "held").length,
+  reverted: DECISIONS.filter((d) => d.status === "reverted").length,
+};
+
+const FILTERS = [
+  { key: "all", label: "All", count: counts.all },
+  { key: "shipped", label: "Shipped", count: counts.shipped },
+  { key: "held", label: "Held", count: counts.held },
+  { key: "reverted", label: "Reverted", count: counts.reverted },
+];
+---
+
+<section id="decisions" class="scroll-mt-14" aria-labelledby="decisions-title">
+  <SectionRule
+    id="decisions"
+    kicker="Evidence"
+    title="A decision log, including the ones I said no to"
+    lead="Seven engineering decisions with the alternatives I weighed and what each one cost. Two of them are a no — one change I measured, proved out and kept out of production, and one I shipped and then undid. Those two are the useful entries."
+    note={`${counts.shipped} shipped · ${counts.held} held · ${counts.reverted} reverted`}
+  />
+
+  <div data-decision-log>
+    {/* Filter. The only script in this section. */}
+    <div
+      class="mb-6 flex flex-wrap items-center gap-2 border-y-2 border-rule py-3"
+      role="group"
+      aria-label="Filter decisions by outcome"
+    >
+      <span class="kicker mr-1">Outcome</span>
+      {
+        FILTERS.map((filter) => (
+          <button
+            type="button"
+            class="label border-2 border-rule px-2.5 py-1 hover:bg-acid focus-visible:bg-acid aria-pressed:bg-ink aria-pressed:text-paper"
+            data-filter={filter.key}
+            aria-pressed={filter.key === "all" ? "true" : "false"}
+          >
+            {filter.label}
+            <span class="ml-1.5 tabular-nums opacity-60">{filter.count}</span>
+          </button>
+        ))
+      }
+      <p class="kicker ml-auto text-ink-3" aria-live="polite" data-filter-status>
+        Showing all {counts.all}
+      </p>
+    </div>
+
+    <ol class="border-t-2 border-rule">
+      {
+        DECISIONS.map((decision, i) => {
+          const meta = STATUS_META[decision.status];
+          return (
+            <li class="border-b-2 border-rule" data-decision data-status={decision.status}>
+              <details class="group">
+                <summary
+                  class="flex cursor-pointer list-none flex-wrap items-baseline gap-x-3 gap-y-2 py-4 hover:bg-acid focus-visible:bg-acid"
+                >
+                  <span class="label w-8 shrink-0 text-ink-3 tabular-nums">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <span class={`label shrink-0 border-2 px-1.5 ${meta.tone}`}>
+                    {meta.label}
+                  </span>
+                  <span class="kicker shrink-0 text-ink-3 tabular-nums">
+                    {decision.year}
+                  </span>
+                  <span class="min-w-0 basis-full font-mono text-base font-bold sm:basis-auto sm:flex-1">
+                    {decision.title}
+                  </span>
+                  <span
+                    class="label shrink-0 text-ink-3 group-open:hidden"
+                    aria-hidden="true"
+                  >
+                    Open +
+                  </span>
+                  <span
+                    class="label hidden shrink-0 text-ink-3 group-open:inline"
+                    aria-hidden="true"
+                  >
+                    Close −
+                  </span>
+                  {/* The one line that survives if nobody opens the entry. */}
+                  <span class="basis-full text-sm text-ink-2 sm:pl-11">
+                    {decision.upshot}
+                  </span>
+                </summary>
+
+                <div class="grid gap-6 pb-6 sm:pl-11 lg:grid-cols-2">
+                  <div>
+                    <h3 class="kicker">The situation</h3>
+                    <p class="mt-2 text-sm text-ink-2">{decision.context}</p>
+
+                    <h3 class="kicker mt-5">What I weighed</h3>
+                    <ul class="mt-2 space-y-1.5">
+                      {decision.options.map((option, oi) => (
+                        <li class="flex gap-2.5 text-sm">
+                          <span
+                            class:list={[
+                              "mt-1.5 h-2.5 w-2.5 shrink-0 border-2 border-rule",
+                              oi === decision.chosen && "bg-acid",
+                            ]}
+                            aria-hidden="true"
+                          />
+                          <span
+                            class:list={[
+                              oi === decision.chosen
+                                ? "font-medium text-ink"
+                                : "text-ink-3 line-through decoration-ink-3/50",
+                            ]}
+                          >
+                            {option}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h3 class="kicker">What I did</h3>
+                    <p class="mt-2 text-sm text-ink">{decision.decision}</p>
+
+                    <h3 class="kicker mt-5">
+                      What it cost, and what it bought
+                    </h3>
+                    <ul class="mt-2 border-l-4 border-ink">
+                      {decision.consequences.map((consequence) => (
+                        <li class="border-b-2 border-rule px-4 py-2 text-sm text-ink-2 last:border-b-0">
+                          {consequence}
+                        </li>
+                      ))}
+                    </ul>
+
+                    {decision.link && (
+                      <p class="mt-4">
+                        <a class="link text-sm" href={decision.link.href}>
+                          {decision.link.label} →
+                        </a>
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </details>
+            </li>
+          );
+        })
+      }
+    </ol>
+  </div>
+</section>
+
+<script>
+  for (const log of document.querySelectorAll<HTMLElement>("[data-decision-log]")) {
+    const buttons = Array.from(
+      log.querySelectorAll<HTMLButtonElement>("[data-filter]"),
+    );
+    const entries = Array.from(
+      log.querySelectorAll<HTMLElement>("[data-decision]"),
+    );
+    const status = log.querySelector<HTMLElement>("[data-filter-status]");
+
+    function apply(key: string) {
+      let shown = 0;
+
+      for (const entry of entries) {
+        const match = key === "all" || entry.dataset.status === key;
+        entry.hidden = !match;
+        if (match) shown += 1;
+        // Collapse what is being hidden, so re-showing it starts closed.
+        if (!match) entry.querySelector("details")?.removeAttribute("open");
+      }
+
+      for (const button of buttons) {
+        button.setAttribute(
+          "aria-pressed",
+          String(button.dataset.filter === key),
+        );
+      }
+
+      if (status) {
+        status.textContent =
+          key === "all"
+            ? `Showing all ${shown}`
+            : `Showing ${shown} of ${entries.length}`;
+      }
+    }
+
+    for (const button of buttons) {
+      button.addEventListener("click", () => apply(button.dataset.filter!));
+    }
+  }
+</script>
