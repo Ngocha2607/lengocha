@@ -37,10 +37,10 @@ export const SOCIALS = [
  */
 export const NAV = [
   { name: "About", href: "#about" },
-  { name: "Career", href: "#career" },
   { name: "Work", href: "#work" },
-  { name: "Decisions", href: "#decisions" },
   { name: "Performance", href: "#performance" },
+  { name: "Decisions", href: "#decisions" },
+  { name: "Career", href: "#career" },
   { name: "Writing", href: "#writing" },
   { name: "Contact", href: "#contact" },
 ] as const;

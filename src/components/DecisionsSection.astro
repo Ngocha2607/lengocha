@@ -177,29 +177,7 @@ const DECISIONS: Decision[] = [
       "That one route carries the weight; every other route stopped loading the spreadsheet at all.",
       "The rule is load-on-demand where it pays, not load-on-demand everywhere. Consistency lost to measurement, which is the right way round.",
     ],
-  },
-  {
-    status: "shipped",
-    year: "2026",
-    title: "Ship this page with no framework JavaScript at all",
-    upshot:
-      "The site's argument about page weight is one you can verify on the site itself.",
-    context:
-      "This page spends two sections arguing about bundle size. Shipping a framework runtime to move a slider would have been the exact mistake it criticises, and a reviewer would find it in one look at the network tab.",
-    options: [
-      "A component island per interactive block (~45KB of runtime)",
-      "A small animation library for the moving parts",
-      "Plain DOM work in Astro scripts",
-    ],
-    chosen: 2,
-    decision:
-      "Plain DOM. The performance slider, the pipeline replay, the marquee, the cursor circle and the live vitals strip are all hand-written or pure CSS.",
-    consequences: [
-      "One external script, and that script is the web-vitals library itself. CLS 0.00 and Lighthouse accessibility, best practices and SEO all 100.",
-      "There is no component library to lean on, so every interactive block is written and checked by hand.",
-      "The claim is checkable rather than asserted — the strip at the bottom measures the page you are reading.",
-    ],
-  },
+  }
 ];
 
 const counts = {

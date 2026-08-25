@@ -109,16 +109,23 @@ counterpart in it and were built in the same language.
 Header          fixed, "L." mark + anchor nav + hamburger      (template)
 Hero            giant wordmark, standfirst, two pill buttons   (template)
 About me        numbers panel + prose + skill pills            (template)
-Career          roles, dashed rows                             NEW
 Work            marquee + project cards with screenshots       (template)
-Decisions       the decision log                               NEW
 Performance     the LMS audit, slider, pipeline replay         NEW
+Decisions       the decision log                               NEW
 How I lead      six practices + mentoring + artifacts          NEW
+Career          roles, dashed rows                             NEW
 Posts           marquee + Notion-backed writing                (template)
 Get in touch    pitch, socials, mail-composing form            (template)
 Live vitals     Core Web Vitals for the page you are on        NEW
 Footer          acid block, wordmark, four link columns        (template)
 ```
+
+The order is a narrative — who I am, what I built with the Performance audit
+directly after the Work card that makes its claims, how I decide and lead,
+then the role history as reference — so evidence sections and
+how-I-think sections stay clustered instead of alternating. Decision 02's
+"The audit it came out of" link points up at `#performance`, which only reads
+correctly while Performance sits above Decisions.
 
 `NAV` and `SOCIALS` in `src/consts.ts` drive the header, the mobile sheet and
 the footer, so a section's anchor is defined in one place.
