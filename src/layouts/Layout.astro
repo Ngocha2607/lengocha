@@ -1,6 +1,7 @@
 ---
 import { Font } from "astro:assets";
 import { SITE, PERSON_SCHEMA } from "../consts";
+import Analytics from "@vercel/analytics/astro";
 import "../styles/global.css";
 
 interface Props {
@@ -31,6 +32,8 @@ const ogImage = new URL("/seo/og.png", SITE.url).href;
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
+
+    <Analytics />
 
     {/*
       Theme, applied before the first paint so the page never flashes the wrong

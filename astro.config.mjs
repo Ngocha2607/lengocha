@@ -48,6 +48,12 @@ export default defineConfig({
           domains: [],
           remotePatterns: [],
         },
+        /**
+         * Enable Vercel Web Analytics for tracking page views and performance.
+         */
+        webAnalytics: {
+          enabled: true,
+        },
       }),
 
 
