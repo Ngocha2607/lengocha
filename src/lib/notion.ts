@@ -16,6 +16,19 @@ import type { PageObjectResponse } from "@notionhq/client/build/src/api-endpoint
  *   Published   (checkbox)     — only checked rows are shown (missing => shown)
  *   Date        (date)         — sort key + displayed date (missing => created time)
  *   Slug        (rich_text)    — URL slug (missing => derived from the title)
+ *   Cover       (url | files)  — optional cover image; see below
+ *
+ * A cover image is read from a `Cover` property if there is one, and otherwise
+ * from the page's own Notion cover banner. Either can hold two kinds of URL and
+ * they are **not** equivalent:
+ *
+ *   external  — a link pasted from any host. Stable, never expires. Use this.
+ *   file      — uploaded into Notion. A signed S3 URL with an expiry, typically
+ *               an hour. The rendered page is ISR-cached for an hour too, so a
+ *               visitor arriving near the end of that window can be handed a
+ *               URL that has already expired, and the image 404s. It is accepted
+ *               here because it mostly works, but a `Cover` of type `url`
+ *               pointing at a host you control is the version that always does.
  *
  * The page's Notion **icon** is read too, when it is an emoji. It is the only
  * per-post visual the API hands over for free: it is chosen by whoever writes
@@ -37,6 +50,8 @@ export interface PostMeta {
   date: string; // ISO 8601
   /** The page's Notion emoji icon, or "" when it has none or uses an image. */
   emoji: string;
+  /** Cover image URL, or "" when the post has none. May be an expiring URL. */
+  coverUrl: string;
 }
 
 export interface Post extends PostMeta {
@@ -117,6 +132,29 @@ function readEmoji(page: PageObjectResponse): string {
   return page.icon?.type === "emoji" ? page.icon.emoji : "";
 }
 
+/**
+ * An explicit `Cover` property wins over the page's own banner, so a post can
+ * show something other than what Notion displays at the top of the page.
+ */
+function readCoverUrl(page: PageObjectResponse): string {
+  const prop = page.properties["Cover"];
+
+  if (prop?.type === "url" && prop.url) return prop.url;
+
+  if (prop?.type === "files") {
+    for (const file of prop.files) {
+      if (file.type === "external") return file.external.url;
+      if (file.type === "file") return file.file.url;
+    }
+  }
+
+  const banner = page.cover;
+  if (banner?.type === "external") return banner.external.url;
+  if (banner?.type === "file") return banner.file.url;
+
+  return "";
+}
+
 function isPublished(page: PageObjectResponse, name: string): boolean {
   const prop = page.properties[name];
   // If there is no Published checkbox, treat everything shared as published.
@@ -136,6 +174,7 @@ function toMeta(page: PageObjectResponse): PostMeta {
     tags: readTags(page, "Tags"),
     date: readDate(page, "Date"),
     emoji: readEmoji(page),
+    coverUrl: readCoverUrl(page),
   };
 }
 

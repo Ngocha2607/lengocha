@@ -32,6 +32,8 @@ interface ArticleCard {
   internal: boolean;
   /** Notion page emoji. Empty is fine — the cover falls back to the tag alone. */
   emoji: string;
+  /** Cover image from Notion, or "" to draw one instead. */
+  coverUrl: string;
 }
 
 /**
@@ -50,6 +52,7 @@ const FALLBACK: ArticleCard[] = [
     href: "https://app.notion.com/p/S-tay-AppSec-cho-Frontend-Gitleaks-Trivy-Semgrep-3a5b7b727ddd81abb32ff56df403c846?source=copy_link",
     internal: false,
     emoji: "🛡️",
+    coverUrl: "",
   },
 ];
 
@@ -63,6 +66,7 @@ function toCard(post: PostMeta): ArticleCard {
     href: `/writing/${post.slug}`,
     internal: true,
     emoji: post.emoji,
+    coverUrl: post.coverUrl,
   };
 }
 
@@ -93,22 +97,38 @@ const articles = posts.length > 0 ? posts.map(toCard) : FALLBACK;
         rel={article.internal ? undefined : "noreferrer noopener"}
       >
         {/*
-          Decoration: the emoji and the tag both appear again as real text in the
-          column beside it, so there is nothing here for a screen reader to gain.
+          Decoration either way: the title, tag and year all appear as real text
+          in the column beside it, so there is nothing here for a screen reader
+          to gain, and the image is a cover rather than content.
+
+          The aspect ratio lives on the container, so a Notion cover of any
+          shape drops in with `object-cover` and cannot shift the layout. If the
+          image fails — an expiring Notion file URL will, eventually — the drawn
+          wash underneath shows through instead of a broken-image icon.
         */}
         <div
-          class="post-cover group-hover:border-primary/50 grid aspect-[610/400] w-full place-items-center p-8 transition md:max-w-[610px]"
+          class="post-cover group-hover:border-primary/50 grid aspect-[610/400] w-full place-items-center transition md:max-w-[610px]"
           aria-hidden="true"
         >
-          <div class="relative grid justify-items-center gap-4 text-center">
-            {article.emoji && (
-              <span class="text-6xl leading-none md:text-7xl">{article.emoji}</span>
-            )}
-            {article.tags[0] && (
-              <span class="label text-primary-ink">{article.tags[0]}</span>
-            )}
-            <span class="label text-secondary tabular-nums">{article.year}</span>
-          </div>
+          {article.coverUrl ? (
+            <img
+              class="absolute inset-0 h-full w-full object-cover"
+              src={article.coverUrl}
+              alt=""
+              loading="lazy"
+              decoding="async"
+            />
+          ) : (
+            <div class="relative grid justify-items-center gap-4 p-8 text-center">
+              {article.emoji && (
+                <span class="text-6xl leading-none md:text-7xl">{article.emoji}</span>
+              )}
+              {article.tags[0] && (
+                <span class="label text-primary-ink">{article.tags[0]}</span>
+              )}
+              <span class="label text-secondary tabular-nums">{article.year}</span>
+            </div>
+          )}
         </div>
 
         <div class="space-y-4 text-center md:text-left">

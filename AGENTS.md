@@ -550,7 +550,21 @@ with `marked` on the server.
   new tab.
 - Notion image URLs are signed and expire (~1h); embedded images may 404 near
   the revalidation boundary. Text/tables/code are unaffected.
-- **The Writing cards have no photography, by decision.** Three routes were
+- **A post can carry a cover image.** `readCoverUrl` reads a `Cover` property
+  (type `url` or `files`) and falls back to the page's own Notion banner. Two
+  kinds of URL come back and they are not equivalent: an **external** link is
+  stable, while an **uploaded file** is a signed S3 URL with roughly an hour's
+  expiry — and since the page is ISR-cached for an hour too, a visitor arriving
+  near the end of that window can be handed a URL that has already expired.
+  Both are accepted; only the external one always works.
+  The cover is a plain `<img>`, not `astro:assets`: `imagesConfig.domains` and
+  `remotePatterns` are both empty, so Vercel's image CDN would refuse a remote
+  host. Add the host to both that list and Astro's `image.domains` to route it
+  through the CDN and get resizing.
+  The aspect ratio sits on the container, so any shape drops in under
+  `object-cover` without shifting the layout, and the drawn wash stays
+  underneath — a cover that 404s degrades to it rather than to a broken image.
+- **Without a cover, the card art is drawn, by decision.** Three routes were
   ruled out: a Notion page cover is one of those signed URLs; a raster generated
   at build time goes stale the moment a title changes and is missing entirely
   for a post published afterwards, since the list is fetched per request and
