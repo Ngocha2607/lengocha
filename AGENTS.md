@@ -550,3 +550,17 @@ with `marked` on the server.
   new tab.
 - Notion image URLs are signed and expire (~1h); embedded images may 404 near
   the revalidation boundary. Text/tables/code are unaffected.
+- **The Writing cards have no photography, by decision.** Three routes were
+  ruled out: a Notion page cover is one of those signed URLs; a raster generated
+  at build time goes stale the moment a title changes and is missing entirely
+  for a post published afterwards, since the list is fetched per request and
+  cached by ISR; and generating one per request needs an endpoint nobody has
+  asked for. The cover is drawn instead — the `post-cover` utility washes both
+  accents over the card surface and the post's **own Notion emoji** sits on top
+  with its primary tag and year. `readEmoji` in `src/lib/notion.ts` reads
+  `page.icon` when it is an emoji, which is the one per-post visual the API
+  gives away free and cannot expire, because it is a character.
+- So **setting the page icon in Notion is how a post gets art.** A post with no
+  icon still renders — the cover falls back to the tag and the year.
+- The tile used to render the post title, which put the same title twice in
+  every row. Do not put it back.

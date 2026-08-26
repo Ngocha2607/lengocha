@@ -17,6 +17,12 @@ import type { PageObjectResponse } from "@notionhq/client/build/src/api-endpoint
  *   Date        (date)         — sort key + displayed date (missing => created time)
  *   Slug        (rich_text)    — URL slug (missing => derived from the title)
  *
+ * The page's Notion **icon** is read too, when it is an emoji. It is the only
+ * per-post visual the API hands over for free: it is chosen by whoever writes
+ * the post, it arrives on the page object with no extra request, and unlike a
+ * Notion cover image its URL cannot expire because it is a character. The
+ * Writing cards use it, so setting an icon in Notion is how a post gets art.
+ *
  * Every function degrades gracefully: if the integration is not configured or
  * Notion errors, it returns empty/null so the site still builds and renders the
  * hardcoded fallback in the Writing section.
@@ -29,6 +35,8 @@ export interface PostMeta {
   description: string;
   tags: string[];
   date: string; // ISO 8601
+  /** The page's Notion emoji icon, or "" when it has none or uses an image. */
+  emoji: string;
 }
 
 export interface Post extends PostMeta {
@@ -101,6 +109,14 @@ function readDate(page: PageObjectResponse, name: string): string {
   return page.created_time;
 }
 
+/**
+ * Notion icons are a union of emoji, external file and uploaded file. Only the
+ * emoji case is useful here — the other two are signed URLs that expire.
+ */
+function readEmoji(page: PageObjectResponse): string {
+  return page.icon?.type === "emoji" ? page.icon.emoji : "";
+}
+
 function isPublished(page: PageObjectResponse, name: string): boolean {
   const prop = page.properties[name];
   // If there is no Published checkbox, treat everything shared as published.
@@ -119,6 +135,7 @@ function toMeta(page: PageObjectResponse): PostMeta {
     description: readRichText(page, "Description"),
     tags: readTags(page, "Tags"),
     date: readDate(page, "Date"),
+    emoji: readEmoji(page),
   };
 }
 

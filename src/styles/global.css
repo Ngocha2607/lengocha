@@ -211,6 +211,35 @@
   box-shadow: var(--shadow-panel);
 }
 
+/*
+  The Writing card's cover. The posts carry no images — Notion covers are signed
+  URLs that expire within the hour, and a build-time raster would go stale the
+  moment a title changed, because the list is fetched per request and cached by
+  ISR. So the cover is drawn: both accents washed over the card surface, with
+  the post's own Notion emoji sitting on top. Nothing to fetch, nothing to
+  regenerate, and it re-themes with the tokens.
+*/
+@utility post-cover {
+  @apply border-border bg-surface relative overflow-hidden rounded-2xl border;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(
+        120% 130% at 12% 8%,
+        color-mix(in oklab, var(--color-primary) 26%, transparent),
+        transparent 58%
+      ),
+      radial-gradient(
+        110% 120% at 92% 96%,
+        color-mix(in oklab, var(--color-accent) 30%, transparent),
+        transparent 62%
+      );
+  }
+}
+
 /* Row separator, matching the project and post lists. */
 @utility rule {
   @apply border-b-border border-b;
