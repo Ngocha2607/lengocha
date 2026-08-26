@@ -210,6 +210,23 @@ mobile sheet covers 768–1023px.
   `overflow-hidden`: its runs were ~1550px wide at a 390px viewport, and an
   earlier build shipped a horizontal scrollbar on the whole document.
 
+### A bare `mailto:` is a silent failure
+
+Clicking a `mailto:` link does **nothing at all** — no error, no tab, no
+feedback — for a visitor with no mail client registered, which is the default
+state of a lot of machines. So a `mailto:` is only ever acceptable where the
+address is also visible as text, giving the visitor something to copy.
+
+Two links broke this rule and were fixed: the footer's "Say hello" call to
+action, which now points at `#contact` the way the Hero's "Hire me" always did;
+and the "Email" entry `SOCIALS` puts in the footer's Elsewhere column, which is
+filtered out there — `ContactSection` was already filtering it for the same
+reason, and the footer's Contact column shows the full address anyway.
+
+The contact form still navigates to a `mailto:` on submit and inherits the same
+dependency, but it states that it composes a draft and prints the address beside
+itself, so the fallback is in view.
+
 ### The contact form has no backend
 
 The site is static plus ISR and there is no form service. Submitting composes a

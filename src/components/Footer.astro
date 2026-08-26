@@ -14,7 +14,17 @@ import { SITE, SOCIALS, NAV } from "../consts";
  */
 const year = 2026;
 
-const isMail = (href: string) => href.startsWith("mailto:");
+/*
+  `SOCIALS` carries an "Email" entry whose href is a bare `mailto:`. It is
+  filtered out here for the same reason `ContactSection` filters it out: a link
+  labelled "Email" does nothing at all for a visitor with no mail client
+  registered, and the Contact column two along already shows the address in full
+  as a working, readable link. Nothing is lost by dropping it, and a silently
+  dead link goes with it.
+*/
+const elsewhere = SOCIALS.filter(
+  (social) => !social.href.startsWith("mailto:"),
+);
 ---
 
 <footer class="bg-header text-header-ink mt-28 rounded-t-[40px] md:rounded-t-[56px]">
@@ -26,11 +36,18 @@ const isMail = (href: string) => href.startsWith("mailto:");
         Got a frontend that has outgrown its structure? Let&apos;s talk.
       </h2>
 
-      {/* Black on the yellow accent is 13.17:1 — the accent never carries white. */}
-      <a
-        class="btn bg-accent shrink-0 text-black hover:opacity-90"
-        href={`mailto:${SITE.email}`}
-      >
+      {/*
+        Points at the contact section, not at `mailto:`. A bare mailto does
+        literally nothing for a visitor with no mail client registered — no
+        error, no tab, no feedback — and this is the page's closing call to
+        action, so silent failure is the worst place for it. `#contact` always
+        works, and it lands on both the form and the address in plain text.
+
+        The Hero's "Hire me" already did this; the footer was the odd one out.
+
+        Black on the yellow accent is 13.17:1 — the accent never carries white.
+      */}
+      <a class="btn bg-accent shrink-0 text-black hover:opacity-90" href="#contact">
         Say hello
       </a>
     </div>
@@ -76,18 +93,16 @@ const isMail = (href: string) => href.startsWith("mailto:");
         <h3 class="label text-header-muted mb-4">Elsewhere</h3>
         <ul class="space-y-2 text-sm">
           {
-            SOCIALS.map((social) => (
+            elsewhere.map((social) => (
               <li>
                 <a
                   class="text-header-muted hover:text-header-ink transition"
                   href={social.href}
-                  target={isMail(social.href) ? undefined : "_blank"}
-                  rel={isMail(social.href) ? undefined : "noreferrer noopener"}
+                  target="_blank"
+                  rel="noreferrer noopener"
                 >
                   {social.name}
-                  {!isMail(social.href) && (
-                    <span class="sr-only"> (opens in a new tab)</span>
-                  )}
+                  <span class="sr-only"> (opens in a new tab)</span>
                 </a>
               </li>
             ))
