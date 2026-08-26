@@ -53,7 +53,10 @@ export default defineConfig({
 
   fonts: [
     {
-      // Headings, labels and every number. Carries the brutalist voice.
+      // Data only: the `.label` caption, tabular figures, the pipeline replay
+      // and the vitals strip. The re-skin took mono off the headings — Nichol
+      // sets everything in one proportional face — but a unit or an acronym
+      // over a number still has to read as data rather than as body copy.
       name: "IBM Plex Mono",
       cssVariable: "--font-mono-face",
       provider: fontProviders.google(),
@@ -64,8 +67,15 @@ export default defineConfig({
       fallbacks: ["ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
     },
     {
-      // Body copy. Long prose in a mono face is hostile to read.
-      name: "Geist",
+      /*
+       * Headings and body both. Nichol uses Sora, which cannot be used here:
+       * its `latin-ext` covers U+1E00-1E9F and U+1EF2-1EFF and skips
+       * U+1EA0-1EF1 entirely, and it ships no `vietnamese` subset at all — so
+       * the `Ọ` in LÊ NGỌC HÀ would fall back to another family in the middle
+       * of the largest word on the page. Plus Jakarta Sans is the nearest
+       * geometric humanist that does ship the subset.
+       */
+      name: "Plus Jakarta Sans",
       cssVariable: "--font-sans-face",
       provider: fontProviders.google(),
       weights: [400, 700],

@@ -30,6 +30,32 @@ const ogImage = new URL("/seo/og.png", SITE.url).href;
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+
+    {/*
+      Theme, applied before the first paint so the page never flashes the wrong
+      one. `is:inline` keeps Astro from bundling it, so this costs no request —
+      the site's own JavaScript is still a single file.
+
+      The attribute is written only when someone has actually chosen. With no
+      stored choice there is no attribute, and the `prefers-color-scheme` block
+      in global.css drives the page instead — which also means the theme keeps
+      following the OS live, and that a visitor with JavaScript off still gets
+      a dark page on a dark system.
+    */}
+    <script is:inline>
+      (function () {
+        try {
+          var stored = localStorage.getItem("theme");
+          if (stored === "dark" || stored === "light") {
+            document.documentElement.dataset.theme = stored;
+          }
+        } catch (error) {
+          /* Private mode, or storage disabled. The media query still works. */
+        }
+      })();
+    </script>
+
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonicalUrl} />
@@ -75,10 +101,40 @@ const ogImage = new URL("/seo/og.png", SITE.url).href;
   <body class="leading-relaxed">
     <a
       href="#content"
-      class="label sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:rounded-2xl focus:bg-primary focus:px-4 focus:py-2"
+      class="label sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:rounded-2xl focus:bg-accent focus:text-black focus:px-4 focus:py-2"
     >
       Skip to content
     </a>
     <slot />
+
+    {/*
+      Cloudflare Web Analytics.
+
+      `is:inline` is required: without it Astro treats this as a script to
+      process and would try to bundle a third-party URL. With it the tag is
+      emitted verbatim.
+
+      Gated on a production build so `npm run dev` does not report traffic. Note
+      that `LOCAL_PROD=1` builds are production builds and will beacon — the
+      hostname will not match the one configured in Cloudflare, so those hits
+      are not attributed, but that is why they are harmless rather than absent.
+
+      The token is public by design; it ships in the page source of every site
+      using this product and is not a secret.
+
+      Cookieless, so it needs no consent banner. It is a `type="module"` script,
+      which is deferred by definition, and it sits after the content so it
+      cannot compete with first paint.
+    */}
+    {
+      import.meta.env.PROD && (
+        <script
+          is:inline
+          type="module"
+          src="https://static.cloudflareinsights.com/beacon.min.js"
+          data-cf-beacon='{"token": "83f92d6ddd0f41d68edff0bde44b2173"}'
+        />
+      )
+    }
   </body>
 </html>

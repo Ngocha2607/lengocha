@@ -4,8 +4,8 @@
   "description": "Lê Ngọc Hà is a frontend tech lead who builds fast, scalable web experiences with React, Next.js, and TypeScript.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#fefefe",
-  "theme_color": "#27FF0B",
+  "background_color": "#F8F9FA",
+  "theme_color": "#0D1220",
   "icons": [
     {
       "src": "/seo/favicon.svg",

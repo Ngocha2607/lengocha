@@ -1,18 +1,39 @@
 ---
 /**
- * Career. The template has no experience section at all — it assumes a
- * freelancer whose projects are the record — so this is new, built in the same
- * language: a big uppercase heading and dashed hairline rows.
+ * Career, in two tiers.
  *
- * Kept tight on purpose. The reasoning behind each role lives in the decision
- * log and the performance case, so repeating it here would make the page
- * longer without making it say more.
+ * The template has no experience section at all — it assumes a freelancer whose
+ * projects are the record — so the structure is borrowed from a portfolio whose
+ * experience page reads unusually well: a rail of milestones you can scan in
+ * three seconds, then the detail cards underneath, with each milestone a jump
+ * link into its card. Scan first, read second.
+ *
+ * The rail runs oldest to newest, because a trajectory reads left to right; the
+ * cards run newest first, because that is the part a reviewer wants. That is
+ * the one place the two tiers disagree, and it is deliberate.
+ *
+ * The rail necessarily restates the period and the employer, which the page
+ * otherwise has a rule against. It earns that by being a different register —
+ * a terse index, not prose — and by being the only navigation into a section
+ * that is otherwise five long cards. The reasoning behind each role still lives
+ * in the decision log and the performance case, not here.
  */
+import SectionHeading from "./SectionHeading.astro";
 
 interface Role {
+  /** Years only. The rail is for scanning; months would just be noise there. */
   period: string;
+  /**
+   * The exact range from the CV, shown on the detail card. Reviewers who care
+   * about gaps read the card, not the rail, and the CV is the source of truth
+   * for these — do not widen them to whole years.
+   */
+  periodExact?: string;
   title: string;
   org: string;
+  /** Rail copy. A rail column is about a fifth of the container. */
+  shortOrg?: string;
+  shortTitle?: string;
   url?: string;
   note?: string;
   summary: string;
@@ -22,6 +43,7 @@ interface Role {
 const ROLES: Role[] = [
   {
     period: "2025 — Present",
+    periodExact: "03/2025 — Present",
     title: "Frontend Tech Lead",
     org: "SAPP Academy",
     url: "https://sapp.edu.vn",
@@ -37,21 +59,25 @@ const ROLES: Role[] = [
   },
   {
     period: "2023 — 2025",
+    periodExact: "03/2023 — 02/2025",
     title: "Fullstack Developer",
     org: "Tweet World Travel Group",
+    shortOrg: "Tweet World",
     url: "https://tweetworldtravel.com",
     summary:
       "Both sides of the wire: Spring Boot microservices and the React / Next.js clients in front of them, for a travel group's agent and consumer products.",
     highlights: [
-      "Five B2B/B2C products and a multilingual ERP serving roughly 1,000 users a month",
-      "Page load 3.2s → 1.1s with mobile Lighthouse held above 85",
+      "Five B2B products and a multilingual ERP serving roughly 1,000 users a month",
+      "Page load 3.2s → 1.1s with mobile Lighthouse held at 85",
       "Mentored three junior engineers and ran the code reviews that held production quality steady",
     ],
   },
   {
     period: "2021 — 2023",
+    periodExact: "10/2021 — 02/2023",
     title: "Frontend Developer",
     org: "Minastik JSC",
+    shortOrg: "Minastik",
     url: "https://www.minastik.com",
     note: "Onsite at 3S Intersoft",
     summary:
@@ -62,9 +88,14 @@ const ROLES: Role[] = [
     ],
   },
   {
+    /*
+     * Not in the CV: it was cut to keep that to two pages. The owner confirmed
+     * the page should keep it, so this is deliberate rather than unsourced.
+     */
     period: "2021",
     title: "Software Engineer Intern",
     org: "FPT Software",
+    shortTitle: "Intern",
     url: "https://www.fpt-software.com",
     summary:
       "Built an employee-management application in C++ and learned how software gets built by more than one person.",
@@ -74,56 +105,103 @@ const ROLES: Role[] = [
     period: "2018 — 2022",
     title: "B.Eng, Electronics & Telecommunications",
     org: "Hanoi University of Science and Technology",
+    shortOrg: "HUST",
+    shortTitle: "B.Eng, ETT",
     url: "https://hust.edu.vn",
     summary: "Engineering degree at HUST, with published research at REV-ECIT 2021.",
     highlights: [],
   },
 ];
+
+/**
+ * The rail is the same data read the other way round. The index travels with it
+ * so a milestone addresses its own card rather than its rail position.
+ */
+const MILESTONES = ROLES.map((role, index) => ({ role, index })).reverse();
 ---
 
-<section id="career" class="container mx-auto mb-28 scroll-mt-24 p-6" aria-labelledby="career-title">
-  <h2 id="career-title" class="section-title">Career</h2>
+<section
+  id="career"
+  class="container mx-auto mb-28 scroll-mt-24 p-6"
+  aria-labelledby="career-title"
+>
+  <SectionHeading id="career-title" icon="briefcase" kicker="Experience">
+    Career
+    <Fragment slot="lead">
+      Just under five years, four roles and a degree — intern, frontend
+      developer, fullstack developer, now tech lead. The rail is the short
+      version; pick a milestone to jump to what the role actually involved.
+    </Fragment>
+  </SectionHeading>
 
-  <p class="mt-8 mb-12 max-w-3xl text-lg text-secondary md:text-2xl">
-    Five years, four roles and a degree — intern, frontend developer, fullstack
-    developer, now tech lead.
-  </p>
-
-  <ol>
+  <ol
+    class="career-rail panel p-6 md:p-8"
+    aria-label="Career milestones, oldest first — each one links to its entry below"
+  >
     {
-      ROLES.map((role) => (
-        <li class="rule-dashed mb-8 grid grid-cols-1 gap-4 pb-8 md:grid-cols-[13rem_minmax(0,1fr)] md:gap-12">
-          <div>
-            <p class="heading text-lg tabular-nums">{role.period}</p>
-            {role.note && <p class="mt-1 text-sm text-secondary">{role.note}</p>}
-          </div>
+      MILESTONES.map(({ role, index }) => (
+        <li class="career-milestone grid-cols-[var(--career-marker)_minmax(0,1fr)] items-start gap-x-4 md:grid-cols-1 md:gap-y-4 md:pr-6">
+          <span class="career-marker mt-0.5 md:mt-0" aria-hidden="true" />
 
-          <div>
-            <h3 class="heading text-2xl uppercase md:text-3xl">
-              {role.title}
-            </h3>
-            <p class="mt-1 text-lg text-secondary">
-              {role.url ? (
-                <a
-                  class="link"
-                  href={role.url}
-                  target="_blank"
-                  rel="noreferrer noopener"
-                  aria-label={`${role.org} (opens in a new tab)`}
-                >
-                  {role.org} ↗
-                </a>
-              ) : (
-                role.org
-              )}
-            </p>
+          <a class="group grid gap-1.5" href={`#career-${index}`}>
+            <span class="label text-secondary normal-case tabular-nums">
+              {role.period}
+            </span>
+            <span class="heading text-base group-hover:underline md:text-lg">
+              {role.shortOrg ?? role.org}
+            </span>
+            <span class="text-sm text-secondary">
+              {role.shortTitle ?? role.title}
+            </span>
+          </a>
+        </li>
+      ))
+    }
+  </ol>
 
-            <p class="mt-4 max-w-2xl text-lg text-secondary md:text-xl">
+  <ol class="career-timeline mt-16">
+    {
+      ROLES.map((role, index) => (
+        <li class="career-role scroll-mt-24" id={`career-${index}`}>
+          <span
+            class="career-marker mt-[var(--career-marker-top)]"
+            aria-hidden="true"
+          />
+
+          <article class="panel p-6 md:p-8">
+            <div class="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start sm:gap-6">
+              <div>
+                <h3 class="heading text-xl md:text-2xl">{role.title}</h3>
+
+                <p class="mt-1 text-lg text-secondary">
+                  {role.url ? (
+                    <a
+                      class="link"
+                      href={role.url}
+                      target="_blank"
+                      rel="noreferrer noopener"
+                    >
+                      {role.org} ↗<span class="sr-only"> (opens in a new tab)</span>
+                    </a>
+                  ) : (
+                    role.org
+                  )}
+                </p>
+
+                {role.note && <p class="mt-1 text-sm text-secondary">{role.note}</p>}
+              </div>
+
+              <p class="pill label shrink-0 normal-case tabular-nums sm:justify-self-end">
+                {role.periodExact ?? role.period}
+              </p>
+            </div>
+
+            <p class="mt-5 max-w-3xl text-lg text-secondary md:text-xl">
               {role.summary}
             </p>
 
             {role.highlights.length > 0 && (
-              <ul class="mt-4 space-y-2">
+              <ul class="mt-6 grid gap-x-10 gap-y-3 lg:grid-cols-2">
                 {role.highlights.map((highlight) => (
                   <li class="flex gap-3 text-secondary">
                     <span
@@ -135,13 +213,18 @@ const ROLES: Role[] = [
                 ))}
               </ul>
             )}
-          </div>
+          </article>
         </li>
       ))
     }
   </ol>
 
-  <a class="btn-invert w-max" href="/Le-Ngoc-Ha-Senior-Frontend-Developer.pdf" target="_blank" rel="noreferrer noopener">
+  <a
+    class="btn-invert mt-12 w-max"
+    href="/Le-Ngoc-Ha-Senior-Frontend-Developer.pdf"
+    target="_blank"
+    rel="noreferrer noopener"
+  >
     Full résumé, PDF ↓
   </a>
 </section>

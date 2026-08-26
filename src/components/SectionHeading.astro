@@ -1,0 +1,66 @@
+---
+/**
+ * The section header: a tinted violet kicker pill, then the title, then the
+ * plain-language lead — centred, which is the rhythm Nichol uses to carry a
+ * long page without every section reading as a poster.
+ *
+ * The kicker never repeats the heading. Nichol's does ("About Me" over "Hi! I'm
+ * Mitchell Hancock"), and the page it came from can afford that because it says
+ * very little; this one has a rule against saying the same thing twice, so each
+ * kicker names the *kind* of section and the heading names the subject.
+ *
+ * The icon is decoration — `aria-hidden`, `focusable="false"` — and the
+ * accessible name of the section stays the heading text.
+ *
+ * The lead is a slot rather than a prop so it can carry links and emphasis.
+ * Sections that have nothing to add omit it and no empty paragraph is rendered.
+ */
+import { SECTION_ICONS, type SectionIconName } from "./icons";
+
+interface Props {
+  /** Referenced by the section's `aria-labelledby`. */
+  id: string;
+  icon: SectionIconName;
+  /** Short category label for the pill. Must not restate the heading. */
+  kicker: string;
+  /** Extra classes for the wrapper, for sections that need their own spacing. */
+  class?: string;
+}
+
+const { id, icon, kicker, class: className } = Astro.props;
+const hasLead = Astro.slots.has("lead");
+---
+
+<div
+  class:list={[
+    "flex flex-col items-center text-center",
+    className ?? "mb-12 md:mb-16",
+  ]}
+>
+  <p class="kicker label">
+    <svg
+      class="size-4"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.75"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      focusable="false"
+      aria-hidden="true"
+    >
+      <Fragment set:html={SECTION_ICONS[icon]} />
+    </svg>
+    {kicker}
+  </p>
+
+  <h2 id={id} class="section-title mt-5"><slot /></h2>
+
+  {
+    hasLead && (
+      <p class="text-secondary mt-5 max-w-2xl text-lg text-balance">
+        <slot name="lead" />
+      </p>
+    )
+  }
+</div>

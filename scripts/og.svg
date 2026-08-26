@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="wash" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFC41F" />
+      <stop offset="1" stop-color="#964BF1" />
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="#F8F9FA" />
+
+  <!-- The hero's gradient block, carrying the mark. -->
+  <rect x="812" y="64" width="324" height="502" rx="40" fill="url(#wash)" />
+  <g fill="#fff">
+    <rect x="934" y="268" width="26" height="96" />
+    <rect x="1000" y="268" width="26" height="96" />
+    <rect x="934" y="303" width="92" height="26" />
+  </g>
+
+  <!-- Kicker pill: violet at 10% with the darkened violet as text, as on the page. -->
+  <rect x="72" y="96" width="326" height="46" rx="23" fill="#964BF1" fill-opacity="0.1" />
+  <text x="100" y="126" font-family="Segoe UI, Arial, sans-serif" font-size="19"
+        font-weight="700" letter-spacing="2.2" fill="#8637DE">FRONTEND TECH LEAD</text>
+
+  <text x="72" y="288" font-family="Segoe UI, Arial, sans-serif" font-size="94"
+        font-weight="700" letter-spacing="-2" fill="#0D1220">Lê Ngọc Hà</text>
+
+  <text x="72" y="356" font-family="Segoe UI, Arial, sans-serif" font-size="33"
+        fill="#565F78">Senior Frontend Engineer</text>
+
+  <text x="72" y="424" font-family="Segoe UI, Arial, sans-serif" font-size="21"
+        font-weight="700" letter-spacing="2.4" fill="#565F78">REACT · NEXT.JS · TYPESCRIPT · ASTRO</text>
+
+  <line x1="72" y1="492" x2="740" y2="492" stroke="#D6DBE5" stroke-width="2" />
+
+  <text x="72" y="546" font-family="Segoe UI, Arial, sans-serif" font-size="24"
+        fill="#565F78">Available for remote · Hanoi, Vietnam · UTC+7</text>
+</svg>

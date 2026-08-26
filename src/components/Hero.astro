@@ -1,34 +1,97 @@
 ---
+import { Image } from "astro:assets";
 import { SITE } from "../consts";
+import portrait from "../assets/le-ngoc-ha.jpg";
+
+/**
+ * Split hero, after Nichol: the wordmark and the pitch on the left, the
+ * portrait on a gradient panel on the right.
+ *
+ * Nichol puts the role in the `h1` and the name in a kicker. That is the wrong
+ * way round here — the JSON-LD declares a Person and the name is what the page
+ * is about — so the two swap: role in the kicker, name in the `h1`.
+ *
+ * The name stays uppercase where the rest of the re-skin went sentence case.
+ * It is a wordmark rather than a heading, and the uppercase is what makes the
+ * `leading-[1.06]` below necessary: Vietnamese stacks diacritics above the cap
+ * height, and at the default leading the Ê and the Ọ collide with the line
+ * above.
+ *
+ * The portrait is almost certainly the LCP element now — it is the largest
+ * thing above the fold — so it is `priority`, which is Astro's shorthand for
+ * eager loading at high fetch priority. `widths` names only sizes declared in
+ * `imagesConfig.sizes`; Vercel silently snaps anything else to its nearest.
+ */
 ---
 
 <section
   id="top"
-  class="container mx-auto grid min-h-screen grid-cols-1 items-center gap-8 p-6 pt-24 md:gap-16 lg:grid-cols-2"
+  class="container mx-auto grid min-h-screen grid-cols-1 items-center gap-10 p-6 pt-28 md:gap-14 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.85fr)] lg:pt-24"
 >
-  {/*
-    The wordmark. Vietnamese uppercase stacks diacritics above the cap height,
-    so this needs looser leading than the template's default or the Ê and the
-    Ọ clip into the line above.
-  */}
-  <h1 class="heading text-[clamp(3.5rem,13vw,9rem)] leading-[1.06] uppercase">
-    {SITE.name}
-  </h1>
+  <div class="order-2 lg:order-1">
+    <p class="kicker label">{SITE.role}</p>
 
-  <div class="space-y-8">
-    <p class="text-xl text-secondary md:text-2xl">{SITE.tagline}</p>
+    <h1
+      class="heading mt-6 text-[clamp(2.75rem,8vw,5.5rem)] leading-[1.06] uppercase"
+    >
+      {SITE.name}
+    </h1>
 
-    <div class="flex flex-col gap-2.5 md:flex-row">
+    <p class="text-secondary mt-6 max-w-xl text-lg md:text-xl">
+      {SITE.tagline}
+    </p>
+
+    <div class="mt-8 flex flex-col gap-3 sm:flex-row">
       <a class="btn-primary w-full sm:w-auto" href="#work">View work</a>
       <a class="btn-invert w-full sm:w-auto" href="#contact">Hire me</a>
     </div>
 
-    <p class="flex flex-wrap items-center gap-x-3 gap-y-2 text-secondary">
-      <span class="pill gap-2 text-sm">
-        <span class="h-2 w-2 rounded-full bg-primary" aria-hidden="true"></span>
+    <p
+      class="text-secondary mt-8 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm"
+    >
+      <span class="pill gap-2 py-1.5 text-sm">
+        <span class="bg-primary size-2 rounded-full" aria-hidden="true"></span>
         {SITE.availability}
       </span>
-      <span class="text-sm">{SITE.location} · {SITE.timezone}</span>
+      <span>{SITE.location} · {SITE.timezone}</span>
     </p>
   </div>
+
+  <div class="relative order-1 mx-auto w-full max-w-md lg:order-2 lg:max-w-none">
+    {/*
+      Nichol floats a cut-out portrait on a full gradient panel. That only works
+      with a subject on transparency; with an ordinary rectangular photograph
+      the panel ends up as four stray slivers around the crop. So the gradient
+      becomes an offset block behind the frame instead — still both accents,
+      still obviously deliberate, and it works with any photo.
+    */}
+    <div class="hero-wash" aria-hidden="true"></div>
+
+    <Image
+      class="border-border relative aspect-[4/5] w-full rounded-3xl border object-cover"
+      src={portrait}
+      alt={SITE.name}
+      widths={[480, 800, 1200]}
+      sizes="(min-width: 1024px) 40vw, (min-width: 640px) 60vw, 90vw"
+      priority
+    />
+  </div>
 </section>
+
+<style>
+  /*
+    Yellow into violet, the two accents, offset down-left behind the frame.
+    Sized off the frame rather than the column so it tracks the image at every
+    breakpoint.
+  */
+  .hero-wash {
+    position: absolute;
+    inset: 2rem -1.25rem -1.25rem 2rem;
+    border-radius: 1.5rem;
+    background: linear-gradient(
+      145deg,
+      var(--color-accent) 0%,
+      var(--color-primary) 100%
+    );
+  }
+</style>

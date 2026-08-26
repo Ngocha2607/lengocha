@@ -26,21 +26,28 @@ export const prerender = false;
 
   <main id="content">
     {/*
-      Ordered as a narrative, not by section age: who I am, what I built (with
-      the Performance audit directly after the Work card that makes its
-      claims), how I decide and lead, then the role history as reference
-      material. Career, Decisions, Performance, How I lead and the live vitals
-      strip have no counterpart in the template — a portfolio for a freelancer
-      does not need a record of roles, a decision log, or an audit. They are
-      built in the same language so the page still reads as one design.
+      Ordered as a narrative: who I am, the trajectory, then the evidence.
+
+      Career sits third rather than late. It used to sit after How I lead, which
+      put roughly 78% of the page's copy — including the 8.5k-character decision
+      log — in front of the one section a recruiter opens the page looking for.
+      Its rail is built to be scanned in three seconds, and at that depth
+      nothing gets scanned. Moving it up costs an engineer very little, because
+      the rail is compact.
+
+      What the order still has to respect: Performance sits directly after the
+      Work card that makes its claims, and both stay above Decisions, because
+      two decision entries link up at `#performance` and `#work`. The evidence
+      run — Work, Performance, Decisions, How I lead — stays contiguous rather
+      than alternating with reference material.
     */}
     <Hero />
     <AboutSection />
+    <CareerSection />
     <WorkSection />
     <PerformanceSection />
     <DecisionsSection />
     <LeadingSection />
-    <CareerSection />
     <PostsSection />
     <ContactSection />
     <WebVitals />

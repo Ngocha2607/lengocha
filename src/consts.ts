@@ -34,13 +34,19 @@ export const SOCIALS = [
  * In-page navigation. This is a single-page portfolio rather than the
  * template's five routes, so the header links are anchors and every section id
  * lives here.
+ *
+ * The order matches the order of the sections on the page, so the header reads
+ * top to bottom. `#leading` was missing for a while: the section was on the
+ * page but unreachable from the header, the mobile sheet or the footer, all
+ * three of which render this list. If a section is added, add it here.
  */
 export const NAV = [
   { name: "About", href: "#about" },
+  { name: "Career", href: "#career" },
   { name: "Work", href: "#work" },
   { name: "Performance", href: "#performance" },
   { name: "Decisions", href: "#decisions" },
-  { name: "Career", href: "#career" },
+  { name: "Leading", href: "#leading" },
   { name: "Writing", href: "#writing" },
   { name: "Contact", href: "#contact" },
 ] as const;

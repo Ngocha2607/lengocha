@@ -30,29 +30,29 @@ const STEPS = [
 
 <figure class="panel overflow-hidden" data-terminal data-steps={STEPS.length}>
   <div
-    class="flex items-center gap-3 border-b border-dashed border-secondary bg-foreground px-4 py-2.5 text-background"
+    class="border-header-muted/25 bg-header text-header-ink flex items-center gap-3 border-b px-4 py-2.5"
   >
     <p class="font-mono text-xs tracking-[0.14em] uppercase">
       ci · merge-request pipeline
     </p>
     <span
-      class="ml-auto border border-background px-2 py-0.5 font-mono text-[10px] font-bold tracking-[0.14em] uppercase opacity-0 transition-opacity duration-500"
+      class="border-header-ink ml-auto border px-2 py-0.5 font-mono text-[10px] font-bold tracking-[0.14em] uppercase opacity-0 transition-opacity duration-500"
       data-badge
     >
       passed
     </span>
   </div>
 
-  <ol class="space-y-3 bg-foreground px-4 py-4 font-mono text-xs leading-relaxed text-background">
+  <ol class="bg-header text-header-ink space-y-3 px-4 py-4 font-mono text-xs leading-relaxed">
     {
       STEPS.map((step) => (
         <li class="translate-y-1 opacity-0 transition-all duration-300" data-step>
           <p class="break-all">
-            <span class="mr-1.5 select-none text-primary">$</span>
+            <span class="mr-1.5 select-none text-accent">$</span>
             {step.command}
           </p>
           <p class="mt-1 pl-4 opacity-70">
-            <span class="mr-1.5 text-primary" aria-hidden="true">
+            <span class="mr-1.5 text-accent" aria-hidden="true">
               ✓
             </span>
             {step.result}
@@ -62,7 +62,7 @@ const STEPS = [
     }
   </ol>
 
-  <figcaption class="border-t border-dashed border-secondary px-4 py-3 text-sm text-secondary">
+  <figcaption class="border-t border-border px-4 py-3 text-sm text-secondary">
     A replay of the security pipeline I wired into GitLab CI at SAPP — Gitleaks,
     Trivy, Semgrep and ZAP gate every merge request. Not a live scan of this
     page.

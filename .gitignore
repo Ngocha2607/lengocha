@@ -48,3 +48,5 @@ Thumbs.db
 temp/
 
 .next/
+# Playwright MCP scratch output
+.playwright-mcp/

@@ -1,19 +1,43 @@
 # Lê Ngọc Hà — Personal Portfolio
 
-A single-page developer portfolio built with Astro, styled after
-[heshify/monolume](https://github.com/heshify/monolume) (MIT) — mono display
-type, a near-white ground, an acid-green accent used as a surface, dashed
-hairline outlines, pill buttons and rounded cards.
+A single-page developer portfolio built with Astro, re-skinned after the
+**Nichol** portfolio template — a violet accent, a warm yellow second accent, a
+near-white ground, rounded cards with hairline borders and a soft shadow, a
+dark header bar that stays dark in both themes, and sentence-case headings at a
+readable size.
 
-Why that template: the original site was a near-copy of `bchiang7/v4` (8.3k
-stars, 4.2k forks), so a reviewer had almost certainly seen it before. Monolume
-has 26 stars, which is the point.
+### Lineage, so nobody re-litigates it
 
-**Match the template's visual language.** It has rounded corners, dashed
-outlines and enormous uppercase headings. An earlier pass ported the *palette*
-but kept a generic stack-of-sections structure with `border-radius: 0` forced
-globally — that read as neither the template nor anything else. Do not
-reintroduce a global radius reset, hard offset shadows, or solid 2px borders.
+Three passes, each with a reason:
+
+1. A near-copy of `bchiang7/v4` (8.3k stars) — a reviewer had almost certainly
+   seen it before.
+2. A port of [heshify/monolume](https://github.com/heshify/monolume) (MIT) —
+   mono display type, acid green, dashed hairlines, enormous uppercase
+   headings. Distinctive, and obscure enough not to be recognised.
+3. The current Nichol re-skin, chosen by the site's owner for warmth and
+   legibility.
+
+**Nichol is a commercial marketplace theme, so the recognisability problem that
+drove pass 1 → 2 is back.** That was raised and the owner decided anyway. Do not
+"fix" it by reverting; if it ever matters, the answer is to diverge further from
+Nichol, not to go back to monolume.
+
+**What was deliberately not taken from Nichol**, because it will look like an
+oversight otherwise:
+
+- Its stack. Nichol is a client-rendered Vue SPA: 738 bytes of HTML, an empty
+  `<div id="app">`, 149KB of JS, 3.2MB over 39 requests. Every performance
+  claim on this page would become false.
+- Its Skills section — self-scored percentage bars, every skill at 90% — and
+  its award badges. See "Two audiences per section" for what this page does
+  instead.
+- Services, Testimonials and the client/project counters. Freelance-designer
+  furniture; there is no honest data here to fill them with.
+- Its alternating two-sided Education & Experience timeline: 1955px for six
+  entries, ambiguous reading order, right-ragged text in the left column. The
+  rail-plus-cards pattern in `CareerSection` is better and stays.
+- Its font. See "Sora cannot be used here" below.
 
 ## Heads-up: Astro 6
 
@@ -33,21 +57,33 @@ dependency that reaches the browser is `web-vitals` (~9KB), for the live strip
 above the footer. Everything else is plain DOM work in an Astro `<script>` or
 pure CSS:
 
-- the marquee bands — CSS keyframes
 - the performance slider, the pipeline replay, the decision filter, the mobile
-  menu, the cursor circle, the contact form — hand-written vanilla
+  menu, the cursor circle, the contact form, the theme toggle — hand-written
+  vanilla
 - the decision log's expansion — native `<details>`
+- the theme's no-flash boot — a blocking `is:inline` script in `<head>`, which
+  Astro does not bundle, so it costs no request
 
-Measured on a production build: **1 external JS file at 9.4KB**, 14 requests,
-LCP 205ms, CLS 0.00, Lighthouse a11y/best-practices/SEO/agentic 100 with 0
-failed audits, desktop and mobile.
+Measured on a production build after the Nichol re-skin: **the site's own
+JavaScript is one file at 9,648 bytes**, LCP 214ms, CLS 0.00, Lighthouse
+a11y/best-practices/SEO/agentic 100 with 0 failed audits, desktop and mobile,
+and 0 contrast failures across every text-bearing element in both themes.
+
+**One third-party script now loads alongside it**, and it is not small:
+Cloudflare Web Analytics' `beacon.min.js` is 28,467 bytes uncompressed and
+9,509 over the wire, so it roughly doubles the page's JavaScript and adds a
+second origin to connect to. That was an explicit choice by the site's owner,
+not an oversight — but any claim written here about "one external JS file" has
+to say *the site's own*, because two files now load. If the weight ever matters
+more than the tool, Vercel's own analytics is about a tenth of the size and
+first-party, since the site is deployed there.
 
 ## Tech Stack
 
 - **Framework:** Astro 6 (`output: "static"`, per-route `prerender = false`)
 - **Styling:** Tailwind CSS v4 via `@tailwindcss/vite`, oklch design tokens
 - **Content:** Notion API → Markdown → HTML (`marked`, server-side)
-- **Fonts:** Astro fonts API (IBM Plex Mono + Geist, self-hosted at build)
+- **Fonts:** Astro fonts API (Plus Jakarta Sans + IBM Plex Mono, self-hosted)
 - **Deployment:** Vercel (`@astrojs/vercel`, ISR)
 
 ### The Vite override is load-bearing
@@ -88,6 +124,21 @@ The Node adapter does not compress responses, so HTML and CSS transfer sizes
 read far larger locally than in production — compress by hand before quoting a
 number. Vercel serves brotli.
 
+Restart the server after every rebuild. `node entry.mjs` holds the old modules
+in memory, so a rebuilt `dist/` is not picked up and you will screenshot the
+previous version and think a change did nothing.
+
+**Check both themes, and check them by reloading rather than by flipping.**
+Setting `data-theme` from the console triggers the stalled-transition bug
+described in the design system, so a live flip measures colours that a real
+visitor would never see. Set `localStorage.theme` and reload instead.
+
+The contrast sweep that has to stay green: walk every element that renders its
+own text, resolve its colour and nearest opaque background through a canvas
+(computed values come back as `oklch()`, which needs converting), and assert
+4.5:1, or 3:1 where the text is >=24px or >=18.66px bold. The last run was
+**0 failures in both themes**.
+
 ## Rendering model
 
 Static by default. Two routes opt out with `prerender = false` because their
@@ -102,45 +153,62 @@ sets `Astro.response.status = 404`.
 
 ## Page structure
 
-The template's own sections carry Hà's material; five sections have no
-counterpart in it and were built in the same language.
+Every section but the hero and the footer opens with the same header: a
+`SectionHeading` carrying a kicker pill, a centred title and a plain-language
+lead.
 
 ```
-Header          fixed, "L." mark + anchor nav + hamburger      (template)
-Hero            giant wordmark, standfirst, two pill buttons   (template)
-About me        numbers panel + prose + skill pills            (template)
-Work            marquee + project cards with screenshots       (template)
-Performance     the LMS audit, slider, pipeline replay         NEW
-Decisions       the decision log                               NEW
-How I lead      six practices + mentoring + artifacts          NEW
-Career          roles, dashed rows                             NEW
-Posts           marquee + Notion-backed writing                (template)
-Get in touch    pitch, socials, mail-composing form            (template)
-Live vitals     Core Web Vitals for the page you are on        NEW
-Footer          acid block, wordmark, four link columns        (template)
+Header          dark bar, "L." mark, anchor nav, theme toggle
+Hero            wordmark + pitch left, portrait on a gradient right
+About me        numbers panel + prose + skill pills
+Career          milestone rail + detail cards
+Work            project cards with screenshots
+Performance     the LMS audit, slider, pipeline replay
+Decisions       the decision log
+How I lead      six practices + mentoring + artifacts
+Posts           Notion-backed writing
+Get in touch    pitch, socials, mail-composing form
+Live vitals     Core Web Vitals for the page you are on
+Footer          dark, CTA banner + four link columns
 ```
 
-The order is a narrative — who I am, what I built with the Performance audit
-directly after the Work card that makes its claims, how I decide and lead,
-then the role history as reference — so evidence sections and
-how-I-think sections stay clustered instead of alternating. Decision 02's
-"The audit it came out of" link points up at `#performance`, which only reads
-correctly while Performance sits above Decisions.
+The order is a narrative: who I am, the trajectory, then the evidence.
+
+**Career sits third, not late.** It used to sit after How I lead, which put
+about 78% of the page's copy — including the 8.5k-character decision log — in
+front of the one section a recruiter opens the page looking for, and its rail is
+built to be scanned in three seconds. Moving it up costs an engineer very little
+because the rail is compact. Do not push it back down without a reason that
+beats that.
+
+What the order must keep: Performance directly after the Work card that makes
+its claims, and both above Decisions, because two decision entries link up at
+`#performance` and `#work`. The evidence run — Work, Performance, Decisions,
+How I lead — stays contiguous rather than alternating with reference material.
 
 `NAV` and `SOCIALS` in `src/consts.ts` drive the header, the mobile sheet and
-the footer, so a section's anchor is defined in one place.
+the footer, so a section's anchor is defined in one place. **`NAV` must list
+every section**, in page order: `#leading` was missing for a while, so How I
+lead was on the page but unreachable from any of the three. At eight items the
+inline nav no longer fits at `md`, so `Header` switches to it at `lg` and the
+mobile sheet covers 768–1023px.
 
-### Things the template does that must be kept
+### Rules that survived the re-skin
 
-- **Marquee containment.** The word runs are far wider than the viewport
-  (~1550px at 390px wide) and are held by `overflow-hidden` on the wrapper. Any
-  full-bleed trick here puts a horizontal scrollbar on the whole document,
-  which is exactly what an earlier build shipped.
+- **Text on the accent fill is always black.** The rule outlived the colour it
+  was written for: acid green behind white type was about 1.4:1, and yellow is
+  1.59:1. Black on `--color-accent` measures 13.17:1.
 - **The cursor circle** on Work cards attaches only where `(pointer: fine)`
   matches and `prefers-reduced-motion` does not — a touch device has no cursor
-  to trail.
-- **Text on the acid fill is always black.** The accent is a surface colour;
-  #27FF0B behind white type is about 1.4:1.
+  to trail. Its arrow is `currentColor` on the violet fill, so it needs
+  `text-white`.
+- **The marquee is gone.** The scrolling word band was the most
+  monolume-specific element on the page and fought Nichol's calmer rhythm.
+  Work and Posts now use `SectionHeading` like every other section, which also
+  gives them a real `<h2>` instead of an `sr-only` one inside the band. If a
+  full-bleed element ever comes back, remember why that one needed
+  `overflow-hidden`: its runs were ~1550px wide at a 390px viewport, and an
+  earlier build shipped a horizontal scrollbar on the whole document.
 
 ### The contact form has no backend
 
@@ -178,6 +246,19 @@ WCAG 2.5.3, and this has now been broken three different ways:
 For a card-sized link, do not set `aria-label` at all — the content is the
 name. Append new-tab warnings as `sr-only` text inside the anchor instead.
 
+4. An `aria-label` on the **header mark**, whose visible text is `H.` while the
+   label read "Lê Ngọc Hà — top of page" — the letter is not in it. The name is
+   now `sr-only` text inside the anchor, so the accessible name reads
+   "H. — Lê Ngọc Hà, top of page" and contains the visible text.
+
+### The mark is the given-name initial
+
+Vietnamese puts the given name last, so the initial that identifies a person is
+the **last** word's: `Lê Ngọc Hà` gives **H**, not the family name's L. The
+header derived it from `charAt(0)` for a while and rendered `L.`, which left it
+disagreeing with `favicon.svg` and the OG card. All three draw an H and must
+stay in step.
+
 ### `<dl>` has a content model, and Lighthouse checks it
 
 A `<div>` inside a `<dl>` must contain its `<dt>` first and its `<dd>` after,
@@ -190,42 +271,131 @@ heading, it is a list, not a description list.
 ```
 src/
   pages/          # index, writing/[slug], 404, robots.txt.ts, sitemap.xml.ts
-  layouts/        # Layout.astro — head, fonts, JSON-LD, skip link
+  layouts/        # Layout.astro — head, fonts, JSON-LD, skip link, theme boot
   components/
-    Header.astro          # fixed nav + hamburger
-    Hero.astro
+    Header.astro          # dark bar, nav, hamburger, theme toggle
+    SectionHeading.astro  # kicker pill + centred title + lead slot
+    icons.ts              # inline SVG bodies, 24x24 grid
+    Hero.astro            # split hero, portrait on a gradient block
     AboutSection.astro
-    CareerSection.astro           NEW
-    Marquee.astro                 # the scrolling word band
-    ProjectCard.astro             # Work row + cursor circle
+    CareerSection.astro   # milestone rail + detail timeline
+    ProjectCard.astro     # Work row + cursor circle
     WorkSection.astro
-    DecisionsSection.astro        NEW
-    PerformanceSection.astro + PerformanceCase + PipelineTerminal   NEW
-    LeadingSection.astro          NEW
+    DecisionsSection.astro
+    PerformanceSection.astro + PerformanceCase + PipelineTerminal
+    LeadingSection.astro
     PostsSection.astro
     ContactSection.astro
-    WebVitals.astro               NEW
+    WebVitals.astro
     Footer.astro
     NotFound.astro
   lib/notion.ts   # Notion "Writing" data layer
   lib/markdown.ts # Notion Markdown -> HTML
-  styles/         # global.css — tokens and @utility classes
-  assets/         # Project screenshots, optimized by astro:assets
+  styles/         # global.css — tokens, dark palette, @utility classes
+  assets/         # le-ngoc-ha.jpg + project screenshots, via astro:assets
   consts.ts       # Identity, socials, NAV, Person JSON-LD
 public/
   seo/            # favicon.svg, apple-touch-icon.png, og.png, webmanifest
-  resume.pdf      # Downloadable CV
+  Le-Ngoc-Ha-Senior-Frontend-Developer.pdf
+scripts/
+  og.svg          # source for the OG card — not served, it lives outside public/
+  build-og.mjs    # rasterises it with sharp
 ```
+
+### The share assets are generated, not hand-drawn
+
+`favicon.svg` is the only one written by hand: a `#0D1220` rounded square with
+a white glyph — monochrome, and deliberately not the accent. At 16px a favicon
+has one job, which is to be picked out of a strip of other tabs, and `#0D1220`
+is the site's own black so the tab icon and the dark header bar read as one
+thing. White on it is 18.68:1. The acid-green original had a 12px inner stroke
+that turned to mush at tab size, so the stroke is gone and the letterform grew
+into the space. Checked by rendering at 16px and 32px and magnifying, not by
+eyeballing the 180px source.
+
+`site.webmanifest` sets `theme_color` to the same `#0D1220`: that value tints
+the browser UI to match the top of the page, and the top of this page is the
+dark bar, not the violet accent.
+
+`apple-touch-icon.png` and `og.png` are rendered from SVG with `sharp`, which
+is already a dependency because Astro uses it. Regenerate the card with
+`node scripts/build-og.mjs` after editing `scripts/og.svg`; the touch icon is
+`sharp('public/seo/favicon.svg', { density: 400 }).resize(180, 180)`.
+
+Two things the OG card deliberately does not do: it does not use Plus Jakarta
+Sans, because sharp renders SVG text with system fonts and the webfont is not
+installed system-wide (Segoe UI stands in and covers the Vietnamese
+diacritics, which is the only hard requirement); and it does not print the
+site's URL, because `SITE.url` defaults to `le-ngoc-ha.vercel.app` while the CV
+says `lengocha.vercel.app` and nobody has reconciled the two.
 
 ## Design system
 
-Tokens live in `@theme` in `src/styles/global.css`, using the template's names:
-`background`, `foreground`, `secondary`, `primary`.
+Tokens live in `@theme` in `src/styles/global.css`. **Every colour was solved
+against a contrast target, not picked by eye** — the helper is a few lines of
+sRGB → luminance maths, and there is a full-page sweep in the verification
+steps below. Do not nudge one without re-running it.
 
-- `--color-primary` (#27FF0B) is a **surface** colour, never a text colour.
-- Data colours (`--color-pass` / `--color-fail` / `--color-warn`) are darker
-  than the usual teal/rose so they clear 4.5:1 — they are the only place on the
-  page where colour carries meaning.
+| Token | Light | Dark | Contract |
+|---|---|---|---|
+| `primary` | `#964BF1` | same | Surface. White on it = **4.60:1**. |
+| `primary-ink` | `#8637DE` | `#AD66FF` | The violet *as text*. **5.50:1** on the ground. |
+| `accent` | `#FFC41F` | same | Surface, **black text only** (13.17:1; white is 1.59:1). |
+| `background` | `#F8F9FA` | `#0B1020` | The page. |
+| `surface` | `#FFFFFF` | `#151B2E` | Cards, sitting above the ground. |
+| `foreground` | `#0D1220` | `#EEF2F8` | Body ink. |
+| `secondary` | `#565F78` | `#9BA7C0` | Muted ink, **6.03:1 / 7.83:1**. |
+| `border` | `#D6DBE5` | `#242C42` | Hairlines. |
+| `header`, `header-ink`, `header-muted` | fixed | fixed | The bar. See below. |
+
+Why violet needs two tokens: `#994FF5` straight off Nichol is 4.38:1 under
+white and 4.16:1 as text on the ground — it fails AA in **both** directions. The
+darkened `primary` fixes the first, `primary-ink` the second.
+
+### Dark mode is a token swap, not a variant
+
+Tailwind v4 compiles utilities to `var(--color-*)` and declares the tokens at
+`:root`, so overriding those variables under a more specific selector re-themes
+the whole page. **There is not one `dark:` class in the markup**, and new
+markup should not add any — use the tokens.
+
+The palette is declared twice: a `prefers-color-scheme` block guarded with
+`:not([data-theme="light"])`, and a `:root[data-theme="dark"]` block. The first
+serves someone who has never touched the toggle (including with JavaScript off,
+where no attribute is ever written); the second serves an explicit choice and
+must beat the system preference in both directions.
+
+Three traps, all of them paid for once already:
+
+1. **Do not put a re-themable value in `@theme`.** A `--shadow-*` theme key
+   makes Tailwind resolve `shadow-panel` to a literal at build time, and a
+   literal cannot be overridden. `--shadow-panel` is therefore a plain custom
+   property on `:root`.
+2. **Never let a theme flip run through a transition.** An element carrying
+   `transition` whose colour changes while it is *outside the viewport* stalls
+   at its start value and never resolves — scrolling to it later does not
+   repaint it. Toggling to dark at the top of the page left every `.link` and
+   `.btn` below the fold permanently in the light palette. The toggle sets
+   `data-theme-switching` on `<html>`, which kills all transitions, and clears
+   it on the next frame *and* on a 120ms timeout, because rAF is throttled in a
+   background tab.
+3. **The header and the footer stay dark in both themes**, so they run on
+   `--color-header*`, which do not appear in the dark blocks. Anything using
+   `foreground`/`background` there would invert. `.link` is banned in the footer
+   for the same reason: it hovers to `primary-ink`, the *dark* violet in light
+   mode, which is about 2:1 on that bar.
+
+### Type
+
+- **Plus Jakarta Sans** for everything, **IBM Plex Mono** for data only —
+  `.label`, tabular figures, the pipeline replay, the vitals strip. The re-skin
+  took mono off the headings.
+- **Sora cannot be used here**, even though Nichol uses it everywhere. Its
+  `latin-ext` covers `U+1E00-1E9F` and `U+1EF2-1EFF` and skips `U+1EA0-1EF1`
+  entirely, and it ships no `vietnamese` subset — so the `Ọ` (U+1ECC) in
+  `LÊ NGỌC HÀ` falls back to another family in the middle of the largest word on
+  the page. Verified alternatives that do ship the subset: Plus Jakarta Sans,
+  Be Vietnam Pro, Manrope, Space Grotesk.
 - Two font weights per family (400/700) and nothing else. Three weights per
   family fetched 12 faces instead of 9.
 - Only preload the faces that paint above the fold. Preloading every declared
@@ -233,6 +403,26 @@ Tokens live in `@theme` in `src/styles/global.css`, using the template's names:
   seconds.
 - `.label` uppercases. Never put a filesystem path, a route, or a unit like
   `15.2s` in it without `normal-case` — that shipped as `/COURSES` and `15.2S`.
+
+### Icons
+
+- Section icons are **inline SVG stroke paths on a 24x24 grid**, in
+  `components/icons.ts`, drawn by `SectionHeading.astro` inside the kicker
+  pill. Never ship them as raster files: the portfolio that pattern came from
+  serves 9 icons for 4.8MB, one of them a 1295x1214 PNG rendered at 34px, on a
+  page that makes no claims about weight. All eight here cost under 2KB of HTML
+  and zero requests.
+- They are decoration — `aria-hidden`, `focusable="false"` — and the section
+  keeps its heading as its accessible name. `UI_ICONS` is kept separate because
+  those are picked by code, not by an author.
+
+### Custom class names
+
+`panel`, `pill`, `label`, `heading`, `link`, `btn-*` kept their names through
+the re-skin even though every one of them changed visually — `panel` is still a
+panel whether its outline is dashed or hairline, and renaming would have meant
+touching ~180 call sites for nothing. Only `rule-dashed` became `rule`, because
+that name asserted something no longer true.
 
 ## Two audiences per section
 
@@ -249,11 +439,33 @@ standfirst under its heading, before any depth.
   callout opens with an "In plain terms" line. Glosses have a reserved two-line
   height (`min-h-8`) so values stay aligned across the row.
 - Skills are indexed by **first-used year, never a self-scored bar** — a year
-  is derivable from the Career section, so a reviewer can line the two up.
+  is derivable from the Career section, so a reviewer can line the two up. This
+  is the clearest place the page departs from Nichol, which shows Figma 90% /
+  Sketch 90% / Photoshop 90% / Illustrator 90% / Adobe XD 90%. Do not
+  reintroduce percentage bars, star ratings or award badges.
 - The page must not say the same thing three times. About used to repeat
   Career, and Career used to repeat the decisions; both were trimmed.
 
 ## Interactive pieces
+
+- `Header` — the theme toggle. Icon-only, so `aria-label` carries the whole
+  accessible name and JS keeps it in step with the current theme. Both the sun
+  and the moon ship and **CSS** picks which shows, so the right one is there on
+  the first paint rather than after hydration. The three-state logic — stored
+  choice, else OS — lives in `currentTheme()`; with no stored choice the
+  attribute is deliberately left off so the page keeps following the OS live.
+
+- `CareerSection` — two tiers, no script. A **rail** of milestones
+  (`career-rail`) you can scan in three seconds, each one a native `#career-N`
+  jump link into a **detail card** below (`career-timeline`). The rail runs
+  oldest to newest because a trajectory reads left to right; the cards run
+  newest first because that is what a reviewer wants. Both connectors are drawn
+  per item with `::after` and suppressed on `:last-child`, so each run stops
+  exactly at the next marker rather than guessing an inset from the last card's
+  height — and the marker is `relative` so the absolutely positioned hairline
+  cannot paint across its face. The rail rotates from a horizontal row to a
+  vertical spine at the `md` breakpoint from the same markup. Highlights sit in
+  a two-column grid so four bullets read as two rows instead of a wall.
 
 - `DecisionsSection` — native `<details>` for expansion, so all seven entries
   stay in the DOM, crawlable and keyboard-operable; the only script is the
@@ -286,7 +498,28 @@ standfirst under its heading, before any depth.
 ## Claims discipline
 
 Everything on the page must be traceable to the Confluence audit, a published
-Writing post, or the CV. This matters most in the decision log, which states
+Writing post, or the CV — `public/Le-Ngoc-Ha-Senior-Frontend-Developer.pdf`,
+which the site's owner has named the source of truth for anything CV-shaped:
+employers, titles, date ranges, and the numbers it states.
+
+Reconciled against the CV once already, so do not re-loosen these:
+
+- Date ranges in the CV are month-precise (`03/2025`, `10/2021 — 02/2023`).
+  `Role.period` is years for the rail, `Role.periodExact` is the CV range for
+  the detail card. Do not widen `periodExact` to whole years.
+- The CV says nearly five years, not five.
+- The CV says the Tweet World mobile Lighthouse was held **at** 85, not above
+  it.
+- **The CV is trimmed to two pages, so absence from it is not evidence.** The
+  FPT Software internship (2021) is on the page and not in the CV — the owner
+  cut it for length and confirmed the page should keep it. Do not delete it as
+  unsourced.
+- The five Tweet World platforms are **B2B**. An earlier pass wrote "B2B/B2C"
+  in four places and gave the storefront card a "both the agent and consumer
+  side" description; none of that is in the CV. Confirmed B2B only.
+- The CV states the traffic figure twice and disagrees with itself — "1.000
+  lượt truy cập" (visits) in the experience section, "~1.000 users" under
+  Selected Projects. The owner confirmed **users**. This matters most in the decision log, which states
 alternatives, costs and reversals — exactly what a reviewer will probe.
 
 Notably NOT true as of the last update, so do not write it: server-side data
@@ -302,9 +535,11 @@ component comments so the site's owner can check rather than inherit them:
 - `LeadingSection` — the six practices are framed from the CV, but the wording
   is editorial.
 
-The "This site" card in `WorkSection` and the "This site" column in the footer
-both describe **this** repo: they currently claim Astro, zero framework
-JavaScript, and Notion-to-HTML hourly. Keep them honest if the stack moves.
+The "This site" column in the footer describes **this** repo: it claims Astro,
+zero framework JavaScript, and Notion-to-HTML hourly. All three are still true —
+the Cloudflare beacon is third-party analytics, not a framework — but keep them
+honest if the stack moves. (`WorkSection` no longer carries a matching card;
+this used to say it did.)
 
 ## Content: Writing (Notion)
 
@@ -326,3 +561,31 @@ with `marked` on the server.
   new tab.
 - Notion image URLs are signed and expire (~1h); embedded images may 404 near
   the revalidation boundary. Text/tables/code are unaffected.
+- **A post can carry a cover image.** `readCoverUrl` reads a `Cover` property
+  (type `url` or `files`) and falls back to the page's own Notion banner. Two
+  kinds of URL come back and they are not equivalent: an **external** link is
+  stable, while an **uploaded file** is a signed S3 URL with roughly an hour's
+  expiry — and since the page is ISR-cached for an hour too, a visitor arriving
+  near the end of that window can be handed a URL that has already expired.
+  Both are accepted; only the external one always works.
+  The cover is a plain `<img>`, not `astro:assets`: `imagesConfig.domains` and
+  `remotePatterns` are both empty, so Vercel's image CDN would refuse a remote
+  host. Add the host to both that list and Astro's `image.domains` to route it
+  through the CDN and get resizing.
+  The aspect ratio sits on the container, so any shape drops in under
+  `object-cover` without shifting the layout, and the drawn wash stays
+  underneath — a cover that 404s degrades to it rather than to a broken image.
+- **Without a cover, the card art is drawn, by decision.** Three routes were
+  ruled out: a Notion page cover is one of those signed URLs; a raster generated
+  at build time goes stale the moment a title changes and is missing entirely
+  for a post published afterwards, since the list is fetched per request and
+  cached by ISR; and generating one per request needs an endpoint nobody has
+  asked for. The cover is drawn instead — the `post-cover` utility washes both
+  accents over the card surface and the post's **own Notion emoji** sits on top
+  with its primary tag and year. `readEmoji` in `src/lib/notion.ts` reads
+  `page.icon` when it is an emoji, which is the one per-post visual the API
+  gives away free and cannot expire, because it is a character.
+- So **setting the page icon in Notion is how a post gets art.** A post with no
+  icon still renders — the cover falls back to the tag and the year.
+- The tile used to render the post title, which put the same title twice in
+  every row. Do not put it back.

@@ -1,5 +1,6 @@
 ---
 import { SITE, SOCIALS } from "../consts";
+import SectionHeading from "./SectionHeading.astro";
 
 /**
  * Contact, in the template's shape: a big heading, a short pitch and socials on
@@ -18,7 +19,13 @@ import { SITE, SOCIALS } from "../consts";
   class="container mx-auto my-28 scroll-mt-24 space-y-12 p-6 md:p-10"
   aria-labelledby="contact-title"
 >
-  <h2 id="contact-title" class="section-title">Get in touch</h2>
+  <SectionHeading id="contact-title" icon="mail" kicker="Say hello">
+    Get in touch
+    <Fragment slot="lead">
+      Open to remote work from Hanoi. The form composes a draft in your own mail
+      client — there is no backend here to receive one.
+    </Fragment>
+  </SectionHeading>
 
   <div class="grid grid-cols-1 items-start gap-10 md:grid-cols-2">
     <div class="space-y-8">
@@ -66,7 +73,7 @@ import { SITE, SOCIALS } from "../consts";
             type="text"
             id="name"
             name="name"
-            class="peer w-full rounded-3xl border border-dashed border-secondary p-4 text-xl placeholder-transparent focus:outline-none"
+            class="peer w-full rounded-3xl border border-border p-4 text-xl placeholder-transparent focus:outline-none"
             placeholder="Name"
             autocomplete="name"
             required
@@ -84,7 +91,7 @@ import { SITE, SOCIALS } from "../consts";
             type="email"
             id="email"
             name="email"
-            class="peer w-full rounded-3xl border border-dashed border-secondary p-4 text-xl placeholder-transparent focus:outline-none"
+            class="peer w-full rounded-3xl border border-border p-4 text-xl placeholder-transparent focus:outline-none"
             placeholder="Email"
             autocomplete="email"
             required
@@ -103,7 +110,7 @@ import { SITE, SOCIALS } from "../consts";
           id="message"
           name="message"
           rows="6"
-          class="peer w-full resize-none rounded-3xl border border-dashed border-secondary p-4 text-xl placeholder-transparent focus:outline-none"
+          class="peer w-full resize-none rounded-3xl border border-border p-4 text-xl placeholder-transparent focus:outline-none"
           placeholder="Message"
           required></textarea>
         <label

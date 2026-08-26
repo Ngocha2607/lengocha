@@ -34,7 +34,7 @@ const Tag = href ? "a" : "div";
 <Tag
   class:list={[
     "group relative mb-8 flex flex-col items-center justify-between gap-8 pb-8 md:flex-row md:gap-12",
-    "rule-dashed",
+    "rule",
     href && "cursor-pointer",
   ]}
   {...href
@@ -49,7 +49,7 @@ const Tag = href ? "a" : "div";
   {
     href && (
       <span
-        class="pointer-events-none absolute hidden h-[75px] w-[75px] -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-dashed border-secondary bg-primary opacity-0 transition-opacity group-hover:grid"
+        class="pointer-events-none absolute hidden h-[75px] w-[75px] -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border-transparent bg-primary text-white opacity-0 transition-opacity group-hover:grid"
         aria-hidden="true"
         data-cursor-circle
       >
@@ -88,7 +88,7 @@ const Tag = href ? "a" : "div";
         />
       ) : (
         <div
-          class="grid h-full w-full place-items-center border border-dashed border-secondary p-6"
+          class="grid h-full w-full place-items-center border border-border p-6"
           aria-hidden="true"
         >
           <span class="heading text-center text-2xl text-secondary md:text-3xl">
@@ -106,7 +106,7 @@ const Tag = href ? "a" : "div";
       of its own. The cue goes under the tags, where it can also say what the
       link actually opens.
     */}
-    <h3 class="heading max-w-xl text-2xl uppercase md:text-4xl">{title}</h3>
+    <h3 class="heading max-w-xl text-2xl md:text-4xl">{title}</h3>
     <p class="mx-auto max-w-xl text-lg text-secondary md:mx-0 md:text-2xl">
       {description}
     </p>

@@ -1,4 +1,6 @@
 ---
+import SectionHeading from "./SectionHeading.astro";
+
 /**
  * About, in the template's two-column shape. The template puts a portrait in
  * the left slot; there is no photograph to use here, so the slot carries the
@@ -14,7 +16,7 @@ const numbers = [
   { value: "~5", label: "Years in frontend", note: "Since 2021" },
   { value: "4", label: "Frontends, one monorepo", note: "lms-fe" },
   { value: "15", label: "LMS routes audited", note: "Lab + field" },
-  { value: "5", label: "B2B/B2C products", note: "Tweet World" },
+  { value: "5", label: "B2B products", note: "Tweet World" },
   { value: "1K+", label: "Monthly users served", note: "Travel ERP" },
   { value: "5", label: "Engineers mentored", note: "Two teams" },
 ];
@@ -41,12 +43,23 @@ const skills = [
 ];
 ---
 
-<section id="about" class="container mx-auto mb-28 scroll-mt-24 p-6">
-  <h2 id="about-title" class="section-title">About me</h2>
+<section
+  id="about"
+  class="container mx-auto mb-28 scroll-mt-24 p-6"
+  aria-labelledby="about-title"
+>
+  <SectionHeading id="about-title" icon="person" kicker="Profile">
+    About me
+    <Fragment slot="lead">
+      A frontend lead who reaches for the measurement before the refactor. The
+      numbers below are the shape of the work; the sections after it are the
+      evidence.
+    </Fragment>
+  </SectionHeading>
 
-  <div class="mt-8 grid grid-cols-1 items-start gap-8 md:grid-cols-2 md:gap-12">
+  <div class="grid grid-cols-1 items-start gap-8 md:grid-cols-2 md:gap-12">
     <div class="panel p-6 md:p-8">
-      <h3 class="heading mb-6 text-xl uppercase text-secondary">By the numbers</h3>
+      <h3 class="heading mb-6 text-xl text-secondary">By the numbers</h3>
       <dl class="grid grid-cols-2 gap-x-6 gap-y-7">
         {
           numbers.map((item) => (
@@ -77,7 +90,7 @@ const skills = [
         <p>
           Before that, two years at a travel group working both sides of the
           wire — Spring Boot services and the React clients in front of them —
-          across five B2B/B2C products and a multilingual ERP. I started in
+          across five B2B products and a multilingual ERP. I started in
           operational software, where a mis-read screen has consequences a
           marketing page never does.
         </p>
@@ -88,7 +101,7 @@ const skills = [
         </p>
       </div>
 
-      <h3 class="heading my-8 text-2xl uppercase text-secondary">My skills</h3>
+      <h3 class="heading my-8 text-2xl text-secondary">My skills</h3>
       <ul class="flex flex-wrap gap-3">
         {
           skills.map((skill) => (

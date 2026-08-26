@@ -1,12 +1,25 @@
 ---
-import Marquee from "./Marquee.astro";
+import SectionHeading from "./SectionHeading.astro";
 import { getPublishedPosts, type PostMeta } from "../lib/notion";
 
 /**
- * Writing, in the template's post-list shape: a marquee band, then rows with a
- * block on the left and the title and description on the right. The template's
- * posts have no images either — it renders a placeholder with the title in it,
- * which is what the block below does.
+ * Writing: rows with a cover on the left, the title and description on the
+ * right.
+ *
+ * The posts have no images, and none of the obvious ways to give them one work
+ * here. A Notion page cover is a signed URL that expires within the hour, which
+ * AGENTS.md already records as the reason embedded images 404 near the
+ * revalidation boundary. A raster generated at build time goes stale the moment
+ * a title changes and does not exist at all for a post published afterwards,
+ * because this list is fetched per request and cached by ISR — a static cover
+ * would quietly undo that.
+ *
+ * So the cover is drawn from what the post already carries: its own Notion
+ * emoji, its primary tag and its year, over a wash of both accents. Whoever
+ * writes the post picks the emoji, so it is authored rather than decorative, and
+ * there is nothing to fetch, regenerate or invalidate.
+ *
+ * The tile used to render the title, which then appeared twice in every row.
  */
 
 interface ArticleCard {
@@ -17,6 +30,10 @@ interface ArticleCard {
   tags: string[];
   href: string;
   internal: boolean;
+  /** Notion page emoji. Empty is fine — the cover falls back to the tag alone. */
+  emoji: string;
+  /** Cover image from Notion, or "" to draw one instead. */
+  coverUrl: string;
 }
 
 /**
@@ -34,6 +51,8 @@ const FALLBACK: ArticleCard[] = [
     tags: ["AppSec", "Gitleaks", "Trivy", "Semgrep", "CI/CD"],
     href: "https://app.notion.com/p/S-tay-AppSec-cho-Frontend-Gitleaks-Trivy-Semgrep-3a5b7b727ddd81abb32ff56df403c846?source=copy_link",
     internal: false,
+    emoji: "🛡️",
+    coverUrl: "",
   },
 ];
 
@@ -46,6 +65,8 @@ function toCard(post: PostMeta): ArticleCard {
     tags: post.tags,
     href: `/writing/${post.slug}`,
     internal: true,
+    emoji: post.emoji,
+    coverUrl: post.coverUrl,
   };
 }
 
@@ -58,34 +79,61 @@ const articles = posts.length > 0 ? posts.map(toCard) : FALLBACK;
   class="container mx-auto mb-28 scroll-mt-24 px-6"
   aria-labelledby="writing-title"
 >
-  <Marquee word="posts" id="writing-title" />
-
-  <p class="mb-12 max-w-3xl text-lg text-secondary md:text-2xl">
-    Write-ups I publish for my team, and for anyone reviewing me. They cover the
-    reasoning behind a decision rather than just the result — the closest thing
-    to seeing how I work before you talk to me.
-  </p>
+  <SectionHeading id="writing-title" icon="pen" kicker="Writing">
+    Posts
+    <Fragment slot="lead">
+      Write-ups I publish for my team, and for anyone reviewing me. They cover
+      the reasoning behind a decision rather than just the result — the closest
+      thing to seeing how I work before you talk to me.
+    </Fragment>
+  </SectionHeading>
 
   {
     articles.map((article) => (
       <a
-        class="group relative mb-8 flex flex-col items-center justify-between gap-8 pb-8 md:flex-row md:gap-12 rule-dashed cursor-pointer"
+        class="group relative mb-8 flex flex-col items-center justify-between gap-8 pb-8 md:flex-row md:gap-12 rule cursor-pointer"
         href={article.href}
         target={article.internal ? undefined : "_blank"}
         rel={article.internal ? undefined : "noreferrer noopener"}
       >
+        {/*
+          Decoration either way: the title, tag and year all appear as real text
+          in the column beside it, so there is nothing here for a screen reader
+          to gain, and the image is a cover rather than content.
+
+          The aspect ratio lives on the container, so a Notion cover of any
+          shape drops in with `object-cover` and cannot shift the layout. If the
+          image fails — an expiring Notion file URL will, eventually — the drawn
+          wash underneath shows through instead of a broken-image icon.
+        */}
         <div
-          class="grid aspect-[610/400] w-full place-items-center overflow-hidden rounded-3xl border border-dashed border-secondary bg-primary/10 p-8 transition group-hover:bg-primary/25 md:max-w-[610px]"
+          class="post-cover group-hover:border-primary/50 grid aspect-[610/400] w-full place-items-center transition md:max-w-[610px]"
           aria-hidden="true"
         >
-          <span class="heading text-center text-xl text-secondary md:text-3xl">
-            {article.title}
-          </span>
+          {article.coverUrl ? (
+            <img
+              class="absolute inset-0 h-full w-full object-cover"
+              src={article.coverUrl}
+              alt=""
+              loading="lazy"
+              decoding="async"
+            />
+          ) : (
+            <div class="relative grid justify-items-center gap-4 p-8 text-center">
+              {article.emoji && (
+                <span class="text-6xl leading-none md:text-7xl">{article.emoji}</span>
+              )}
+              {article.tags[0] && (
+                <span class="label text-primary-ink">{article.tags[0]}</span>
+              )}
+              <span class="label text-secondary tabular-nums">{article.year}</span>
+            </div>
+          )}
         </div>
 
         <div class="space-y-4 text-center md:text-left">
           <p class="text-sm tabular-nums text-secondary">{article.year}</p>
-          <h3 class="heading max-w-xl text-2xl uppercase md:text-4xl">
+          <h3 class="heading max-w-xl text-2xl md:text-4xl">
             {article.title}
           </h3>
           {article.description && (
