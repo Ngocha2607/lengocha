@@ -3,7 +3,7 @@ import tailwindcss from "@tailwindcss/vite";
 import vercel from "@astrojs/vercel";
 import node from "@astrojs/node";
 
-import { SITE } from "./src/consts";
+import { SITE, BLOB_HOST } from "./src/consts";
 
 /**
  * The Vercel adapter has no preview entrypoint, so `astro preview` cannot serve
@@ -12,23 +12,6 @@ import { SITE } from "./src/consts";
  * the footer is meaningless on the dev server, so it has to be measured here.
  */
 const localProd = process.env.LOCAL_PROD === "1";
-
-/**
- * Public Vercel Blob URLs look like
- *   https://<storeId>.public.blob.vercel-storage.com/<pathname>
- * and the store id is generated when the store is created, so both allowlists
- * below match the whole suffix rather than one host.
- *
- * They are two different dialects and that is not a mistake:
- *   - Astro's `image.remotePatterns` takes glob wildcards (`**.` = any subdomain)
- *   - the Vercel adapter's `imagesConfig.remotePatterns` takes a regular
- *     expression, per its own type docs
- *
- * If Vercel ever rejects an optimized image, the zero-ambiguity fix is to drop
- * the store's exact hostname into `imagesConfig.domains` instead.
- */
-const BLOB_HOST_GLOB = "**.public.blob.vercel-storage.com";
-const BLOB_HOST_REGEX = "^[a-z0-9]+\.public\.blob\.vercel-storage\.com$";
 
 export default defineConfig({
   site: SITE.url,
@@ -60,12 +43,16 @@ export default defineConfig({
          * would have been served at 1920px into a 480px slot. Declare the
          * widths the layout actually asks for.
          */
+        /**
+         * `domains` takes exact hostnames, `remotePatterns` takes a regular
+         * expression — and the equivalent Astro option below takes glob
+         * wildcards instead. Since the store's hostname is known, both use the
+         * exact-match option and the dialect difference stops mattering.
+         */
         imagesConfig: {
           sizes: [480, 800, 1200],
-          domains: [],
-          remotePatterns: [
-            { protocol: "https", hostname: BLOB_HOST_REGEX },
-          ],
+          domains: [BLOB_HOST],
+          remotePatterns: [],
         },
       }),
 
@@ -78,7 +65,7 @@ export default defineConfig({
    * and both have to agree.
    */
   image: {
-    remotePatterns: [{ protocol: "https", hostname: BLOB_HOST_GLOB }],
+    domains: [BLOB_HOST],
   },
 
   fonts: [

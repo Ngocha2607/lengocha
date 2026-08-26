@@ -612,15 +612,20 @@ Setup, in order:
    needed**: the site only reads public URLs, it never writes.
 3. Paste the URL into the post's `Cover` property in Notion.
 
-Public URLs are `https://<storeId>.public.blob.vercel-storage.com/<pathname>`,
-and that suffix is allowlisted twice in `astro.config.mjs` — once for Astro,
-once for the Vercel adapter. **The two use different dialects**: Astro's
-`image.remotePatterns` takes glob wildcards, the adapter's
-`imagesConfig.remotePatterns` takes a regular expression. Both must match or the
-image is not optimized. This cannot be verified locally, because `LOCAL_PROD`
-builds use the Node adapter and sharp, which ignore `imagesConfig` — check it on
-the first deploy. If Vercel rejects an image, put the store's exact hostname in
-`imagesConfig.domains` instead.
+The store's hostname lives in **one place**, `BLOB_HOST` in `src/consts.ts`,
+because three things need to agree on it: Astro's `image.domains`, the adapter's
+`imagesConfig.domains`, and `PostsSection`'s decision about whether a cover can
+be optimized. If those drift, Astro hands Vercel a URL its optimizer rejects and
+the cover 400s instead of falling back. `astro.config.mjs` already imports from
+`consts.ts`, so there is no reason to duplicate the string.
+
+Both allowlists use the **exact-hostname** option rather than a pattern. That is
+deliberate: `imagesConfig.remotePatterns` takes a regular expression while
+Astro's `image.remotePatterns` takes glob wildcards, and getting either dialect
+wrong is invisible locally — `LOCAL_PROD` builds use the Node adapter and sharp,
+which ignore `imagesConfig` entirely. Exact hostnames remove the dialect
+question. A cover from a *different* Blob store is therefore not optimized; it
+falls back to a plain `<img>`, which is the correct outcome.
 
 `PostsSection` renders a Blob cover through `<Image>` and anything else as a
 plain `<img>`, because Astro refuses to optimize a host it was not told about.

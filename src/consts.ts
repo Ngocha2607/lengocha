@@ -21,6 +21,19 @@ export const SITE = {
   email: "ngocha2k0.ln@gmail.com",
 } as const;
 
+/**
+ * The public Vercel Blob store holding post cover images.
+ *
+ * Exported from here rather than written in two places because both
+ * `astro.config.mjs` — which allowlists the host for image optimization — and
+ * `PostsSection`, which decides whether a given cover can be optimized, need
+ * the same value. If those two ever disagree, Astro hands Vercel a URL its
+ * optimizer rejects and the cover 400s instead of falling back.
+ *
+ * Region sin1. The store's access mode is public and cannot be changed.
+ */
+export const BLOB_HOST = "qgat4v5hrepgvc3n.public.blob.vercel-storage.com";
+
 export const SOCIALS = [
   { name: "GitHub", href: "https://github.com/Ngocha2607" },
   {

@@ -2,6 +2,7 @@
 import { Image } from "astro:assets";
 import SectionHeading from "./SectionHeading.astro";
 import { getPublishedPosts, type PostMeta } from "../lib/notion";
+import { BLOB_HOST } from "../consts";
 
 /**
  * Writing: rows with a cover on the left, the title and description on the
@@ -40,8 +41,10 @@ interface ArticleCard {
 }
 
 /**
- * Covers are meant to live in Vercel Blob, whose hostname is allowlisted in
- * `astro.config.mjs`. Anything else still renders — the `Cover` property is
+ * Covers are meant to live in the Vercel Blob store named by `BLOB_HOST`, which
+ * is the same value `astro.config.mjs` allowlists — an exact match on both
+ * sides, so a cover from some other Blob store falls back to a plain `<img>`
+ * rather than being handed to an optimizer that would reject it. Anything else still renders — the `Cover` property is
  * free text and someone will paste a link from elsewhere — but it goes out as a
  * plain `<img>`, because Astro refuses to optimize a host it was not told about
  * and Vercel would reject the request anyway.
@@ -49,11 +52,9 @@ interface ArticleCard {
  * `new URL` rather than a string match, so a malformed value fails to a plain
  * `<img>` instead of throwing during render.
  */
-const BLOB_HOST_SUFFIX = ".public.blob.vercel-storage.com";
-
 function isOptimizable(url: string): boolean {
   try {
-    return new URL(url).hostname.endsWith(BLOB_HOST_SUFFIX);
+    return new URL(url).hostname === BLOB_HOST;
   } catch {
     return false;
   }
