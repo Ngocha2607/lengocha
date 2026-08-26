@@ -28,8 +28,8 @@ const METRICS = [
 
 <section class="container mx-auto mb-16 p-6" aria-labelledby="vitals-title" data-vitals>
   <div class="panel p-6 md:p-10">
-    <p class="pill mb-4 w-max bg-primary text-sm">Live</p>
-    <h2 id="vitals-title" class="heading text-2xl uppercase md:text-4xl">
+    <p class="pill mb-4 w-max bg-accent text-sm text-black">Live</p>
+    <h2 id="vitals-title" class="heading text-2xl md:text-4xl">
       This page, measured in your browser
     </h2>
     <p class="mt-4 max-w-3xl text-lg text-secondary">
@@ -41,14 +41,14 @@ const METRICS = [
       {
         METRICS.map((metric) => (
           <li
-            class="rounded-3xl border border-dashed border-secondary p-4"
+            class="rounded-3xl border border-border p-4"
             data-metric={metric.name}
             data-good={metric.good}
             data-pending={metric.pending}
           >
             <p class="label flex items-center gap-2">
               <span
-                class="h-2.5 w-2.5 shrink-0 rounded-full border border-dashed border-secondary"
+                class="h-2.5 w-2.5 shrink-0 rounded-full border border-border"
                 aria-hidden="true"
                 data-box
               />

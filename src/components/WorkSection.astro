@@ -1,6 +1,6 @@
 ---
 import type { ImageMetadata } from "astro";
-import Marquee from "./Marquee.astro";
+import SectionHeading from "./SectionHeading.astro";
 import ProjectCard from "./ProjectCard.astro";
 
 import lmsPlatform from "../assets/projects/lms-platform.png";
@@ -90,12 +90,13 @@ const PROJECTS: Project[] = [
 ---
 
 <section id="work" class="container mx-auto mb-28 scroll-mt-24 px-6" aria-labelledby="work-title">
-  <Marquee word="work" id="work-title" />
-
-  <p class="mb-12 max-w-3xl text-lg text-secondary md:text-2xl">
-    Seven products across four employers. Internal platforms have no public URL,
-    so those cards link to the write-up rather than to a login screen.
-  </p>
+  <SectionHeading id="work-title" icon="grid" kicker="Selected work">
+    Things I&apos;ve built
+    <Fragment slot="lead">
+      Seven products across four employers. Internal platforms have no public
+      URL, so those cards link to the write-up rather than to a login screen.
+    </Fragment>
+  </SectionHeading>
 
   {PROJECTS.map((project) => <ProjectCard {...project} />)}
 </section>

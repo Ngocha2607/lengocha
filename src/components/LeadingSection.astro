@@ -66,25 +66,26 @@ const artifacts = [
   class="container mx-auto mb-28 scroll-mt-24 p-6"
   aria-labelledby="leading-title"
 >
-  <SectionHeading id="leading-title" icon="people">How I lead</SectionHeading>
-
-  <p class="mt-8 mb-12 max-w-3xl text-lg text-secondary md:text-2xl">
-    Six practices, each with the mechanism that makes it real rather than
-    aspirational. The short version: put the standard somewhere it cannot be
-    skipped, measure before deciding, and write things down so the answer
-    outlives whoever found it.
-  </p>
+  <SectionHeading id="leading-title" icon="people" kicker="Practice">
+    How I lead
+    <Fragment slot="lead">
+      Six practices, each with the mechanism that makes it real rather than
+      aspirational. The short version: put the standard somewhere it cannot be
+      skipped, measure before deciding, and write things down so the answer
+      outlives whoever found it.
+    </Fragment>
+  </SectionHeading>
 
   <div class="grid gap-10 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
     <ol>
       {
         practices.map((practice, i) => (
-          <li class="rule-dashed mb-6 flex gap-4 pb-6 md:gap-6">
+          <li class="rule mb-6 flex gap-4 pb-6 md:gap-6">
             <span class="heading shrink-0 text-lg tabular-nums text-secondary">
               {String(i + 1).padStart(2, "0")}
             </span>
             <div class="min-w-0">
-              <h3 class="heading text-xl uppercase md:text-2xl">{practice.title}</h3>
+              <h3 class="heading text-xl md:text-2xl">{practice.title}</h3>
               <p class="mt-3 max-w-2xl text-secondary md:text-lg">{practice.body}</p>
               <p class="pill mt-4 px-3 py-1 text-sm text-secondary">
                 {practice.mechanism}
@@ -97,7 +98,7 @@ const artifacts = [
 
     <div class="space-y-8">
       <aside class="panel p-6" aria-labelledby="mentoring-title">
-        <h3 id="mentoring-title" class="heading text-lg uppercase text-secondary">
+        <h3 id="mentoring-title" class="heading text-lg text-secondary">
           People I&apos;ve brought on
         </h3>
         <ul class="mt-5 space-y-5">
@@ -120,14 +121,14 @@ const artifacts = [
       <aside class="panel overflow-hidden" aria-labelledby="artifacts-title">
         <h3
           id="artifacts-title"
-          class="heading border-b border-dashed border-secondary bg-primary px-6 py-4 text-lg uppercase"
+          class="heading border-b border-border bg-accent px-6 py-4 text-lg text-black"
         >
           What I leave behind
         </h3>
         <ul>
           {
             artifacts.map((artifact) => (
-              <li class="flex gap-3 border-b border-dashed border-secondary px-6 py-4 text-secondary last:border-b-0">
+              <li class="flex gap-3 border-b border-border px-6 py-4 text-secondary last:border-b-0">
                 <span
                   class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-foreground"
                   aria-hidden="true"

@@ -2,80 +2,129 @@
 import { SITE, SOCIALS, NAV } from "../consts";
 
 /**
- * The template's closing block: an acid panel with a big rounded top edge, the
- * wordmark, a line of philosophy, then four columns of links.
+ * Closing block, after Nichol: a call to action across the top, then the link
+ * columns, then the small print.
  *
- * Text on the acid fill is always black — the accent is a surface colour, and
- * #27FF0B behind white type is about 1.4:1.
+ * The footer runs on the header's three tokens rather than `background` /
+ * `foreground`, for the same reason the header does — it stays dark in both
+ * themes, so it must not follow tokens that swap.
+ *
+ * `.link` is deliberately not used here. It hovers to `primary-ink`, which is
+ * the *dark* violet in light mode and would drop to about 2:1 on this bar.
  */
 const year = 2026;
+
+const isMail = (href: string) => href.startsWith("mailto:");
 ---
 
-<footer class="container mx-auto space-y-10 rounded-t-[48px] bg-primary p-8 text-foreground md:rounded-t-[80px] md:p-12">
-  <div class="flex flex-col items-start justify-between gap-6 lg:flex-row lg:items-center">
-    {/* Same looser leading as the hero: stacked Vietnamese diacritics collide. */}
-    <h2 class="heading text-5xl leading-[1.08] uppercase lg:text-8xl">
-      {SITE.name}
-    </h2>
-    <p class="max-w-[620px] text-xl lg:text-3xl">{SITE.motto}</p>
+<footer class="bg-header text-header-ink mt-28 rounded-t-[40px] md:rounded-t-[56px]">
+  <div class="container mx-auto p-8 md:p-12">
+    <div
+      class="border-header-muted/20 flex flex-col items-start justify-between gap-6 border-b pb-10 lg:flex-row lg:items-center"
+    >
+      <h2 class="heading max-w-2xl text-2xl leading-tight md:text-4xl">
+        Got a frontend that has outgrown its structure? Let&apos;s talk.
+      </h2>
+
+      {/* Black on the yellow accent is 13.17:1 — the accent never carries white. */}
+      <a
+        class="btn bg-accent shrink-0 text-black hover:opacity-90"
+        href={`mailto:${SITE.email}`}
+      >
+        Say hello
+      </a>
+    </div>
+
+    <div
+      class="grid gap-10 py-10 sm:grid-cols-2 lg:grid-cols-4 lg:justify-between"
+    >
+      <div>
+        <h3 class="label text-header-muted mb-4">Contact</h3>
+        <ul class="space-y-2 text-sm">
+          <li>
+            <a
+              class="hover:text-header-ink underline underline-offset-4 transition"
+              href={`mailto:${SITE.email}`}
+            >
+              {SITE.email}
+            </a>
+          </li>
+          <li class="text-header-muted">{SITE.location} · {SITE.timezone}</li>
+          <li class="text-header-muted">{SITE.availability}</li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="label text-header-muted mb-4">Navigation</h3>
+        <ul class="space-y-2 text-sm">
+          {
+            NAV.map((link) => (
+              <li>
+                <a
+                  class="text-header-muted hover:text-header-ink transition"
+                  href={link.href}
+                >
+                  {link.name}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="label text-header-muted mb-4">Elsewhere</h3>
+        <ul class="space-y-2 text-sm">
+          {
+            SOCIALS.map((social) => (
+              <li>
+                <a
+                  class="text-header-muted hover:text-header-ink transition"
+                  href={social.href}
+                  target={isMail(social.href) ? undefined : "_blank"}
+                  rel={isMail(social.href) ? undefined : "noreferrer noopener"}
+                >
+                  {social.name}
+                  {!isMail(social.href) && (
+                    <span class="sr-only"> (opens in a new tab)</span>
+                  )}
+                </a>
+              </li>
+            ))
+          }
+          <li>
+            <a
+              class="text-header-muted hover:text-header-ink transition"
+              href="/Le-Ngoc-Ha-Senior-Frontend-Developer.pdf"
+              target="_blank"
+              rel="noreferrer noopener"
+            >
+              Résumé, PDF<span class="sr-only"> (opens in a new tab)</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      {/*
+        Describes *this* repository. Keep it honest if the stack moves — the
+        "This site" card in WorkSection makes the same claims.
+      */}
+      <div>
+        <h3 class="label text-header-muted mb-4">This site</h3>
+        <ul class="text-header-muted space-y-2 text-sm">
+          <li>Astro · Tailwind CSS v4</li>
+          <li>No framework JavaScript</li>
+          <li>Writing from Notion, hourly</li>
+          <li>Deployed on Vercel</li>
+        </ul>
+      </div>
+    </div>
+
+    <div
+      class="border-header-muted/20 text-header-muted flex flex-col items-center justify-between gap-3 border-t pt-8 text-sm sm:flex-row"
+    >
+      <p>© {year} {SITE.name}</p>
+      <p>Design adapted from the Nichol portfolio template.</p>
+    </div>
   </div>
-
-  <div class="flex flex-col justify-between gap-10 sm:flex-row sm:flex-wrap">
-    <div>
-      <h3 class="heading mb-3 text-lg uppercase">Contact</h3>
-      <ul class="space-y-1">
-        <li><a class="link" href={`mailto:${SITE.email}`}>{SITE.email}</a></li>
-        <li>{SITE.location} · {SITE.timezone}</li>
-        <li>{SITE.availability}</li>
-      </ul>
-    </div>
-
-    <div>
-      <h3 class="heading mb-3 text-lg uppercase">Navigation</h3>
-      <ul class="space-y-1">
-        {NAV.map((link) => <li><a class="link" href={link.href}>{link.name}</a></li>)}
-      </ul>
-    </div>
-
-    <div>
-      <h3 class="heading mb-3 text-lg uppercase">Elsewhere</h3>
-      <ul class="space-y-1">
-        {
-          SOCIALS.map((social) => (
-            <li>
-              <a
-                class="link"
-                href={social.href}
-                target={social.href.startsWith("mailto:") ? undefined : "_blank"}
-                rel={
-                  social.href.startsWith("mailto:") ? undefined : "noreferrer noopener"
-                }
-              >
-                {social.name}
-              </a>
-            </li>
-          ))
-        }
-        <li>
-          <a class="link" href="/Le-Ngoc-Ha-Senior-Frontend-Developer.pdf" target="_blank" rel="noreferrer noopener">
-            Résumé, PDF
-          </a>
-        </li>
-      </ul>
-    </div>
-
-    <div>
-      <h3 class="heading mb-3 text-lg uppercase">This site</h3>
-      <ul class="space-y-1">
-        <li>Astro · Tailwind CSS v4</li>
-        <li>No framework JavaScript</li>
-        <li>Writing from Notion, hourly</li>
-        <li>Deployed on Vercel</li>
-      </ul>
-    </div>
-  </div>
-
-  <p class="text-center text-sm opacity-70">
-    © {year} {SITE.name}. Built with Astro. Design adapted from Mono Lume (MIT).
-  </p>
 </footer>

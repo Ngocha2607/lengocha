@@ -1,19 +1,43 @@
 # Lê Ngọc Hà — Personal Portfolio
 
-A single-page developer portfolio built with Astro, styled after
-[heshify/monolume](https://github.com/heshify/monolume) (MIT) — mono display
-type, a near-white ground, an acid-green accent used as a surface, dashed
-hairline outlines, pill buttons and rounded cards.
+A single-page developer portfolio built with Astro, re-skinned after the
+**Nichol** portfolio template — a violet accent, a warm yellow second accent, a
+near-white ground, rounded cards with hairline borders and a soft shadow, a
+dark header bar that stays dark in both themes, and sentence-case headings at a
+readable size.
 
-Why that template: the original site was a near-copy of `bchiang7/v4` (8.3k
-stars, 4.2k forks), so a reviewer had almost certainly seen it before. Monolume
-has 26 stars, which is the point.
+### Lineage, so nobody re-litigates it
 
-**Match the template's visual language.** It has rounded corners, dashed
-outlines and enormous uppercase headings. An earlier pass ported the *palette*
-but kept a generic stack-of-sections structure with `border-radius: 0` forced
-globally — that read as neither the template nor anything else. Do not
-reintroduce a global radius reset, hard offset shadows, or solid 2px borders.
+Three passes, each with a reason:
+
+1. A near-copy of `bchiang7/v4` (8.3k stars) — a reviewer had almost certainly
+   seen it before.
+2. A port of [heshify/monolume](https://github.com/heshify/monolume) (MIT) —
+   mono display type, acid green, dashed hairlines, enormous uppercase
+   headings. Distinctive, and obscure enough not to be recognised.
+3. The current Nichol re-skin, chosen by the site's owner for warmth and
+   legibility.
+
+**Nichol is a commercial marketplace theme, so the recognisability problem that
+drove pass 1 → 2 is back.** That was raised and the owner decided anyway. Do not
+"fix" it by reverting; if it ever matters, the answer is to diverge further from
+Nichol, not to go back to monolume.
+
+**What was deliberately not taken from Nichol**, because it will look like an
+oversight otherwise:
+
+- Its stack. Nichol is a client-rendered Vue SPA: 738 bytes of HTML, an empty
+  `<div id="app">`, 149KB of JS, 3.2MB over 39 requests. Every performance
+  claim on this page would become false.
+- Its Skills section — self-scored percentage bars, every skill at 90% — and
+  its award badges. See "Two audiences per section" for what this page does
+  instead.
+- Services, Testimonials and the client/project counters. Freelance-designer
+  furniture; there is no honest data here to fill them with.
+- Its alternating two-sided Education & Experience timeline: 1955px for six
+  entries, ambiguous reading order, right-ragged text in the left column. The
+  rail-plus-cards pattern in `CareerSection` is better and stays.
+- Its font. See "Sora cannot be used here" below.
 
 ## Heads-up: Astro 6
 
@@ -33,21 +57,24 @@ dependency that reaches the browser is `web-vitals` (~9KB), for the live strip
 above the footer. Everything else is plain DOM work in an Astro `<script>` or
 pure CSS:
 
-- the marquee bands — CSS keyframes
 - the performance slider, the pipeline replay, the decision filter, the mobile
-  menu, the cursor circle, the contact form — hand-written vanilla
+  menu, the cursor circle, the contact form, the theme toggle — hand-written
+  vanilla
 - the decision log's expansion — native `<details>`
+- the theme's no-flash boot — a blocking `is:inline` script in `<head>`, which
+  Astro does not bundle, so it costs no request
 
-Measured on a production build: **1 external JS file at 9.4KB**, 14 requests,
-LCP 205ms, CLS 0.00, Lighthouse a11y/best-practices/SEO/agentic 100 with 0
-failed audits, desktop and mobile.
+Measured on a production build after the Nichol re-skin: **1 external JS file
+at 9,648 bytes**, LCP 214ms, CLS 0.00, Lighthouse a11y/best-practices/SEO/
+agentic 100 with 0 failed audits, desktop and mobile, and 0 contrast failures
+across every text-bearing element in both themes.
 
 ## Tech Stack
 
 - **Framework:** Astro 6 (`output: "static"`, per-route `prerender = false`)
 - **Styling:** Tailwind CSS v4 via `@tailwindcss/vite`, oklch design tokens
 - **Content:** Notion API → Markdown → HTML (`marked`, server-side)
-- **Fonts:** Astro fonts API (IBM Plex Mono + Geist, self-hosted at build)
+- **Fonts:** Astro fonts API (Plus Jakarta Sans + IBM Plex Mono, self-hosted)
 - **Deployment:** Vercel (`@astrojs/vercel`, ISR)
 
 ### The Vite override is load-bearing
@@ -88,6 +115,21 @@ The Node adapter does not compress responses, so HTML and CSS transfer sizes
 read far larger locally than in production — compress by hand before quoting a
 number. Vercel serves brotli.
 
+Restart the server after every rebuild. `node entry.mjs` holds the old modules
+in memory, so a rebuilt `dist/` is not picked up and you will screenshot the
+previous version and think a change did nothing.
+
+**Check both themes, and check them by reloading rather than by flipping.**
+Setting `data-theme` from the console triggers the stalled-transition bug
+described in the design system, so a live flip measures colours that a real
+visitor would never see. Set `localStorage.theme` and reload instead.
+
+The contrast sweep that has to stay green: walk every element that renders its
+own text, resolve its colour and nearest opaque background through a canvas
+(computed values come back as `oklch()`, which needs converting), and assert
+4.5:1, or 3:1 where the text is >=24px or >=18.66px bold. The last run was
+**0 failures in both themes**.
+
 ## Rendering model
 
 Static by default. Two routes opt out with `prerender = false` because their
@@ -102,22 +144,23 @@ sets `Astro.response.status = 404`.
 
 ## Page structure
 
-The template's own sections carry Hà's material; five sections have no
-counterpart in it and were built in the same language.
+Every section but the hero and the footer opens with the same header: a
+`SectionHeading` carrying a kicker pill, a centred title and a plain-language
+lead.
 
 ```
-Header          fixed, "L." mark + anchor nav + hamburger      (template)
-Hero            giant wordmark, standfirst, two pill buttons   (template)
-About me        numbers panel + prose + skill pills            (template)
-Work            marquee + project cards with screenshots       (template)
-Performance     the LMS audit, slider, pipeline replay         NEW
-Decisions       the decision log                               NEW
-How I lead      six practices + mentoring + artifacts          NEW
-Career          roles, dashed rows                             NEW
-Posts           marquee + Notion-backed writing                (template)
-Get in touch    pitch, socials, mail-composing form            (template)
-Live vitals     Core Web Vitals for the page you are on        NEW
-Footer          acid block, wordmark, four link columns        (template)
+Header          dark bar, "L." mark, anchor nav, theme toggle
+Hero            wordmark + pitch left, portrait on a gradient right
+About me        numbers panel + prose + skill pills
+Work            project cards with screenshots
+Performance     the LMS audit, slider, pipeline replay
+Decisions       the decision log
+How I lead      six practices + mentoring + artifacts
+Career          milestone rail + detail cards
+Posts           Notion-backed writing
+Get in touch    pitch, socials, mail-composing form
+Live vitals     Core Web Vitals for the page you are on
+Footer          dark, CTA banner + four link columns
 ```
 
 The order is a narrative — who I am, what I built with the Performance audit
@@ -130,17 +173,22 @@ correctly while Performance sits above Decisions.
 `NAV` and `SOCIALS` in `src/consts.ts` drive the header, the mobile sheet and
 the footer, so a section's anchor is defined in one place.
 
-### Things the template does that must be kept
+### Rules that survived the re-skin
 
-- **Marquee containment.** The word runs are far wider than the viewport
-  (~1550px at 390px wide) and are held by `overflow-hidden` on the wrapper. Any
-  full-bleed trick here puts a horizontal scrollbar on the whole document,
-  which is exactly what an earlier build shipped.
+- **Text on the accent fill is always black.** The rule outlived the colour it
+  was written for: acid green behind white type was about 1.4:1, and yellow is
+  1.59:1. Black on `--color-accent` measures 13.17:1.
 - **The cursor circle** on Work cards attaches only where `(pointer: fine)`
   matches and `prefers-reduced-motion` does not — a touch device has no cursor
-  to trail.
-- **Text on the acid fill is always black.** The accent is a surface colour;
-  #27FF0B behind white type is about 1.4:1.
+  to trail. Its arrow is `currentColor` on the violet fill, so it needs
+  `text-white`.
+- **The marquee is gone.** The scrolling word band was the most
+  monolume-specific element on the page and fought Nichol's calmer rhythm.
+  Work and Posts now use `SectionHeading` like every other section, which also
+  gives them a real `<h2>` instead of an `sr-only` one inside the band. If a
+  full-bleed element ever comes back, remember why that one needed
+  `overflow-hidden`: its runs were ~1550px wide at a 390px viewport, and an
+  earlier build shipped a horizontal scrollbar on the whole document.
 
 ### The contact form has no backend
 
@@ -190,53 +238,101 @@ heading, it is a list, not a description list.
 ```
 src/
   pages/          # index, writing/[slug], 404, robots.txt.ts, sitemap.xml.ts
-  layouts/        # Layout.astro — head, fonts, JSON-LD, skip link
+  layouts/        # Layout.astro — head, fonts, JSON-LD, skip link, theme boot
   components/
-    Header.astro          # fixed nav + hamburger
-    SectionHeading.astro          # acid icon tile + section title   NEW
-    icons.ts                      # inline SVG bodies, 24x24 grid    NEW
-    Hero.astro
+    Header.astro          # dark bar, nav, hamburger, theme toggle
+    SectionHeading.astro  # kicker pill + centred title + lead slot
+    icons.ts              # inline SVG bodies, 24x24 grid
+    Hero.astro            # split hero, portrait on a gradient block
     AboutSection.astro
-    CareerSection.astro           NEW  # rail + timeline
-    Marquee.astro                 # the scrolling word band
-    ProjectCard.astro             # Work row + cursor circle
+    CareerSection.astro   # milestone rail + detail timeline
+    ProjectCard.astro     # Work row + cursor circle
     WorkSection.astro
-    DecisionsSection.astro        NEW
-    PerformanceSection.astro + PerformanceCase + PipelineTerminal   NEW
-    LeadingSection.astro          NEW
+    DecisionsSection.astro
+    PerformanceSection.astro + PerformanceCase + PipelineTerminal
+    LeadingSection.astro
     PostsSection.astro
     ContactSection.astro
-    WebVitals.astro               NEW
+    WebVitals.astro
     Footer.astro
     NotFound.astro
   lib/notion.ts   # Notion "Writing" data layer
   lib/markdown.ts # Notion Markdown -> HTML
-  styles/         # global.css — tokens and @utility classes
-  assets/         # Project screenshots, optimized by astro:assets
+  styles/         # global.css — tokens, dark palette, @utility classes
+  assets/         # le-ngoc-ha.jpg + project screenshots, via astro:assets
   consts.ts       # Identity, socials, NAV, Person JSON-LD
 public/
   seo/            # favicon.svg, apple-touch-icon.png, og.png, webmanifest
-  resume.pdf      # Downloadable CV
+  Le-Ngoc-Ha-Senior-Frontend-Developer.pdf
 ```
 
 ## Design system
 
-Tokens live in `@theme` in `src/styles/global.css`, using the template's names:
-`background`, `foreground`, `secondary`, `primary`.
+Tokens live in `@theme` in `src/styles/global.css`. **Every colour was solved
+against a contrast target, not picked by eye** — the helper is a few lines of
+sRGB → luminance maths, and there is a full-page sweep in the verification
+steps below. Do not nudge one without re-running it.
 
-- `--color-primary` (#27FF0B) is a **surface** colour, never a text colour.
-- Data colours (`--color-pass` / `--color-fail` / `--color-warn`) are darker
-  than the usual teal/rose so they clear 4.5:1 — they are the only place on the
-  page where colour carries meaning.
-- Section icons are **inline SVG stroke paths on a 24x24 grid**, in
-  `components/icons.ts`, drawn by `SectionHeading.astro` into an acid tile that
-  scales with the heading. Never ship them as raster files: the portfolio this
-  pattern came from serves 9 icons for 4.8MB, one of them a 1295x1214 PNG
-  rendered at 34px, on a page that makes no claims about weight. All six here
-  cost 1,898 bytes of HTML and zero requests.
-- The icon is decoration — `aria-hidden`, `focusable="false"` — and the section
-  keeps its heading as its accessible name. Work and Posts open with the
-  template's marquee instead, so they have no tile.
+| Token | Light | Dark | Contract |
+|---|---|---|---|
+| `primary` | `#964BF1` | same | Surface. White on it = **4.60:1**. |
+| `primary-ink` | `#8637DE` | `#AD66FF` | The violet *as text*. **5.50:1** on the ground. |
+| `accent` | `#FFC41F` | same | Surface, **black text only** (13.17:1; white is 1.59:1). |
+| `background` | `#F8F9FA` | `#0B1020` | The page. |
+| `surface` | `#FFFFFF` | `#151B2E` | Cards, sitting above the ground. |
+| `foreground` | `#0D1220` | `#EEF2F8` | Body ink. |
+| `secondary` | `#565F78` | `#9BA7C0` | Muted ink, **6.03:1 / 7.83:1**. |
+| `border` | `#D6DBE5` | `#242C42` | Hairlines. |
+| `header`, `header-ink`, `header-muted` | fixed | fixed | The bar. See below. |
+
+Why violet needs two tokens: `#994FF5` straight off Nichol is 4.38:1 under
+white and 4.16:1 as text on the ground — it fails AA in **both** directions. The
+darkened `primary` fixes the first, `primary-ink` the second.
+
+### Dark mode is a token swap, not a variant
+
+Tailwind v4 compiles utilities to `var(--color-*)` and declares the tokens at
+`:root`, so overriding those variables under a more specific selector re-themes
+the whole page. **There is not one `dark:` class in the markup**, and new
+markup should not add any — use the tokens.
+
+The palette is declared twice: a `prefers-color-scheme` block guarded with
+`:not([data-theme="light"])`, and a `:root[data-theme="dark"]` block. The first
+serves someone who has never touched the toggle (including with JavaScript off,
+where no attribute is ever written); the second serves an explicit choice and
+must beat the system preference in both directions.
+
+Three traps, all of them paid for once already:
+
+1. **Do not put a re-themable value in `@theme`.** A `--shadow-*` theme key
+   makes Tailwind resolve `shadow-panel` to a literal at build time, and a
+   literal cannot be overridden. `--shadow-panel` is therefore a plain custom
+   property on `:root`.
+2. **Never let a theme flip run through a transition.** An element carrying
+   `transition` whose colour changes while it is *outside the viewport* stalls
+   at its start value and never resolves — scrolling to it later does not
+   repaint it. Toggling to dark at the top of the page left every `.link` and
+   `.btn` below the fold permanently in the light palette. The toggle sets
+   `data-theme-switching` on `<html>`, which kills all transitions, and clears
+   it on the next frame *and* on a 120ms timeout, because rAF is throttled in a
+   background tab.
+3. **The header and the footer stay dark in both themes**, so they run on
+   `--color-header*`, which do not appear in the dark blocks. Anything using
+   `foreground`/`background` there would invert. `.link` is banned in the footer
+   for the same reason: it hovers to `primary-ink`, the *dark* violet in light
+   mode, which is about 2:1 on that bar.
+
+### Type
+
+- **Plus Jakarta Sans** for everything, **IBM Plex Mono** for data only —
+  `.label`, tabular figures, the pipeline replay, the vitals strip. The re-skin
+  took mono off the headings.
+- **Sora cannot be used here**, even though Nichol uses it everywhere. Its
+  `latin-ext` covers `U+1E00-1E9F` and `U+1EF2-1EFF` and skips `U+1EA0-1EF1`
+  entirely, and it ships no `vietnamese` subset — so the `Ọ` (U+1ECC) in
+  `LÊ NGỌC HÀ` falls back to another family in the middle of the largest word on
+  the page. Verified alternatives that do ship the subset: Plus Jakarta Sans,
+  Be Vietnam Pro, Manrope, Space Grotesk.
 - Two font weights per family (400/700) and nothing else. Three weights per
   family fetched 12 faces instead of 9.
 - Only preload the faces that paint above the fold. Preloading every declared
@@ -244,6 +340,26 @@ Tokens live in `@theme` in `src/styles/global.css`, using the template's names:
   seconds.
 - `.label` uppercases. Never put a filesystem path, a route, or a unit like
   `15.2s` in it without `normal-case` — that shipped as `/COURSES` and `15.2S`.
+
+### Icons
+
+- Section icons are **inline SVG stroke paths on a 24x24 grid**, in
+  `components/icons.ts`, drawn by `SectionHeading.astro` inside the kicker
+  pill. Never ship them as raster files: the portfolio that pattern came from
+  serves 9 icons for 4.8MB, one of them a 1295x1214 PNG rendered at 34px, on a
+  page that makes no claims about weight. All eight here cost under 2KB of HTML
+  and zero requests.
+- They are decoration — `aria-hidden`, `focusable="false"` — and the section
+  keeps its heading as its accessible name. `UI_ICONS` is kept separate because
+  those are picked by code, not by an author.
+
+### Custom class names
+
+`panel`, `pill`, `label`, `heading`, `link`, `btn-*` kept their names through
+the re-skin even though every one of them changed visually — `panel` is still a
+panel whether its outline is dashed or hairline, and renaming would have meant
+touching ~180 call sites for nothing. Only `rule-dashed` became `rule`, because
+that name asserted something no longer true.
 
 ## Two audiences per section
 
@@ -260,11 +376,21 @@ standfirst under its heading, before any depth.
   callout opens with an "In plain terms" line. Glosses have a reserved two-line
   height (`min-h-8`) so values stay aligned across the row.
 - Skills are indexed by **first-used year, never a self-scored bar** — a year
-  is derivable from the Career section, so a reviewer can line the two up.
+  is derivable from the Career section, so a reviewer can line the two up. This
+  is the clearest place the page departs from Nichol, which shows Figma 90% /
+  Sketch 90% / Photoshop 90% / Illustrator 90% / Adobe XD 90%. Do not
+  reintroduce percentage bars, star ratings or award badges.
 - The page must not say the same thing three times. About used to repeat
   Career, and Career used to repeat the decisions; both were trimmed.
 
 ## Interactive pieces
+
+- `Header` — the theme toggle. Icon-only, so `aria-label` carries the whole
+  accessible name and JS keeps it in step with the current theme. Both the sun
+  and the moon ship and **CSS** picks which shows, so the right one is there on
+  the first paint rather than after hydration. The three-state logic — stored
+  choice, else OS — lives in `currentTheme()`; with no stored choice the
+  attribute is deliberately left off so the page keeps following the OS live.
 
 - `CareerSection` — two tiers, no script. A **rail** of milestones
   (`career-rail`) you can scan in three seconds, each one a native `#career-N`

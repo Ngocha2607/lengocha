@@ -1,20 +1,19 @@
 ---
 /**
- * The section header row: an acid tile carrying a line icon, then the title.
+ * The section header: a tinted violet kicker pill, then the title, then the
+ * plain-language lead — centred, which is the rhythm Nichol uses to carry a
+ * long page without every section reading as a poster.
  *
- * Ported from a portfolio whose section headings pair a 3D icon with a kicker
- * and a heading. The kicker is dropped — there it repeats the heading word for
- * word, and this page has a rule against saying the same thing twice — so the
- * icon does the indexing on its own.
+ * The kicker never repeats the heading. Nichol's does ("About Me" over "Hi! I'm
+ * Mitchell Hancock"), and the page it came from can afford that because it says
+ * very little; this one has a rule against saying the same thing twice, so each
+ * kicker names the *kind* of section and the heading names the subject.
  *
- * The tile is acid because the accent is a surface here, never a text colour;
- * the icon strokes on it are black, the same contract the footer block and the
- * primary button work under. Both scale with the heading so a 128px title
- * doesn't sit next to a 40px square.
+ * The icon is decoration — `aria-hidden`, `focusable="false"` — and the
+ * accessible name of the section stays the heading text.
  *
- * The icon is decoration: it is `aria-hidden`, and the accessible name of the
- * section stays the heading text. Two sections have no heading to decorate —
- * Work and Posts open with the template's marquee — so they don't use this.
+ * The lead is a slot rather than a prop so it can carry links and emphasis.
+ * Sections that have nothing to add omit it and no empty paragraph is rendered.
  */
 import { SECTION_ICONS, type SectionIconName } from "./icons";
 
@@ -22,24 +21,29 @@ interface Props {
   /** Referenced by the section's `aria-labelledby`. */
   id: string;
   icon: SectionIconName;
+  /** Short category label for the pill. Must not restate the heading. */
+  kicker: string;
   /** Extra classes for the wrapper, for sections that need their own spacing. */
   class?: string;
 }
 
-const { id, icon, class: className } = Astro.props;
+const { id, icon, kicker, class: className } = Astro.props;
+const hasLead = Astro.slots.has("lead");
 ---
 
-<div class:list={["flex items-center gap-4 md:gap-5 lg:gap-6", className]}>
-  <span
-    class="grid size-11 shrink-0 place-items-center rounded-2xl bg-primary text-foreground md:size-14 md:rounded-3xl lg:size-18"
-    aria-hidden="true"
-  >
+<div
+  class:list={[
+    "flex flex-col items-center text-center",
+    className ?? "mb-12 md:mb-16",
+  ]}
+>
+  <p class="kicker label">
     <svg
-      class="size-6 md:size-7 lg:size-9"
+      class="size-4"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      stroke-width="1.5"
+      stroke-width="1.75"
       stroke-linecap="round"
       stroke-linejoin="round"
       focusable="false"
@@ -47,7 +51,16 @@ const { id, icon, class: className } = Astro.props;
     >
       <Fragment set:html={SECTION_ICONS[icon]} />
     </svg>
-  </span>
+    {kicker}
+  </p>
 
-  <h2 id={id} class="section-title"><slot /></h2>
+  <h2 id={id} class="section-title mt-5"><slot /></h2>
+
+  {
+    hasLead && (
+      <p class="text-secondary mt-5 max-w-2xl text-lg text-balance">
+        <slot name="lead" />
+      </p>
+    )
+  }
 </div>

@@ -1,26 +1,35 @@
 ---
 import { SITE, NAV } from "../consts";
+import { UI_ICONS } from "./icons";
 
 /**
- * Fixed header, ported from the template: initial + full stop as the mark, a
- * light nav on the right, a hamburger below md. The nav points at in-page
- * anchors rather than routes, because this is one page.
+ * Fixed header: initial + full stop as the mark, nav on the right, a hamburger
+ * below md, and the theme toggle.
+ *
+ * The bar stays dark in both themes. That inversion against a near-white page
+ * is the one thing that reads as Nichol at a glance, and it is why the header
+ * uses its own three tokens rather than `foreground` / `background` — those
+ * swap under dark mode and the bar must not.
  */
 const mark = `${SITE.name.charAt(0).toUpperCase()}.`;
 ---
 
-<header class="fixed top-0 z-50 w-full bg-background/85 backdrop-blur">
-  <div class="container mx-auto flex items-center justify-between p-6">
-    <a href="#top" class="heading text-4xl" aria-label={`${SITE.name} — top of page`}>
+<header class="bg-header text-header-ink fixed top-0 z-50 w-full">
+  <div class="container mx-auto flex items-center justify-between gap-4 p-6">
+    <a
+      href="#top"
+      class="heading text-3xl"
+      aria-label={`${SITE.name} — top of page`}
+    >
       {mark}
     </a>
 
-    <nav class="hidden space-x-4 text-secondary md:block" aria-label="Sections">
+    <nav class="hidden items-center gap-6 md:flex" aria-label="Sections">
       {
         NAV.map((link) => (
           <a
             href={link.href}
-            class="pb-0.5 hover:border-b-2 hover:border-dashed hover:border-secondary"
+            class="text-header-muted hover:text-header-ink text-sm font-bold transition"
           >
             {link.name}
           </a>
@@ -28,26 +37,68 @@ const mark = `${SITE.name.charAt(0).toUpperCase()}.`;
       }
     </nav>
 
-    <button
-      id="menu-toggle"
-      class="hamburger flex focus:outline-none md:hidden"
-      aria-label="Toggle navigation"
-      aria-expanded="false"
-      aria-controls="menu-mobile"
-    >
-      <span class="hamburger-line"></span>
-      <span class="hamburger-line"></span>
-      <span class="hamburger-line"></span>
-    </button>
+    <div class="flex items-center gap-3">
+      {/*
+        Icon-only, so the accessible name comes entirely from `aria-label` —
+        there is no visible text for WCAG 2.5.3 to have to contain. Both icons
+        are rendered and CSS shows the one for the *current* theme; doing it in
+        CSS rather than JS means the right icon is there on the first paint.
+      */}
+      <button
+        id="theme-toggle"
+        type="button"
+        class="theme-toggle border-header-muted/30 text-header-ink hover:border-header-ink grid size-10 shrink-0 place-items-center rounded-full border transition"
+        aria-label="Switch to dark theme"
+      >
+        <svg
+          class="theme-icon-sun size-5"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.75"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          focusable="false"
+          aria-hidden="true"
+        >
+          <Fragment set:html={UI_ICONS.sun} />
+        </svg>
+        <svg
+          class="theme-icon-moon size-5"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.75"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          focusable="false"
+          aria-hidden="true"
+        >
+          <Fragment set:html={UI_ICONS.moon} />
+        </svg>
+      </button>
+
+      <button
+        id="menu-toggle"
+        class="hamburger flex focus:outline-none md:hidden"
+        aria-label="Toggle navigation"
+        aria-expanded="false"
+        aria-controls="menu-mobile"
+      >
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+      </button>
+    </div>
   </div>
 
-  <div id="menu-mobile" class="hidden bg-background p-6 md:hidden">
-    <nav class="flex flex-col gap-4 text-2xl text-secondary" aria-label="Sections">
+  <div id="menu-mobile" class="bg-header hidden p-6 md:hidden">
+    <nav class="flex flex-col gap-4 text-xl" aria-label="Sections">
       {
         NAV.map((link) => (
           <a
             href={link.href}
-            class="w-max pb-0.5 hover:border-b-2 hover:border-dashed hover:border-secondary"
+            class="text-header-muted hover:text-header-ink w-max font-bold transition"
             data-mobile-link
           >
             {link.name}
@@ -59,6 +110,37 @@ const mark = `${SITE.name.charAt(0).toUpperCase()}.`;
 </header>
 
 <style>
+  /*
+    Both icons ship; CSS picks. The moon shows on a light page (press it to go
+    dark) and the sun on a dark one. Stacking them in one grid cell keeps the
+    button from resizing when it flips.
+  */
+  .theme-toggle > svg {
+    grid-area: 1 / 1;
+  }
+
+  .theme-icon-sun {
+    display: none;
+  }
+
+  :root[data-theme="dark"] .theme-icon-sun {
+    display: block;
+  }
+
+  :root[data-theme="dark"] .theme-icon-moon {
+    display: none;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .theme-icon-sun {
+      display: block;
+    }
+
+    :root:not([data-theme="light"]) .theme-icon-moon {
+      display: none;
+    }
+  }
+
   .hamburger {
     position: relative;
     width: 24px;
@@ -74,7 +156,7 @@ const mark = `${SITE.name.charAt(0).toUpperCase()}.`;
     left: 0;
     width: 24px;
     height: 3px;
-    background-color: var(--color-foreground);
+    background-color: var(--color-header-ink);
     transition: all 0.3s ease;
   }
 
@@ -125,4 +207,65 @@ const mark = `${SITE.name.charAt(0).toUpperCase()}.`;
   for (const link of document.querySelectorAll("[data-mobile-link]")) {
     link.addEventListener("click", () => setOpen(false));
   }
+
+  /* Theme ------------------------------------------------------------------ */
+
+  const root = document.documentElement;
+  const themeButton = document.getElementById("theme-toggle");
+
+  /**
+   * What the page is showing right now. With no explicit choice stored there is
+   * no attribute, and the `prefers-color-scheme` block in global.css is what is
+   * driving the page — so the OS is the source of truth in that case.
+   */
+  function currentTheme(): "light" | "dark" {
+    const chosen = root.dataset.theme;
+    if (chosen === "light" || chosen === "dark") return chosen;
+    return window.matchMedia("(prefers-color-scheme: dark)").matches
+      ? "dark"
+      : "light";
+  }
+
+  function describe() {
+    const next = currentTheme() === "dark" ? "light" : "dark";
+    themeButton?.setAttribute("aria-label", `Switch to ${next} theme`);
+  }
+
+  themeButton?.addEventListener("click", () => {
+    const next = currentTheme() === "dark" ? "light" : "dark";
+
+    /*
+      Suppress transitions across the flip. An element carrying `transition`
+      whose colour changes while it is off-screen stalls at its start value and
+      never resolves, so without this every link and button below the fold kept
+      the old palette until a reload.
+    */
+    root.setAttribute("data-theme-switching", "");
+    root.dataset.theme = next;
+
+    try {
+      localStorage.setItem("theme", next);
+    } catch {
+      /* Private mode. The choice just will not survive the tab. */
+    }
+
+    describe();
+
+    /*
+      Two frames is enough for the new colours to be painted without a
+      transition. The timeout is a floor, not a duplicate: rAF is throttled in
+      a background tab, and leaving this attribute set would disable every
+      hover transition on the page until the visitor came back.
+    */
+    const restore = () => root.removeAttribute("data-theme-switching");
+    requestAnimationFrame(() => requestAnimationFrame(restore));
+    setTimeout(restore, 120);
+  });
+
+  // Follow the OS while the visitor has not chosen one themselves.
+  window
+    .matchMedia("(prefers-color-scheme: dark)")
+    .addEventListener("change", describe);
+
+  describe();
 </script>

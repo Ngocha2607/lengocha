@@ -111,13 +111,14 @@ const MILESTONES = ROLES.map((role, index) => ({ role, index })).reverse();
   class="container mx-auto mb-28 scroll-mt-24 p-6"
   aria-labelledby="career-title"
 >
-  <SectionHeading id="career-title" icon="briefcase">Career</SectionHeading>
-
-  <p class="mt-8 mb-12 max-w-3xl text-lg text-secondary md:text-2xl">
-    Five years, four roles and a degree — intern, frontend developer, fullstack
-    developer, now tech lead. The rail is the short version; pick a milestone to
-    jump to what the role actually involved.
-  </p>
+  <SectionHeading id="career-title" icon="briefcase" kicker="Experience">
+    Career
+    <Fragment slot="lead">
+      Five years, four roles and a degree — intern, frontend developer,
+      fullstack developer, now tech lead. The rail is the short version; pick a
+      milestone to jump to what the role actually involved.
+    </Fragment>
+  </SectionHeading>
 
   <ol
     class="career-rail panel p-6 md:p-8"
@@ -132,7 +133,7 @@ const MILESTONES = ROLES.map((role, index) => ({ role, index })).reverse();
             <span class="label text-secondary normal-case tabular-nums">
               {role.period}
             </span>
-            <span class="heading text-base uppercase group-hover:underline md:text-lg">
+            <span class="heading text-base group-hover:underline md:text-lg">
               {role.shortOrg ?? role.org}
             </span>
             <span class="text-sm text-secondary">
@@ -156,7 +157,7 @@ const MILESTONES = ROLES.map((role, index) => ({ role, index })).reverse();
           <article class="panel p-6 md:p-8">
             <div class="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start sm:gap-6">
               <div>
-                <h3 class="heading text-2xl uppercase md:text-3xl">{role.title}</h3>
+                <h3 class="heading text-xl md:text-2xl">{role.title}</h3>
 
                 <p class="mt-1 text-lg text-secondary">
                   {role.url ? (

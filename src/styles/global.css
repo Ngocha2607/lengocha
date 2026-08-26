@@ -2,30 +2,138 @@
 @plugin "@tailwindcss/typography";
 
 /*
-  Design system ported from heshify/monolume (MIT): mono display type, a
-  near-white ground, an acid-green accent used as a surface, and dashed hairline
-  outlines instead of solid borders. Token names follow the template's so the
-  markup reads the same way its components do.
+  Design system re-skinned after the Nichol portfolio template: a violet accent,
+  a warm yellow secondary accent, a near-white ground, soft rounded cards with
+  hairline borders instead of dashed outlines, and sentence-case headings at a
+  readable size rather than the enormous uppercase mono the previous pass used.
+
+  Every colour below was solved, not eyeballed. The targets are in
+  AGENTS.md; the short version is that `primary` is dark enough for white text
+  to clear 4.5:1 on it, `primary-ink` is dark enough to be readable *as* text on
+  the page, and `accent` only ever carries black.
 */
+
+/*
+  Dark mode is driven by a `data-theme` attribute on <html>, set before first
+  paint by an inline script in Layout.astro. Tailwind v4 compiles utilities to
+  `var(--color-*)` references and declares the tokens at `:root`, so overriding
+  the variables under a more specific selector re-themes the entire page — there
+  is not a single `dark:` variant in the markup. The variant below exists only
+  for the handful of cases where a rule cannot be expressed as a token swap.
+*/
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/*
+  Declared here rather than in `@theme` on purpose. A `--shadow-*` theme key
+  makes Tailwind resolve `shadow-panel` to a literal at build time, and a
+  literal cannot be re-themed; as a plain custom property the dark blocks below
+  can drop it the same way they swap a colour. Shadow on a dark ground reads as
+  smudge rather than lift, so there the border carries the edge alone.
+*/
+:root {
+  --shadow-panel:
+    0 1px 2px rgb(13 18 32 / 4%),
+    0 8px 24px -12px rgb(13 18 32 / 10%);
+}
+
 @theme {
-  --color-primary: oklch(86.89% 0.29 142.02); /* #27FF0B */
-  --color-background: oklch(99.7% 0 0); /* #fefefe */
-  --color-foreground: oklch(0% 0 0); /* #000000 */
-  --color-secondary: oklch(38% 0 0); /* #434343 */
+  /* Violet. A surface colour first: white text on it measures 4.60:1. */
+  --color-primary: oklch(59.04% 0.2351 299.68); /* #964BF1 */
+  /* The same violet, darkened until it is legible as text: 5.50:1 on the page. */
+  --color-primary-ink: oklch(53.69% 0.2351 299.68); /* #8637DE */
+  /* Yellow is a surface only. Black on it is 13.17:1; white is 1.59:1. */
+  --color-accent: oklch(85.04% 0.1687 85.71); /* #FFC41F */
+
+  --color-background: oklch(98.16% 0.0017 247.84); /* #F8F9FA */
+  --color-surface: oklch(100% 0 0); /* #FFFFFF — cards sit above the ground */
+  --color-foreground: oklch(18.48% 0.0299 268.42); /* #0D1220 */
+  --color-secondary: oklch(48.75% 0.0418 269.36); /* #565F78 — 6.03:1 */
+  --color-border: oklch(89.05% 0.0147 264.49); /* #D6DBE5 */
+
+  /*
+    The header keeps its dark bar in both themes — that inversion is the one
+    thing that reads as Nichol at a glance — so these three do not appear in
+    the dark blocks below. Ink measures 16.85:1 on the bar, muted 6.96:1.
+  */
+  --color-header: oklch(18.48% 0.0299 268.42); /* #0D1220 */
+  --color-header-ink: oklch(95.98% 0.0091 258.34); /* #EEF2F8 */
+  --color-header-muted: oklch(72.72% 0.0388 265.05); /* #9BA7C0 */
 
   /*
     Data colours for the performance strips — the one place on the page where
-    colour carries meaning. Darker than the usual teal/rose so each clears
-    4.5:1 on the background, and checked against the muted grey too.
+    colour carries meaning. Each clears 4.5:1 on both the ground and a card.
   */
-  --color-pass: oklch(45% 0.13 150);
+  --color-pass: oklch(45.18% 0.1273 149.05);
   --color-fail: oklch(48% 0.19 25);
-  --color-warn: oklch(46% 0.11 70);
+  --color-warn: oklch(46.1% 0.1025 66.11);
 
   --font-plex: var(--font-mono-face), ui-monospace, SFMono-Regular, Menlo,
     monospace;
-  --font-geist: var(--font-sans-face), ui-sans-serif, system-ui, "Segoe UI",
+  --font-jakarta: var(--font-sans-face), ui-sans-serif, system-ui, "Segoe UI",
     sans-serif;
+}
+
+/*
+  The dark palette, declared twice on purpose. The media query serves a visitor
+  who has never touched the toggle — including one with JavaScript off, where no
+  attribute is ever written — while the attribute rule serves an explicit
+  choice and must win over the system preference in both directions. Guarding
+  the media query with `:not([data-theme="light"])` is what lets someone force
+  light on a dark OS.
+*/
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+
+    --color-primary: oklch(59.04% 0.2351 299.68);
+    --color-primary-ink: oklch(65.88% 0.2205 302.1); /* #AD66FF — 5.50:1 */
+    --color-background: oklch(16.94% 0.0288 267.5); /* #0B1020 */
+    --color-surface: oklch(23.36% 0.0328 268.5); /* #151B2E */
+    --color-foreground: oklch(95.98% 0.0091 258.34); /* #EEF2F8 */
+    --color-secondary: oklch(72.72% 0.0388 265.05); /* #9BA7C0 — 7.83:1 */
+    --color-border: oklch(29.62% 0.0418 268.47); /* #242C42 */
+
+    --color-pass: oklch(59.61% 0.13 150);
+    --color-fail: oklch(63.3% 0.19 25);
+    --color-warn: oklch(61.57% 0.11 70);
+
+    --shadow-panel: none;
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --color-primary: oklch(59.04% 0.2351 299.68);
+  --color-primary-ink: oklch(65.88% 0.2205 302.1);
+  --color-background: oklch(16.94% 0.0288 267.5);
+  --color-surface: oklch(23.36% 0.0328 268.5);
+  --color-foreground: oklch(95.98% 0.0091 258.34);
+  --color-secondary: oklch(72.72% 0.0388 265.05);
+  --color-border: oklch(29.62% 0.0418 268.47);
+
+  --color-pass: oklch(59.61% 0.13 150);
+  --color-fail: oklch(63.3% 0.19 25);
+  --color-warn: oklch(61.57% 0.11 70);
+
+  --shadow-panel: none;
+}
+
+/*
+  Theme flips must not run through a transition.
+
+  Measured: an element carrying `transition` whose colour changes while it is
+  outside the viewport stalls at its start value and never resolves — scrolling
+  to it afterwards does not repaint it. Toggling to dark at the top of the page
+  therefore left every `.link` and `.btn` below the fold still wearing the light
+  palette, permanently. Suppressing transitions for the duration of the flip
+  removes the cause; the toggle clears the attribute on the next frame, so
+  hover transitions are unaffected.
+*/
+:root[data-theme-switching] *,
+:root[data-theme-switching] *::before,
+:root[data-theme-switching] *::after {
+  transition: none !important;
 }
 
 @layer base {
@@ -34,8 +142,9 @@
   }
 
   body {
-    @apply bg-background text-foreground font-geist antialiased;
-    @apply selection:bg-primary selection:text-foreground;
+    @apply bg-background text-foreground font-jakarta antialiased;
+    /* Yellow, not violet: black on yellow is 13:1, black on violet is 4.79:1. */
+    @apply selection:bg-accent selection:text-foreground;
   }
 
   :focus-visible {
@@ -48,58 +157,73 @@
   lets `@apply` reach real utilities, so `.section-title { @apply heading }`
   fails with "Cannot apply unknown utility class" when `heading` is a plain
   component class. `@utility` makes them first-class, so they compose.
+
+  The names survived the re-skin even where the styling did not. `panel` is
+  still a panel whether its outline is dashed or hairline, and renaming it would
+  have meant touching 13 call sites for no gain. Only the old `rule-dashed` was
+  renamed — to `rule` — because that name asserted something no longer true.
 */
 
 /* The display face. Every heading on the page uses it. */
 @utility heading {
-  @apply font-plex font-bold tracking-[-0.02em];
+  @apply font-jakarta font-bold tracking-[-0.02em];
 }
 
 /*
-  Section heading. The template sets these enormous and uppercase; the size is
-  the section divider, which is why there are almost no rules on the page.
+  Section heading. Nichol sets these at a readable size in sentence case and
+  lets the kicker pill above do the dividing, which is why the page can carry
+  eleven sections without feeling like eleven posters.
 */
 @utility section-title {
-  @apply heading text-5xl uppercase md:text-8xl lg:text-9xl;
+  @apply heading text-3xl md:text-4xl lg:text-5xl;
 }
 
-/* Primary action: acid fill, inverting to a dashed outline on hover. */
+/*
+  The eyebrow above each section title: a tinted violet pill holding an icon and
+  a short label. `primary/10` keeps the fill light enough that `primary-ink`
+  reads on it in both themes.
+*/
+@utility kicker {
+  @apply bg-primary/10 text-primary-ink inline-flex items-center gap-2 rounded-full px-4 py-1.5;
+}
+
 @utility btn {
-  @apply flex cursor-pointer items-center justify-center rounded-2xl px-6 py-3 transition sm:px-10 sm:py-4;
-  @apply hover:bg-background hover:text-foreground hover:outline hover:outline-dashed hover:outline-secondary;
+  @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl px-6 py-3.5 font-bold transition sm:px-8;
 }
 
+/* White on `primary` is 4.60:1 — above AA, and the label is bold. */
 @utility btn-primary {
-  @apply btn bg-primary;
+  @apply btn bg-primary hover:bg-primary-ink text-white;
 }
 
 @utility btn-invert {
-  @apply btn bg-foreground text-background;
+  @apply btn border-border bg-surface text-foreground hover:border-primary hover:text-primary-ink border;
 }
 
-/* Dashed pill, used for skills and tags. */
+/* Rounded chip, used for skills, tags and dates. */
 @utility pill {
-  @apply outline-secondary inline-flex items-center justify-center gap-2 rounded-4xl px-5 py-2.5 outline-1 outline-dashed;
+  @apply border-border bg-surface inline-flex items-center justify-center gap-2 rounded-full border px-5 py-2.5;
 }
 
-/* Dashed card surface. The page's only container treatment. */
+/* Card surface. The page's only container treatment. */
 @utility panel {
-  @apply border-secondary rounded-3xl border border-dashed;
+  @apply border-border bg-surface rounded-2xl border;
+  box-shadow: var(--shadow-panel);
 }
 
 /* Row separator, matching the project and post lists. */
-@utility rule-dashed {
-  @apply border-b-secondary border-b border-dashed;
+@utility rule {
+  @apply border-b-border border-b;
 }
 
 @utility link {
-  @apply hover:text-secondary underline transition;
+  @apply hover:text-primary-ink underline underline-offset-4 transition;
 }
 
 /*
-  Small structural label. The template has no equivalent because it has no data
-  to label; the performance strips do, and an acronym needs to read as a caption
-  rather than as body copy.
+  Small structural label. Mono survived the re-skin in exactly one role: the
+  caption over a number. An acronym or a unit needs to read as data rather than
+  as body copy, and the proportional face cannot do that.
 */
 @utility label {
   @apply font-plex text-xs font-bold tracking-[0.12em] uppercase;
@@ -107,11 +231,7 @@
 
 /*
   Career, in two tiers: a rail you can scan in three seconds, then the detail
-  cards. Ported in structure from a portfolio whose experience page reads well
-  — overview first, reading copy second — and re-skinned here, because the
-  original is purple glassmorphism and this page is hairlines and acid.
-
-  Both connectors are drawn per item rather than as one line down the
+  cards. Both connectors are drawn per item rather than as one line down the
   container, so each run stops exactly at the next marker instead of guessing
   an inset from the last card's height. `:last-child` has nowhere to run to.
 
@@ -144,7 +264,7 @@
     left: calc(var(--career-marker) / 2);
     top: var(--career-marker);
     bottom: calc(-1 * var(--career-gap));
-    border-left: 1px dashed var(--color-secondary);
+    border-left: 1px solid var(--color-border);
   }
 
   &:last-child::after {
@@ -158,7 +278,7 @@
       top: calc(var(--career-marker) / 2);
       bottom: auto;
       border-left: 0;
-      border-top: 1px dashed var(--color-secondary);
+      border-top: 1px solid var(--color-border);
     }
   }
 }
@@ -183,7 +303,7 @@
     left: calc(var(--career-marker) / 2);
     top: calc(var(--career-marker-top) + var(--career-marker));
     bottom: calc(-1 * (var(--career-gap) + var(--career-marker-top)));
-    border-left: 1px dashed var(--color-secondary);
+    border-left: 1px solid var(--color-border);
   }
 
   &:last-child::after {
@@ -195,9 +315,9 @@
   }
 }
 
-/* The flat marker both tiers sit on. Acid fill, black ring, no gradient. */
+/* The marker both tiers sit on. Violet fill, ring in the page ink. */
 @utility career-marker {
-  @apply relative block shrink-0 rounded-full border border-foreground bg-primary;
+  @apply border-foreground bg-primary relative block shrink-0 rounded-full border;
   width: var(--career-marker);
   height: var(--career-marker);
 }
@@ -205,33 +325,15 @@
 /* Long-form article body on /writing/[slug]. */
 .prose-mono {
   @apply prose prose-neutral max-w-none;
-  @apply prose-headings:font-plex prose-headings:text-foreground prose-headings:tracking-[-0.02em];
+  @apply prose-headings:font-jakarta prose-headings:text-foreground prose-headings:tracking-[-0.02em];
   @apply prose-p:text-secondary prose-li:text-secondary;
   @apply prose-strong:text-foreground prose-strong:font-bold;
-  @apply prose-a:text-foreground prose-a:underline-offset-4;
+  @apply prose-a:text-primary-ink prose-a:underline-offset-4;
   @apply prose-code:font-plex prose-code:text-foreground prose-code:before:content-none prose-code:after:content-none;
-  @apply prose-pre:border prose-pre:border-dashed prose-pre:border-secondary prose-pre:bg-background prose-pre:text-foreground prose-pre:rounded-3xl;
-  @apply prose-blockquote:border-l-2 prose-blockquote:border-dashed prose-blockquote:border-secondary prose-blockquote:text-secondary prose-blockquote:not-italic;
+  @apply prose-pre:border prose-pre:border-border prose-pre:bg-surface prose-pre:text-foreground prose-pre:rounded-2xl;
+  @apply prose-blockquote:border-l-2 prose-blockquote:border-primary prose-blockquote:text-secondary prose-blockquote:not-italic;
   @apply prose-th:text-foreground prose-th:font-plex;
-  @apply prose-img:rounded-3xl;
-}
-
-/*
-  The marquee bands over Work and Posts. Pure CSS, and the global
-  reduced-motion block below parks it — there is no animation library on this
-  site, and a page that argues about bundle size is not going to add one.
-*/
-@keyframes marquee-scroll {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-50%);
-  }
-}
-
-.animate-marquee {
-  animation: marquee-scroll 20s linear infinite;
+  @apply prose-img:rounded-2xl;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -242,10 +344,5 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
-  }
-
-  .animate-marquee {
-    animation: none !important;
-    transform: none !important;
   }
 }

@@ -30,6 +30,32 @@ const ogImage = new URL("/seo/og.png", SITE.url).href;
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+
+    {/*
+      Theme, applied before the first paint so the page never flashes the wrong
+      one. `is:inline` keeps Astro from bundling it, so this costs no request
+      and the site still ships exactly one external script.
+
+      The attribute is written only when someone has actually chosen. With no
+      stored choice there is no attribute, and the `prefers-color-scheme` block
+      in global.css drives the page instead — which also means the theme keeps
+      following the OS live, and that a visitor with JavaScript off still gets
+      a dark page on a dark system.
+    */}
+    <script is:inline>
+      (function () {
+        try {
+          var stored = localStorage.getItem("theme");
+          if (stored === "dark" || stored === "light") {
+            document.documentElement.dataset.theme = stored;
+          }
+        } catch (error) {
+          /* Private mode, or storage disabled. The media query still works. */
+        }
+      })();
+    </script>
+
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonicalUrl} />
@@ -75,7 +101,7 @@ const ogImage = new URL("/seo/og.png", SITE.url).href;
   <body class="leading-relaxed">
     <a
       href="#content"
-      class="label sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:rounded-2xl focus:bg-primary focus:px-4 focus:py-2"
+      class="label sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:rounded-2xl focus:bg-accent focus:text-black focus:px-4 focus:py-2"
     >
       Skip to content
     </a>

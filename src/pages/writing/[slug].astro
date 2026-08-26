@@ -43,15 +43,15 @@ function formatDate(iso: string): string {
       canonical={`/writing/${post.slug}`}
       ogType="article"
     >
-      <div class="mx-auto max-w-3xl border-x border-dashed border-secondary">
-        <div class="border-b border-dashed border-secondary px-4 py-4 sm:px-6">
-          <a class="label hover:bg-primary focus-visible:bg-primary" href="/#writing">
+      <div class="mx-auto max-w-3xl border-x border-border">
+        <div class="border-b border-border px-4 py-4 sm:px-6">
+          <a class="label hover:bg-accent hover:text-black focus-visible:bg-accent focus-visible:text-black" href="/#writing">
             ← Writing
           </a>
         </div>
 
         <article class="px-4 py-10 sm:px-6 md:py-14">
-          <header class="mb-10 border-b border-dashed border-secondary pb-6">
+          <header class="mb-10 border-b border-border pb-6">
             <h1 class="text-3xl leading-[1.15] text-balance sm:text-4xl">
               {post.title}
             </h1>

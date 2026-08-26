@@ -1,5 +1,5 @@
 ---
-import Marquee from "./Marquee.astro";
+import SectionHeading from "./SectionHeading.astro";
 import { getPublishedPosts, type PostMeta } from "../lib/notion";
 
 /**
@@ -58,24 +58,25 @@ const articles = posts.length > 0 ? posts.map(toCard) : FALLBACK;
   class="container mx-auto mb-28 scroll-mt-24 px-6"
   aria-labelledby="writing-title"
 >
-  <Marquee word="posts" id="writing-title" />
-
-  <p class="mb-12 max-w-3xl text-lg text-secondary md:text-2xl">
-    Write-ups I publish for my team, and for anyone reviewing me. They cover the
-    reasoning behind a decision rather than just the result — the closest thing
-    to seeing how I work before you talk to me.
-  </p>
+  <SectionHeading id="writing-title" icon="pen" kicker="Writing">
+    Posts
+    <Fragment slot="lead">
+      Write-ups I publish for my team, and for anyone reviewing me. They cover
+      the reasoning behind a decision rather than just the result — the closest
+      thing to seeing how I work before you talk to me.
+    </Fragment>
+  </SectionHeading>
 
   {
     articles.map((article) => (
       <a
-        class="group relative mb-8 flex flex-col items-center justify-between gap-8 pb-8 md:flex-row md:gap-12 rule-dashed cursor-pointer"
+        class="group relative mb-8 flex flex-col items-center justify-between gap-8 pb-8 md:flex-row md:gap-12 rule cursor-pointer"
         href={article.href}
         target={article.internal ? undefined : "_blank"}
         rel={article.internal ? undefined : "noreferrer noopener"}
       >
         <div
-          class="grid aspect-[610/400] w-full place-items-center overflow-hidden rounded-3xl border border-dashed border-secondary bg-primary/10 p-8 transition group-hover:bg-primary/25 md:max-w-[610px]"
+          class="grid aspect-[610/400] w-full place-items-center overflow-hidden rounded-3xl border border-border bg-primary/10 p-8 transition group-hover:bg-primary/25 md:max-w-[610px]"
           aria-hidden="true"
         >
           <span class="heading text-center text-xl text-secondary md:text-3xl">
@@ -85,7 +86,7 @@ const articles = posts.length > 0 ? posts.map(toCard) : FALLBACK;
 
         <div class="space-y-4 text-center md:text-left">
           <p class="text-sm tabular-nums text-secondary">{article.year}</p>
-          <h3 class="heading max-w-xl text-2xl uppercase md:text-4xl">
+          <h3 class="heading max-w-xl text-2xl md:text-4xl">
             {article.title}
           </h3>
           {article.description && (
