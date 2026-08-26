@@ -275,7 +275,28 @@ src/
 public/
   seo/            # favicon.svg, apple-touch-icon.png, og.png, webmanifest
   Le-Ngoc-Ha-Senior-Frontend-Developer.pdf
+scripts/
+  og.svg          # source for the OG card — not served, it lives outside public/
+  build-og.mjs    # rasterises it with sharp
 ```
+
+### The share assets are generated, not hand-drawn
+
+`favicon.svg` is the only one written by hand: a violet rounded square with a
+white glyph. The acid-green version had a black inner stroke that turned to
+mush at 16px, so the stroke is gone and the letterform grew into the space.
+
+`apple-touch-icon.png` and `og.png` are rendered from SVG with `sharp`, which
+is already a dependency because Astro uses it. Regenerate the card with
+`node scripts/build-og.mjs` after editing `scripts/og.svg`; the touch icon is
+`sharp('public/seo/favicon.svg', { density: 400 }).resize(180, 180)`.
+
+Two things the OG card deliberately does not do: it does not use Plus Jakarta
+Sans, because sharp renders SVG text with system fonts and the webfont is not
+installed system-wide (Segoe UI stands in and covers the Vietnamese
+diacritics, which is the only hard requirement); and it does not print the
+site's URL, because `SITE.url` defaults to `le-ngoc-ha.vercel.app` while the CV
+says `lengocha.vercel.app` and nobody has reconciled the two.
 
 ## Design system
 
@@ -457,7 +478,17 @@ Reconciled against the CV once already, so do not re-loosen these:
   the detail card. Do not widen `periodExact` to whole years.
 - The CV says nearly five years, not five.
 - The CV says the Tweet World mobile Lighthouse was held **at** 85, not above
-  it. This matters most in the decision log, which states
+  it.
+- **The CV is trimmed to two pages, so absence from it is not evidence.** The
+  FPT Software internship (2021) is on the page and not in the CV — the owner
+  cut it for length and confirmed the page should keep it. Do not delete it as
+  unsourced.
+- The five Tweet World platforms are **B2B**. An earlier pass wrote "B2B/B2C"
+  in four places and gave the storefront card a "both the agent and consumer
+  side" description; none of that is in the CV. Confirmed B2B only.
+- The CV states the traffic figure twice and disagrees with itself — "1.000
+  lượt truy cập" (visits) in the experience section, "~1.000 users" under
+  Selected Projects. The owner confirmed **users**. This matters most in the decision log, which states
 alternatives, costs and reversals — exactly what a reviewer will probe.
 
 Notably NOT true as of the last update, so do not write it: server-side data
