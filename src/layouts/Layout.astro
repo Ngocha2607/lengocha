@@ -1,4 +1,5 @@
 ---
+import Analytics from "@vercel/analytics/astro";
 import { Font } from "astro:assets";
 import { SITE, PERSON_SCHEMA } from "../consts";
 import "../styles/global.css";
@@ -34,8 +35,9 @@ const ogImage = new URL("/seo/og.png", SITE.url).href;
 
     {/*
       Theme, applied before the first paint so the page never flashes the wrong
-      one. `is:inline` keeps Astro from bundling it, so this costs no request —
-      the site's own JavaScript is still a single file.
+      one. `is:inline` keeps Astro from bundling it, so this costs no request
+      at all — unlike the analytics component at the end of `<body>`, which
+      Astro does bundle.
 
       The attribute is written only when someone has actually chosen. With no
       stored choice there is no attribute, and the `prefers-color-scheme` block
@@ -108,33 +110,22 @@ const ogImage = new URL("/seo/og.png", SITE.url).href;
     <slot />
 
     {/*
-      Cloudflare Web Analytics.
+      Vercel Web Analytics.
 
-      `is:inline` is required: without it Astro treats this as a script to
-      process and would try to bundle a third-party URL. With it the tag is
-      emitted verbatim.
+      Unlike a third-party beacon this is not `is:inline`: the component ships a
+      normal Astro `<script>`, so it is bundled with the site's own JavaScript,
+      and at runtime it pulls `/_vercel/insights/script.js` — a first-party path
+      on this domain. No extra origin to resolve, connect and negotiate TLS
+      with, which is most of what a third-party tag actually costs.
 
-      Gated on a production build so `npm run dev` does not report traffic. Note
-      that `LOCAL_PROD=1` builds are production builds and will beacon — the
-      hostname will not match the one configured in Cloudflare, so those hits
-      are not attributed, but that is why they are harmless rather than absent.
+      Deliberately not gated on a production build, unlike the Cloudflare tag it
+      replaces: `inject()` detects the environment itself and, off Vercel, loads
+      a debug script and logs to the console instead of reporting. A `LOCAL_PROD`
+      server will 404 on that path, which is expected and harmless.
 
-      The token is public by design; it ships in the page source of every site
-      using this product and is not a secret.
-
-      Cookieless, so it needs no consent banner. It is a `type="module"` script,
-      which is deferred by definition, and it sits after the content so it
-      cannot compete with first paint.
+      Do not also set the adapter's `webAnalytics` option — that injects a tag of
+      its own and page views would be counted twice.
     */}
-    {
-      import.meta.env.PROD && (
-        <script
-          is:inline
-          type="module"
-          src="https://static.cloudflareinsights.com/beacon.min.js"
-          data-cf-beacon='{"token": "83f92d6ddd0f41d68edff0bde44b2173"}'
-        />
-      )
-    }
+    <Analytics />
   </body>
 </html>

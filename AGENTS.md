@@ -69,14 +69,31 @@ JavaScript is one file at 9,648 bytes**, LCP 214ms, CLS 0.00, Lighthouse
 a11y/best-practices/SEO/agentic 100 with 0 failed audits, desktop and mobile,
 and 0 contrast failures across every text-bearing element in both themes.
 
-**One third-party script now loads alongside it**, and it is not small:
-Cloudflare Web Analytics' `beacon.min.js` is 28,467 bytes uncompressed and
-9,509 over the wire, so it roughly doubles the page's JavaScript and adds a
-second origin to connect to. That was an explicit choice by the site's owner,
-not an oversight — but any claim written here about "one external JS file" has
-to say *the site's own*, because two files now load. If the weight ever matters
-more than the tool, Vercel's own analytics is about a tenth of the size and
-first-party, since the site is deployed there.
+### Analytics: Vercel, not Cloudflare
+
+Cloudflare Web Analytics was tried and removed. Its `beacon.min.js` is 28,467
+bytes uncompressed and 9,509 over the wire from `static.cloudflareinsights.com`
+— it roughly doubled the page's JavaScript and added a second origin to resolve,
+connect and negotiate TLS with, which is most of what a third-party tag actually
+costs.
+
+`@vercel/analytics/astro` replaces it and is a different shape entirely:
+
+- Its component ships a normal Astro `<script>`, not `is:inline`, so Astro
+  bundles it — and being small, **inlines it into the HTML**: 2,905 bytes of
+  markup, no new file, no new request. The external-JS count stays at one.
+- At runtime it loads `/_vercel/insights/script.js`, **1,300 bytes and
+  first-party**. So the browser does fetch a second script on Vercel, but from
+  this origin — no extra connection.
+- Off Vercel it loads a debug script from `va.vercel-scripts.com` and logs to
+  the console instead of reporting, which is why the component is *not* gated on
+  `import.meta.env.PROD` the way the Cloudflare tag had to be. A `LOCAL_PROD`
+  server 404s on the first-party path; that is expected.
+- It renders a `<vercel-analytics>` custom element. Harmless, but do not delete
+  it thinking it is stray markup — it is how the component passes route data in.
+
+**Never set the Vercel adapter's `webAnalytics` option as well.** It injects a
+tag of its own and page views would be counted twice.
 
 ## Tech Stack
 
