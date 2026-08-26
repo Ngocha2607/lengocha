@@ -1,6 +1,7 @@
 ---
 import PerformanceCase from "./PerformanceCase.astro";
 import PipelineTerminal from "./PipelineTerminal.astro";
+import SectionHeading from "./SectionHeading.astro";
 
 /**
  * Field data, Vercel Speed Insights, P75 desktop on UAT, taken before the
@@ -45,7 +46,7 @@ const ROOT_CAUSES = [
   class="container mx-auto mb-28 scroll-mt-24 p-6"
   aria-labelledby="performance-title"
 >
-  <h2 id="performance-title" class="section-title">Performance</h2>
+  <SectionHeading id="performance-title" icon="gauge">Performance</SectionHeading>
 
   <p class="mt-8 mb-6 max-w-3xl text-lg text-secondary md:text-2xl">
     A page in SAPP&apos;s learning platform took 15 seconds to open. Without the

@@ -193,9 +193,11 @@ src/
   layouts/        # Layout.astro — head, fonts, JSON-LD, skip link
   components/
     Header.astro          # fixed nav + hamburger
+    SectionHeading.astro          # acid icon tile + section title   NEW
+    icons.ts                      # inline SVG bodies, 24x24 grid    NEW
     Hero.astro
     AboutSection.astro
-    CareerSection.astro           NEW
+    CareerSection.astro           NEW  # rail + timeline
     Marquee.astro                 # the scrolling word band
     ProjectCard.astro             # Work row + cursor circle
     WorkSection.astro
@@ -226,6 +228,15 @@ Tokens live in `@theme` in `src/styles/global.css`, using the template's names:
 - Data colours (`--color-pass` / `--color-fail` / `--color-warn`) are darker
   than the usual teal/rose so they clear 4.5:1 — they are the only place on the
   page where colour carries meaning.
+- Section icons are **inline SVG stroke paths on a 24x24 grid**, in
+  `components/icons.ts`, drawn by `SectionHeading.astro` into an acid tile that
+  scales with the heading. Never ship them as raster files: the portfolio this
+  pattern came from serves 9 icons for 4.8MB, one of them a 1295x1214 PNG
+  rendered at 34px, on a page that makes no claims about weight. All six here
+  cost 1,898 bytes of HTML and zero requests.
+- The icon is decoration — `aria-hidden`, `focusable="false"` — and the section
+  keeps its heading as its accessible name. Work and Posts open with the
+  template's marquee instead, so they have no tile.
 - Two font weights per family (400/700) and nothing else. Three weights per
   family fetched 12 faces instead of 9.
 - Only preload the faces that paint above the fold. Preloading every declared
@@ -254,6 +265,18 @@ standfirst under its heading, before any depth.
   Career, and Career used to repeat the decisions; both were trimmed.
 
 ## Interactive pieces
+
+- `CareerSection` — two tiers, no script. A **rail** of milestones
+  (`career-rail`) you can scan in three seconds, each one a native `#career-N`
+  jump link into a **detail card** below (`career-timeline`). The rail runs
+  oldest to newest because a trajectory reads left to right; the cards run
+  newest first because that is what a reviewer wants. Both connectors are drawn
+  per item with `::after` and suppressed on `:last-child`, so each run stops
+  exactly at the next marker rather than guessing an inset from the last card's
+  height — and the marker is `relative` so the absolutely positioned hairline
+  cannot paint across its face. The rail rotates from a horizontal row to a
+  vertical spine at the `md` breakpoint from the same markup. Highlights sit in
+  a two-column grid so four bullets read as two rows instead of a wall.
 
 - `DecisionsSection` — native `<details>` for expansion, so all seven entries
   stay in the DOM, crawlable and keyboard-operable; the only script is the

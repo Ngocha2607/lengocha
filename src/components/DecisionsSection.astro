@@ -1,4 +1,6 @@
 ---
+import SectionHeading from "./SectionHeading.astro";
+
 /**
  * A decision log, written as architecture decision records.
  *
@@ -200,7 +202,7 @@ const FILTERS = [
   class="container mx-auto mb-28 scroll-mt-24 p-6"
   aria-labelledby="decisions-title"
 >
-  <h2 id="decisions-title" class="section-title">Decisions</h2>
+  <SectionHeading id="decisions-title" icon="fork">Decisions</SectionHeading>
 
   <p class="mt-8 max-w-3xl text-lg text-secondary md:text-2xl">
     Seven engineering decisions with the alternatives I weighed and what each one

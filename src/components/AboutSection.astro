@@ -1,4 +1,6 @@
 ---
+import SectionHeading from "./SectionHeading.astro";
+
 /**
  * About, in the template's two-column shape. The template puts a portrait in
  * the left slot; there is no photograph to use here, so the slot carries the
@@ -41,8 +43,12 @@ const skills = [
 ];
 ---
 
-<section id="about" class="container mx-auto mb-28 scroll-mt-24 p-6">
-  <h2 id="about-title" class="section-title">About me</h2>
+<section
+  id="about"
+  class="container mx-auto mb-28 scroll-mt-24 p-6"
+  aria-labelledby="about-title"
+>
+  <SectionHeading id="about-title" icon="person">About me</SectionHeading>
 
   <div class="mt-8 grid grid-cols-1 items-start gap-8 md:grid-cols-2 md:gap-12">
     <div class="panel p-6 md:p-8">

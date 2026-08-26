@@ -1,0 +1,53 @@
+---
+/**
+ * The section header row: an acid tile carrying a line icon, then the title.
+ *
+ * Ported from a portfolio whose section headings pair a 3D icon with a kicker
+ * and a heading. The kicker is dropped — there it repeats the heading word for
+ * word, and this page has a rule against saying the same thing twice — so the
+ * icon does the indexing on its own.
+ *
+ * The tile is acid because the accent is a surface here, never a text colour;
+ * the icon strokes on it are black, the same contract the footer block and the
+ * primary button work under. Both scale with the heading so a 128px title
+ * doesn't sit next to a 40px square.
+ *
+ * The icon is decoration: it is `aria-hidden`, and the accessible name of the
+ * section stays the heading text. Two sections have no heading to decorate —
+ * Work and Posts open with the template's marquee — so they don't use this.
+ */
+import { SECTION_ICONS, type SectionIconName } from "./icons";
+
+interface Props {
+  /** Referenced by the section's `aria-labelledby`. */
+  id: string;
+  icon: SectionIconName;
+  /** Extra classes for the wrapper, for sections that need their own spacing. */
+  class?: string;
+}
+
+const { id, icon, class: className } = Astro.props;
+---
+
+<div class:list={["flex items-center gap-4 md:gap-5 lg:gap-6", className]}>
+  <span
+    class="grid size-11 shrink-0 place-items-center rounded-2xl bg-primary text-foreground md:size-14 md:rounded-3xl lg:size-18"
+    aria-hidden="true"
+  >
+    <svg
+      class="size-6 md:size-7 lg:size-9"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.5"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      focusable="false"
+      aria-hidden="true"
+    >
+      <Fragment set:html={SECTION_ICONS[icon]} />
+    </svg>
+  </span>
+
+  <h2 id={id} class="section-title"><slot /></h2>
+</div>

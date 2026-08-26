@@ -105,6 +105,103 @@
   @apply font-plex text-xs font-bold tracking-[0.12em] uppercase;
 }
 
+/*
+  Career, in two tiers: a rail you can scan in three seconds, then the detail
+  cards. Ported in structure from a portfolio whose experience page reads well
+  — overview first, reading copy second — and re-skinned here, because the
+  original is purple glassmorphism and this page is hairlines and acid.
+
+  Both connectors are drawn per item rather than as one line down the
+  container, so each run stops exactly at the next marker instead of guessing
+  an inset from the last card's height. `:last-child` has nowhere to run to.
+
+  The marker is `relative` on purpose: an absolutely positioned `::after`
+  paints above every non-positioned sibling regardless of source order, so
+  without it the hairline would cross the next marker's face.
+*/
+@utility career-rail {
+  --career-marker: 0.875rem;
+  --career-gap: 1.75rem;
+
+  @apply relative grid;
+  gap: var(--career-gap);
+
+  /* Desktop lays the milestones along one row; the gap moves inside the cell
+     as padding so a connector can run cell-edge to cell-edge. */
+  @media (width >= 48rem) {
+    --career-gap: 0rem;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+  }
+}
+
+@utility career-milestone {
+  @apply relative grid;
+
+  &::after {
+    content: "";
+    position: absolute;
+    left: calc(var(--career-marker) / 2);
+    top: var(--career-marker);
+    bottom: calc(-1 * var(--career-gap));
+    border-left: 1px dashed var(--color-secondary);
+  }
+
+  &:last-child::after {
+    content: none;
+  }
+
+  @media (width >= 48rem) {
+    &::after {
+      left: var(--career-marker);
+      right: calc(-1 * var(--career-marker) / 2);
+      top: calc(var(--career-marker) / 2);
+      bottom: auto;
+      border-left: 0;
+      border-top: 1px dashed var(--color-secondary);
+    }
+  }
+}
+
+@utility career-timeline {
+  --career-marker: 0.875rem;
+  --career-marker-top: 2rem;
+  --career-gap: 1.5rem;
+
+  @apply grid;
+  gap: var(--career-gap);
+}
+
+@utility career-role {
+  @apply relative grid items-start;
+  grid-template-columns: var(--career-marker) minmax(0, 1fr);
+  column-gap: 1.25rem;
+
+  &::after {
+    content: "";
+    position: absolute;
+    left: calc(var(--career-marker) / 2);
+    top: calc(var(--career-marker-top) + var(--career-marker));
+    bottom: calc(-1 * (var(--career-gap) + var(--career-marker-top)));
+    border-left: 1px dashed var(--color-secondary);
+  }
+
+  &:last-child::after {
+    content: none;
+  }
+
+  @media (width >= 48rem) {
+    column-gap: 1.5rem;
+  }
+}
+
+/* The flat marker both tiers sit on. Acid fill, black ring, no gradient. */
+@utility career-marker {
+  @apply relative block shrink-0 rounded-full border border-foreground bg-primary;
+  width: var(--career-marker);
+  height: var(--career-marker);
+}
+
 /* Long-form article body on /writing/[slug]. */
 .prose-mono {
   @apply prose prose-neutral max-w-none;
