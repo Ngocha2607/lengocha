@@ -1,4 +1,5 @@
 ---
+import { Image } from "astro:assets";
 import SectionHeading from "./SectionHeading.astro";
 import { getPublishedPosts, type PostMeta } from "../lib/notion";
 
@@ -34,6 +35,28 @@ interface ArticleCard {
   emoji: string;
   /** Cover image from Notion, or "" to draw one instead. */
   coverUrl: string;
+  /** True when the cover is on a host Astro and Vercel are both allowed to optimize. */
+  coverOptimizable: boolean;
+}
+
+/**
+ * Covers are meant to live in Vercel Blob, whose hostname is allowlisted in
+ * `astro.config.mjs`. Anything else still renders — the `Cover` property is
+ * free text and someone will paste a link from elsewhere — but it goes out as a
+ * plain `<img>`, because Astro refuses to optimize a host it was not told about
+ * and Vercel would reject the request anyway.
+ *
+ * `new URL` rather than a string match, so a malformed value fails to a plain
+ * `<img>` instead of throwing during render.
+ */
+const BLOB_HOST_SUFFIX = ".public.blob.vercel-storage.com";
+
+function isOptimizable(url: string): boolean {
+  try {
+    return new URL(url).hostname.endsWith(BLOB_HOST_SUFFIX);
+  } catch {
+    return false;
+  }
 }
 
 /**
@@ -53,6 +76,7 @@ const FALLBACK: ArticleCard[] = [
     internal: false,
     emoji: "🛡️",
     coverUrl: "",
+    coverOptimizable: false,
   },
 ];
 
@@ -67,6 +91,7 @@ function toCard(post: PostMeta): ArticleCard {
     internal: true,
     emoji: post.emoji,
     coverUrl: post.coverUrl,
+    coverOptimizable: isOptimizable(post.coverUrl),
   };
 }
 
@@ -110,7 +135,26 @@ const articles = posts.length > 0 ? posts.map(toCard) : FALLBACK;
           class="post-cover group-hover:border-primary/50 grid aspect-[610/400] w-full place-items-center transition md:max-w-[610px]"
           aria-hidden="true"
         >
-          {article.coverUrl ? (
+          {article.coverOptimizable ? (
+            /*
+              Explicit width/height rather than `inferSize`, which would fetch
+              the image server-side on every uncached render of an ISR page.
+              The numbers only set the ratio used to build the srcset — the
+              container owns the box — so they match the 610/400 frame.
+              `widths` names only sizes declared in `imagesConfig.sizes`.
+            */
+            <Image
+              class="absolute inset-0 h-full w-full object-cover"
+              src={article.coverUrl}
+              width={800}
+              height={525}
+              widths={[480, 800, 1200]}
+              sizes="(min-width: 768px) 610px, 100vw"
+              alt=""
+              loading="lazy"
+              decoding="async"
+            />
+          ) : article.coverUrl ? (
             <img
               class="absolute inset-0 h-full w-full object-cover"
               src={article.coverUrl}

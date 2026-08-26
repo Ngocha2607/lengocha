@@ -578,6 +578,42 @@ with `marked` on the server.
   new tab.
 - Notion image URLs are signed and expire (~1h); embedded images may 404 near
   the revalidation boundary. Text/tables/code are unaffected.
+### Post covers live in Vercel Blob
+
+Chosen over the repo so publishing a post from Notion does not need a redeploy,
+and over Cloudflare because the site is already on Vercel — R2's free tier is
+generous but its public `r2.dev` URL is, in Cloudflare's own words, rate-limited
+and for development only, and a production custom domain there needs a domain
+added to Cloudflare as a zone. Cloudflare *Images* is not free for storage or
+delivery at all; only transformations are.
+
+Setup, in order:
+
+1. Create the store with **public** access. This cannot be changed afterwards —
+   it is the one irreversible step.
+2. Upload via the dashboard or `vercel blob` CLI. **No SDK dependency is
+   needed**: the site only reads public URLs, it never writes.
+3. Paste the URL into the post's `Cover` property in Notion.
+
+Public URLs are `https://<storeId>.public.blob.vercel-storage.com/<pathname>`,
+and that suffix is allowlisted twice in `astro.config.mjs` — once for Astro,
+once for the Vercel adapter. **The two use different dialects**: Astro's
+`image.remotePatterns` takes glob wildcards, the adapter's
+`imagesConfig.remotePatterns` takes a regular expression. Both must match or the
+image is not optimized. This cannot be verified locally, because `LOCAL_PROD`
+builds use the Node adapter and sharp, which ignore `imagesConfig` — check it on
+the first deploy. If Vercel rejects an image, put the store's exact hostname in
+`imagesConfig.domains` instead.
+
+`PostsSection` renders a Blob cover through `<Image>` and anything else as a
+plain `<img>`, because Astro refuses to optimize a host it was not told about.
+Width and height are explicit rather than `inferSize`, which would fetch the
+image server-side on every uncached render of an ISR page.
+
+Blob's CDN caches for up to a month and an overwrite takes up to 60s to
+propagate, with browsers holding the old copy for longer — so **treat covers as
+immutable**: upload a new pathname rather than replacing one.
+
 - **A post can carry a cover image.** `readCoverUrl` reads a `Cover` property
   (type `url` or `files`) and falls back to the page's own Notion banner. Two
   kinds of URL come back and they are not equivalent: an **external** link is
