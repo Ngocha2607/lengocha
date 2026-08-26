@@ -237,6 +237,19 @@ WCAG 2.5.3, and this has now been broken three different ways:
 For a card-sized link, do not set `aria-label` at all — the content is the
 name. Append new-tab warnings as `sr-only` text inside the anchor instead.
 
+4. An `aria-label` on the **header mark**, whose visible text is `H.` while the
+   label read "Lê Ngọc Hà — top of page" — the letter is not in it. The name is
+   now `sr-only` text inside the anchor, so the accessible name reads
+   "H. — Lê Ngọc Hà, top of page" and contains the visible text.
+
+### The mark is the given-name initial
+
+Vietnamese puts the given name last, so the initial that identifies a person is
+the **last** word's: `Lê Ngọc Hà` gives **H**, not the family name's L. The
+header derived it from `charAt(0)` for a while and rendered `L.`, which left it
+disagreeing with `favicon.svg` and the OG card. All three draw an H and must
+stay in step.
+
 ### `<dl>` has a content model, and Lighthouse checks it
 
 A `<div>` inside a `<dl>` must contain its `<dt>` first and its `<dd>` after,

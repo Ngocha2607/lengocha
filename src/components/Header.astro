@@ -11,17 +11,27 @@ import { UI_ICONS } from "./icons";
  * uses its own three tokens rather than `foreground` / `background` — those
  * swap under dark mode and the bar must not.
  */
-const mark = `${SITE.name.charAt(0).toUpperCase()}.`;
+/**
+ * The mark. Vietnamese puts the given name last, so the initial that actually
+ * identifies a person is the last word's — "Lê Ngọc Hà" gives H, not the family
+ * name's L. This was L for a while, which left the header disagreeing with
+ * `public/seo/favicon.svg` and the OG card; all three now draw an H, and they
+ * have to stay in step.
+ */
+const givenName = SITE.name.trim().split(/\s+/).at(-1) ?? SITE.name;
+const mark = `${givenName.charAt(0).toUpperCase()}.`;
 ---
 
 <header class="bg-header text-header-ink fixed top-0 z-50 w-full">
   <div class="container mx-auto flex items-center justify-between gap-4 p-6">
-    <a
-      href="#top"
-      class="heading text-3xl"
-      aria-label={`${SITE.name} — top of page`}
-    >
-      {mark}
+    {/*
+      The name is appended as `sr-only` text rather than set as an `aria-label`.
+      An `aria-label` replaces the accessible name outright, so the visible "H."
+      would not appear in it — the same WCAG 2.5.3 trap this file has fallen into
+      before. Inside the anchor, the name extends the visible text instead.
+    */}
+    <a href="#top" class="heading text-3xl">
+      {mark}<span class="sr-only"> — {SITE.name}, top of page</span>
     </a>
 
     {/*
