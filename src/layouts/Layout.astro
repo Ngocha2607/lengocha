@@ -34,8 +34,8 @@ const ogImage = new URL("/seo/og.png", SITE.url).href;
 
     {/*
       Theme, applied before the first paint so the page never flashes the wrong
-      one. `is:inline` keeps Astro from bundling it, so this costs no request
-      and the site still ships exactly one external script.
+      one. `is:inline` keeps Astro from bundling it, so this costs no request —
+      the site's own JavaScript is still a single file.
 
       The attribute is written only when someone has actually chosen. With no
       stored choice there is no attribute, and the `prefers-color-scheme` block
@@ -106,5 +106,35 @@ const ogImage = new URL("/seo/og.png", SITE.url).href;
       Skip to content
     </a>
     <slot />
+
+    {/*
+      Cloudflare Web Analytics.
+
+      `is:inline` is required: without it Astro treats this as a script to
+      process and would try to bundle a third-party URL. With it the tag is
+      emitted verbatim.
+
+      Gated on a production build so `npm run dev` does not report traffic. Note
+      that `LOCAL_PROD=1` builds are production builds and will beacon — the
+      hostname will not match the one configured in Cloudflare, so those hits
+      are not attributed, but that is why they are harmless rather than absent.
+
+      The token is public by design; it ships in the page source of every site
+      using this product and is not a secret.
+
+      Cookieless, so it needs no consent banner. It is a `type="module"` script,
+      which is deferred by definition, and it sits after the content so it
+      cannot compete with first paint.
+    */}
+    {
+      import.meta.env.PROD && (
+        <script
+          is:inline
+          type="module"
+          src="https://static.cloudflareinsights.com/beacon.min.js"
+          data-cf-beacon='{"token": "83f92d6ddd0f41d68edff0bde44b2173"}'
+        />
+      )
+    }
   </body>
 </html>

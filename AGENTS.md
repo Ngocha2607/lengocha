@@ -64,10 +64,19 @@ pure CSS:
 - the theme's no-flash boot — a blocking `is:inline` script in `<head>`, which
   Astro does not bundle, so it costs no request
 
-Measured on a production build after the Nichol re-skin: **1 external JS file
-at 9,648 bytes**, LCP 214ms, CLS 0.00, Lighthouse a11y/best-practices/SEO/
-agentic 100 with 0 failed audits, desktop and mobile, and 0 contrast failures
-across every text-bearing element in both themes.
+Measured on a production build after the Nichol re-skin: **the site's own
+JavaScript is one file at 9,648 bytes**, LCP 214ms, CLS 0.00, Lighthouse
+a11y/best-practices/SEO/agentic 100 with 0 failed audits, desktop and mobile,
+and 0 contrast failures across every text-bearing element in both themes.
+
+**One third-party script now loads alongside it**, and it is not small:
+Cloudflare Web Analytics' `beacon.min.js` is 28,467 bytes uncompressed and
+9,509 over the wire, so it roughly doubles the page's JavaScript and adds a
+second origin to connect to. That was an explicit choice by the site's owner,
+not an oversight — but any claim written here about "one external JS file" has
+to say *the site's own*, because two files now load. If the weight ever matters
+more than the tool, Vercel's own analytics is about a tenth of the size and
+first-party, since the site is deployed there.
 
 ## Tech Stack
 
@@ -526,9 +535,11 @@ component comments so the site's owner can check rather than inherit them:
 - `LeadingSection` — the six practices are framed from the CV, but the wording
   is editorial.
 
-The "This site" card in `WorkSection` and the "This site" column in the footer
-both describe **this** repo: they currently claim Astro, zero framework
-JavaScript, and Notion-to-HTML hourly. Keep them honest if the stack moves.
+The "This site" column in the footer describes **this** repo: it claims Astro,
+zero framework JavaScript, and Notion-to-HTML hourly. All three are still true —
+the Cloudflare beacon is third-party analytics, not a framework — but keep them
+honest if the stack moves. (`WorkSection` no longer carries a matching card;
+this used to say it did.)
 
 ## Content: Writing (Notion)
 
