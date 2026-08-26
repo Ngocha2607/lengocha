@@ -152,26 +152,37 @@ lead.
 Header          dark bar, "L." mark, anchor nav, theme toggle
 Hero            wordmark + pitch left, portrait on a gradient right
 About me        numbers panel + prose + skill pills
+Career          milestone rail + detail cards
 Work            project cards with screenshots
 Performance     the LMS audit, slider, pipeline replay
 Decisions       the decision log
 How I lead      six practices + mentoring + artifacts
-Career          milestone rail + detail cards
 Posts           Notion-backed writing
 Get in touch    pitch, socials, mail-composing form
 Live vitals     Core Web Vitals for the page you are on
 Footer          dark, CTA banner + four link columns
 ```
 
-The order is a narrative — who I am, what I built with the Performance audit
-directly after the Work card that makes its claims, how I decide and lead,
-then the role history as reference — so evidence sections and
-how-I-think sections stay clustered instead of alternating. Decision 02's
-"The audit it came out of" link points up at `#performance`, which only reads
-correctly while Performance sits above Decisions.
+The order is a narrative: who I am, the trajectory, then the evidence.
+
+**Career sits third, not late.** It used to sit after How I lead, which put
+about 78% of the page's copy — including the 8.5k-character decision log — in
+front of the one section a recruiter opens the page looking for, and its rail is
+built to be scanned in three seconds. Moving it up costs an engineer very little
+because the rail is compact. Do not push it back down without a reason that
+beats that.
+
+What the order must keep: Performance directly after the Work card that makes
+its claims, and both above Decisions, because two decision entries link up at
+`#performance` and `#work`. The evidence run — Work, Performance, Decisions,
+How I lead — stays contiguous rather than alternating with reference material.
 
 `NAV` and `SOCIALS` in `src/consts.ts` drive the header, the mobile sheet and
-the footer, so a section's anchor is defined in one place.
+the footer, so a section's anchor is defined in one place. **`NAV` must list
+every section**, in page order: `#leading` was missing for a while, so How I
+lead was on the page but unreachable from any of the three. At eight items the
+inline nav no longer fits at `md`, so `Header` switches to it at `lg` and the
+mobile sheet covers 768–1023px.
 
 ### Rules that survived the re-skin
 
@@ -435,7 +446,18 @@ standfirst under its heading, before any depth.
 ## Claims discipline
 
 Everything on the page must be traceable to the Confluence audit, a published
-Writing post, or the CV. This matters most in the decision log, which states
+Writing post, or the CV — `public/Le-Ngoc-Ha-Senior-Frontend-Developer.pdf`,
+which the site's owner has named the source of truth for anything CV-shaped:
+employers, titles, date ranges, and the numbers it states.
+
+Reconciled against the CV once already, so do not re-loosen these:
+
+- Date ranges in the CV are month-precise (`03/2025`, `10/2021 — 02/2023`).
+  `Role.period` is years for the rail, `Role.periodExact` is the CV range for
+  the detail card. Do not widen `periodExact` to whole years.
+- The CV says nearly five years, not five.
+- The CV says the Tweet World mobile Lighthouse was held **at** 85, not above
+  it. This matters most in the decision log, which states
 alternatives, costs and reversals — exactly what a reviewer will probe.
 
 Notably NOT true as of the last update, so do not write it: server-side data

@@ -4,7 +4,7 @@ import { UI_ICONS } from "./icons";
 
 /**
  * Fixed header: initial + full stop as the mark, nav on the right, a hamburger
- * below md, and the theme toggle.
+ * below lg, and the theme toggle.
  *
  * The bar stays dark in both themes. That inversion against a near-white page
  * is the one thing that reads as Nichol at a glance, and it is why the header
@@ -24,7 +24,12 @@ const mark = `${SITE.name.charAt(0).toUpperCase()}.`;
       {mark}
     </a>
 
-    <nav class="hidden items-center gap-6 md:flex" aria-label="Sections">
+    {/*
+      Eight items, so the inline nav starts at `lg` rather than `md`. At 768px
+      the row plus the mark and the toggle no longer fits, and the mobile sheet
+      is the better answer at that width anyway.
+    */}
+    <nav class="hidden items-center gap-6 lg:flex" aria-label="Sections">
       {
         NAV.map((link) => (
           <a
@@ -80,7 +85,7 @@ const mark = `${SITE.name.charAt(0).toUpperCase()}.`;
 
       <button
         id="menu-toggle"
-        class="hamburger flex focus:outline-none md:hidden"
+        class="hamburger flex focus:outline-none lg:hidden"
         aria-label="Toggle navigation"
         aria-expanded="false"
         aria-controls="menu-mobile"
@@ -92,7 +97,7 @@ const mark = `${SITE.name.charAt(0).toUpperCase()}.`;
     </div>
   </div>
 
-  <div id="menu-mobile" class="bg-header hidden p-6 md:hidden">
+  <div id="menu-mobile" class="bg-header hidden p-6 lg:hidden">
     <nav class="flex flex-col gap-4 text-xl" aria-label="Sections">
       {
         NAV.map((link) => (
