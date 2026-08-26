@@ -295,9 +295,18 @@ scripts/
 
 ### The share assets are generated, not hand-drawn
 
-`favicon.svg` is the only one written by hand: a violet rounded square with a
-white glyph. The acid-green version had a black inner stroke that turned to
-mush at 16px, so the stroke is gone and the letterform grew into the space.
+`favicon.svg` is the only one written by hand: a `#0D1220` rounded square with
+a white glyph — monochrome, and deliberately not the accent. At 16px a favicon
+has one job, which is to be picked out of a strip of other tabs, and `#0D1220`
+is the site's own black so the tab icon and the dark header bar read as one
+thing. White on it is 18.68:1. The acid-green original had a 12px inner stroke
+that turned to mush at tab size, so the stroke is gone and the letterform grew
+into the space. Checked by rendering at 16px and 32px and magnifying, not by
+eyeballing the 180px source.
+
+`site.webmanifest` sets `theme_color` to the same `#0D1220`: that value tints
+the browser UI to match the top of the page, and the top of this page is the
+dark bar, not the violet accent.
 
 `apple-touch-icon.png` and `og.png` are rendered from SVG with `sharp`, which
 is already a dependency because Astro uses it. Regenerate the card with
