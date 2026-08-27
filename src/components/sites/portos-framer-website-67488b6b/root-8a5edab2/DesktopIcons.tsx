@@ -60,7 +60,9 @@ export function DesktopIcons({ onOpen }: DesktopIconsProps) {
         <DesktopIconButton icon={ABOUT} onOpen={onOpen} />
         <DesktopIconButton icon={WALLPAPER} onOpen={onOpen} />
       </div>
-      {/* Journal File & Title Wrapper */}
+      {/* "Journal File & Title Wrapper" — the live site's own Framer layer name,
+          kept for provenance. It holds the Projects icon, not a journal, and the
+          window it opens is now Writing. The name was already wrong upstream. */}
       <div className="flex w-full flex-row items-center justify-start">
         <div className="pt-[13px]">
           <DesktopIconButton icon={PROJECTS} onOpen={onOpen} />

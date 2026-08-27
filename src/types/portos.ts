@@ -7,7 +7,7 @@
 export type PortosAppId =
   | "about"
   | "projects"
-  | "journal"
+  | "writing"
   | "contact"
   | "resume"
   | "gallery"
@@ -54,13 +54,6 @@ export interface ProjectCard {
 export interface GalleryImage {
   src: string;
   height: number;
-}
-
-export interface JournalEntry {
-  title: string;
-  blurb: string;
-  image: string;
-  imageHeight: number;
 }
 
 export interface AboutCounter {

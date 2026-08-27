@@ -1,16 +1,20 @@
 "use client";
 
+import { CircleCheck, FileText, Globe, Mail, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { GitHubGlyph, LinkedInGlyph } from "./SocialIcons";
 
 /**
- * The five form fields, in the live site's order.
+ * The form fields, in the live site's order.
  *
- * Three copy details below look like mistakes but are transcribed VERBATIM from
+ * PROJECT and BUDGET were dropped on request — the live site asks for both, with
+ * a `$5k- $20k` budget placeholder that frames this as agency intake rather than
+ * a way to reach a person. Three fields is the whole form now.
+ *
+ * Two copy details below look like mistakes but are transcribed VERBATIM from
  * the live site — do not "fix" them:
  *   - the first field's `name` really is mixed-case `Name`, while every other
  *     field name is all caps;
- *   - the budget placeholder really is `$5k- $20k`, with the space AFTER the
- *     hyphen rather than before it;
  *   - the labels are stored already-uppercase (computed `text-transform` is
  *     `none`), so the rendered element carries no `uppercase` utility either.
  *
@@ -22,8 +26,6 @@ import { cn } from "@/lib/utils";
 const CONTACT_FIELDS = [
   { label: "NAME", name: "Name", type: "text", placeholder: "Your name" },
   { label: "EMAIL", name: "EMAIL", type: "email", placeholder: "you@email.com" },
-  { label: "PROJECT", name: "PROJECT", type: "text", placeholder: "What do you need?" },
-  { label: "BUDGET", name: "BUDGET", type: "text", placeholder: "$5k- $20k" },
   {
     label: "MESSAGE",
     name: "MESSAGE",
@@ -38,19 +40,23 @@ const CONTACT_FIELDS = [
  * and `https://linkedin.com` root URLs) are gone — he has no Twitter or Dribbble.
  */
 const SOCIAL_LINKS = [
-  { label: "GitHub", href: "https://github.com/Ngocha2607" },
+  { label: "GitHub", href: "https://github.com/Ngocha2607", Icon: GitHubGlyph },
   {
     label: "LinkedIn",
     href: "https://www.linkedin.com/in/ng%E1%BB%8Dc-h%C3%A0-l%C3%AA-886aa3228/",
+    Icon: LinkedInGlyph,
   },
-  { label: "Portfolio", href: "https://lengocha.vercel.app" },
-  // "CV" rather than "Résumé": the row is only ~210px wide and the four labels
-  // have to fit on one line. At "Résumé" they summed to 209.6px and collided.
+  { label: "Portfolio", href: "https://lengocha.vercel.app", Icon: Globe },
+  // "CV" rather than "Résumé": the row is tight and the labels have to fit.
   {
     label: "CV",
     href: "https://lengocha.vercel.app/Le-Ngoc-Ha-Senior-Frontend-Developer.pdf",
+    Icon: FileText,
   },
 ] as const;
+
+/** Every icon in the right column renders at this size. */
+const ICON_CLASS = "size-[13px] shrink-0";
 
 /** Shared type/colour of every small grey block label in the right column. */
 const BLOCK_LABEL = "font-sans text-[12px] font-normal leading-[16.8px] text-black/60";
@@ -90,10 +96,10 @@ export function ContactWindow() {
             {/* 72px / 86.4px / -2.88px is exactly 1.2 line-height and -0.04em
                 tracking, so the two smaller steps stay proportional. */}
             <h2 className="font-display text-[40px] font-normal leading-[1.2] tracking-[-0.04em] text-black min-[640px]:text-[56px] min-[880px]:text-[72px]">
-              {"Let's build something good."}
+              {"Let's talk"}
             </h2>
             <p className="font-display text-[16px] font-normal leading-[22.4px] tracking-[-0.16px] text-black/60">
-              Available for remote · Hanoi, Vietnam · UTC+7
+              Available for remote · Hanoi, Vietnam
             </p>
           </div>
 
@@ -174,7 +180,9 @@ export function ContactWindow() {
 
             {/* All Contact Details */}
             <div className="flex w-full flex-col items-start justify-center gap-8 min-[880px]:w-[251px] min-[880px]:shrink-0">
-              {/* Email */}
+              {/* Email. The icon sits on the value, not the label: the labels are
+                  the quiet grey scaffolding, and putting a mark on each of those
+                  instead would compete with the values for attention. */}
               <div className="flex flex-col items-start gap-1">
                 <p className={BLOCK_LABEL}>EMAIL</p>
                 <a
@@ -182,8 +190,9 @@ export function ContactWindow() {
                   href="mailto:ngocha2k0.ln@gmail.com"
                   target="_blank"
                   rel="noreferrer noopener"
-                  className={BLOCK_VALUE}
+                  className={cn(BLOCK_VALUE, "flex items-center gap-2")}
                 >
+                  <Mail className={ICON_CLASS} aria-hidden="true" />
                   ngocha2k0.ln@gmail.com
                 </a>
               </div>
@@ -193,26 +202,37 @@ export function ContactWindow() {
                   equivalent, this is left as text. */}
               <div className="flex flex-col items-start gap-1">
                 <p className={BLOCK_LABEL}>LOCATION</p>
-                <p className={BLOCK_VALUE}>Hanoi, Vietnam · UTC+7</p>
-              </div>
-
-              {/* Availability — only the bullet is green. */}
-              <div className="flex flex-col items-start gap-1">
-                <p className={BLOCK_LABEL}>
-                  <span className="text-[#50a25a]">•</span> AVAILABILITY
+                <p className={cn(BLOCK_VALUE, "flex items-center gap-2")}>
+                  <MapPin className={ICON_CLASS} aria-hidden="true" />
+                  Hanoi, Vietnam · UTC+7
                 </p>
-                <p className={BLOCK_VALUE}>Available for remote work</p>
               </div>
 
-              {/* Social — the same two-copy slide as the submit button, 24px.
-                  `gap-x-4` is a floor, not decoration: the row shrink-wraps to its
-                  content here, so `justify-between` alone has no slack to
-                  distribute and the labels render flush against each other. */}
+              {/* Availability — the green carries the meaning, so it moves from
+                  the label's bullet onto the icon and the bullet goes away. */}
+              <div className="flex flex-col items-start gap-1">
+                <p className={BLOCK_LABEL}>AVAILABILITY</p>
+                <p className={cn(BLOCK_VALUE, "flex items-center gap-2")}>
+                  <CircleCheck className={cn(ICON_CLASS, "text-os-green")} aria-hidden="true" />
+                  Available for remote work
+                </p>
+              </div>
+
+              {/* Social — keeps the live site's two-copy slide: each label is
+                  printed twice in a clipped 22.4px box, and hover shifts the
+                  column up exactly one step so the second copy takes its place.
+                  The icon sits OUTSIDE that box on purpose, so it stays put while
+                  the text travels; inside, it would slide away with the label.
+
+                  Two across rather than the original's single row. With an icon
+                  and a gap in front of each, the four labels no longer fit in
+                  251px, and a wrapped `justify-between` row spaces its last line
+                  differently from its first. A 2x2 grid stays even. */}
               <div className="flex w-full flex-col items-start gap-4">
                 <p className={BLOCK_LABEL}>SOCIAL</p>
                 <div
                   data-no-drag
-                  className="flex w-full max-w-[251px] flex-row flex-wrap items-start justify-between gap-x-4 gap-y-1"
+                  className="grid w-full max-w-[251px] grid-cols-2 gap-x-4 gap-y-2"
                 >
                   {SOCIAL_LINKS.map((social) => (
                     <a
@@ -220,17 +240,22 @@ export function ContactWindow() {
                       href={social.href}
                       target="_blank"
                       rel="noreferrer noopener"
-                      className="group/social flex h-[22.4px] shrink-0 overflow-clip"
+                      className="group/social flex items-center gap-2"
                     >
-                      <span
-                        className={cn(
-                          "flex flex-col items-start gap-[1.6px] group-hover/social:-translate-y-6",
-                          SLIDE_TRANSITION,
-                        )}
-                      >
-                        <span className={cn(BLOCK_VALUE, "whitespace-nowrap")}>{social.label}</span>
-                        <span aria-hidden="true" className={cn(BLOCK_VALUE, "whitespace-nowrap")}>
-                          {social.label}
+                      <social.Icon className={ICON_CLASS} />
+                      <span className="flex h-[22.4px] overflow-clip">
+                        <span
+                          className={cn(
+                            "flex flex-col items-start gap-[1.6px] group-hover/social:-translate-y-6",
+                            SLIDE_TRANSITION,
+                          )}
+                        >
+                          <span className={cn(BLOCK_VALUE, "whitespace-nowrap")}>
+                            {social.label}
+                          </span>
+                          <span aria-hidden="true" className={cn(BLOCK_VALUE, "whitespace-nowrap")}>
+                            {social.label}
+                          </span>
                         </span>
                       </span>
                     </a>

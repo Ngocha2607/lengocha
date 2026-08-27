@@ -8,7 +8,7 @@ import { ContactWindow } from "./ContactWindow";
 import { DesktopIcons } from "./DesktopIcons";
 import { Dock } from "./Dock";
 import { GalleryWindow } from "./GalleryWindow";
-import { JournalWindow } from "./JournalWindow";
+import { WritingWindow } from "./WritingWindow";
 import { MenuBar } from "./MenuBar";
 import { PreLoader } from "./PreLoader";
 import { ProjectsToggle, ProjectsWindow, type ProjectsMode } from "./ProjectsWindow";
@@ -37,7 +37,7 @@ const WINDOWS: Record<PortosAppId, WindowDef> = {
   // title font is kept — that is a real quirk of the source, see WindowFrame.
   about: { title: "About Lê Ngọc Hà", geometry: STANDARD, top: 68, titleFont: "inter" },
   projects: { title: "Overview of the Project", geometry: STANDARD, top: 68 },
-  journal: { title: "Journal", geometry: STANDARD, top: 68 },
+  writing: { title: "Writing", geometry: STANDARD, top: 68 },
   contact: { title: "Contact", geometry: STANDARD, top: 68 },
   resume: { title: "Resume", geometry: STANDARD, top: 68 },
   gallery: { title: "Gallery", geometry: STANDARD, top: 68 },
@@ -78,8 +78,8 @@ export function DesktopShell() {
         return <AboutWindow />;
       case "projects":
         return <ProjectsWindow mode={projectsMode} />;
-      case "journal":
-        return <JournalWindow />;
+      case "writing":
+        return <WritingWindow />;
       case "contact":
         return <ContactWindow />;
       case "resume":

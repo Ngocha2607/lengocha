@@ -15,7 +15,7 @@ const DOCK_ITEMS: DockItem[] = [
     name: "Launchpad",
     icon: `${PORTOS_ASSETS}/images/dock-launchpad.png`,
     alt: "Launchpad",
-    app: "journal",
+    app: "writing",
   },
   {
     name: "Contacts",

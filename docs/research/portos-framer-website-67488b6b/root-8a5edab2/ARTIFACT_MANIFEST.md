@@ -150,6 +150,64 @@ Notes:
 - **SEO artwork is now the owner's.** `seo/favicon.svg` and `seo/apple-touch-icon.png` were
   supplied by him; `seo/og-image.png` is a 1200x630 capture of this build's own desktop.
   `seo/favicon.png` (the template's) is left on disk, unreferenced.
+- **The Journal window is gone; "Writing" reads live from Notion.** The template's two-slide
+  carousel plus six invented design essays is replaced by the owner's real Writing database —
+  the same one behind lengocha.vercel.app/#writing — so editing a post in Notion updates this
+  site with no redeploy. Clicking a card swaps the window body for the article and offers
+  "← Writing" back, mirroring how his own article pages are laid out.
+
+  Wiring: `src/lib/notion.ts` (server-only) + `src/lib/markdown.ts` behind two route handlers,
+  `/api/writing` and `/api/writing/[slug]`. The window is a client component, so it never
+  imports the Notion module — anything a `"use client"` file imports is shipped to the browser,
+  and `NOTION_TOKEN` must not be. Markdown is rendered to HTML on the server, with raw HTML in
+  the Notion source ESCAPED rather than passed through; verified no `<script>` survives.
+
+  Three things worth knowing:
+  - The app id was renamed `journal` -> `writing` across the contract, dock, shell and icons.
+  - `next.config.ts` now allows ONE remote image host, the owner's Vercel Blob store, for post
+    covers. It is the only exception to this site being entirely same-origin, and it exists
+    because live content is the point of the window. Writing is now the one part of the site
+    that needs the network.
+  - Article bodies are cached 10 minutes, separately from the 60s list, because they are
+    expensive rather than volatile. `pageToMarkdown` costs one Notion request per level of
+    block nesting, so latency tracks nesting, not length: measured cold through the route,
+    1.1s for the simplest of the four posts and 11.0s for the one with 27 sub-headings, 9
+    tables and 54 list items. Warm it answers in 0.014s. Cards also warm the cache on hover,
+    which took a real click on the slowest post from 11.7s to 0.25s. Concurrent requests for
+    one slug share a single walk instead of racing.
+  - `getPublishedPosts` memoises for 60s. The Astro original memoises per render and lets ISR
+    decide reuse; there is no ISR here, so a plain module-level promise in a long-running server
+    would never expire and a post edited in Notion would never appear.
+
+  Measured end to end: 4 posts listed, the largest article renders 87 prose nodes — 12 h2, 6
+  tables, 7 code blocks — and the window body does NOT scroll sideways, because `pre` and
+  `table` carry their own `overflow-x` (`display: table` ignores `overflow`, so the table is set
+  to `display: block` to become its own scroll container).
+- **The Contact window lost two fields and gained icons.** The heading is now "Let's talk"; the
+  live site's PROJECT and BUDGET fields are dropped, leaving NAME / EMAIL / MESSAGE. Email,
+  location and availability each carry a lucide mark, and the four social links carry one too —
+  GitHub and LinkedIn hand-drawn in `SocialIcons.tsx`, because lucide ships no brand marks at
+  all. Those two are bare `currentColor` glyphs rather than the dock's colour badges, so they
+  inherit the link colour and its hover. The social row became a 2x2 grid: with an icon in front
+  of each label the four no longer fit 251px, and a wrapped `justify-between` row spaces its
+  last line differently from its first. The two-copy hover slide is kept, with the icon outside
+  the clipped box so it stays put while the label travels.
+- **Gallery is four to a row.** Changed from the two-column mosaic at the owner's request. Four
+  across the 824px content width with the template's 16px gap puts each tile at 194px, 92px tall
+  at the screenshots' 2.1 ratio — contact-sheet thumbnails. Six tiles means the second row holds
+  two; that is left alone, since stretching them would break the shared ratio.
+- **The 31 unreferenced template images were deleted.** Verified restorable first: the download
+  script is gone (it went with `scripts/`), so git is the only restore path — all 31 were
+  confirmed tracked in HEAD before removal, and `git restore <path>` brings any of them back.
+  Verified safe after: every window and desktop icon was opened and swept, 364 distinct images
+  checked, 0 broken. That sweep is not optional — `next/image` resolves its `src` at runtime, so
+  a green build proves nothing about a missing file.
+- **The Gallery window now shows the project screenshots.** Nine stock photos in three portrait
+  masonry columns became the same six project shots the Projects window uses, in a two-column
+  mosaic that alternates one 824x392 tile with a pair at 404x192 — chosen so the 2.1 screenshots
+  are never cropped. It stays image-only and static, which is both the live site's behaviour and
+  what stops it duplicating Projects; only `alt` changed, from decorative `""` to the real
+  descriptions. See `components/GalleryWindow.spec.md`.
 - **The Resume window was replaced on request and no longer clones anything.** The live site
   fills it with eight cards for the template author's design tools; it now embeds the owner's
   actual CV (`public/Le-Ngoc-Ha-Senior-Frontend-Developer.pdf`, 3.6MB, two pages) in the
@@ -157,7 +215,7 @@ Notes:
   mobile browsers that will not render a PDF in an iframe. The dead `ResumeTool` type went with
   it. Body height is `calc(100% - 44px)` because the title bar lives inside the scroll
   container — see `components/ResumeWindow.spec.md`.
-- **28 template images are now unreferenced but deliberately kept.** All of them are template
+- **31 template images are now unreferenced but deliberately kept.** All of them are template
   content that has been replaced or intentionally dropped: `projects-*`, `resume-*`, `about-*`,
   two `journal-*`, `dock-instagram`/`dock-framer`, `menubar-apple.svg` (the menu bar shows the
   owner's favicon instead) and the two `wallpaper-arrow-*.svg` (the live carousel never renders
