@@ -1,0 +1,151 @@
+"use client";
+
+import Image from "next/image";
+import { useCallback, useState } from "react";
+import { PORTOS_ASSETS, type PortosAppId, type WindowGeometry } from "@/types/portos";
+import { AboutWindow } from "./AboutWindow";
+import { ContactWindow } from "./ContactWindow";
+import { DesktopIcons } from "./DesktopIcons";
+import { Dock } from "./Dock";
+import { GalleryWindow } from "./GalleryWindow";
+import { JournalWindow } from "./JournalWindow";
+import { MenuBar } from "./MenuBar";
+import { PreLoader } from "./PreLoader";
+import { ProjectsToggle, ProjectsWindow, type ProjectsMode } from "./ProjectsWindow";
+import { RecycleBinWindow } from "./RecycleBinWindow";
+import { ResumeWindow } from "./ResumeWindow";
+import { WallpaperWindow } from "./WallpaperWindow";
+import { WindowFrame } from "./WindowFrame";
+
+interface WindowDef {
+  title: string;
+  geometry: WindowGeometry;
+  /** Measured distance from the top of the viewport. */
+  top: number;
+  /** The About window's title bar uses Inter 16px, unlike every other window. */
+  titleFont?: "sf" | "inter";
+}
+
+/**
+ * Measured on the live site. Every window is 864×630 at `top: 68` except Wallpaper,
+ * which is 720×596 and sits 21px lower at `top: 89`.
+ */
+const STANDARD: WindowGeometry = { width: 864, height: 630 };
+
+const WINDOWS: Record<PortosAppId, WindowDef> = {
+  // Title is the owner's, not the template's ("Our work with Norma"). The Inter
+  // title font is kept — that is a real quirk of the source, see WindowFrame.
+  about: { title: "About Lê Ngọc Hà", geometry: STANDARD, top: 68, titleFont: "inter" },
+  projects: { title: "Overview of the Project", geometry: STANDARD, top: 68 },
+  journal: { title: "Journal", geometry: STANDARD, top: 68 },
+  contact: { title: "Contact", geometry: STANDARD, top: 68 },
+  resume: { title: "Resume", geometry: STANDARD, top: 68 },
+  gallery: { title: "Gallery", geometry: STANDARD, top: 68 },
+  recycleBin: { title: "Recycle Bin", geometry: STANDARD, top: 68 },
+  wallpaper: { title: "Wallpaper", geometry: { width: 720, height: 596 }, top: 89 },
+};
+
+const BASE_Z = 4;
+
+/**
+ * The macOS desktop: wallpaper, always-on scrim, menu bar, icons, dock, and the
+ * stack of open windows. Multiple windows can be open at once; the most recently
+ * opened or focused one renders on top, matching the live site's DOM-order stacking.
+ */
+export function DesktopShell() {
+  const [open, setOpen] = useState<PortosAppId[]>([]);
+  const [projectsMode, setProjectsMode] = useState<ProjectsMode>("grid");
+
+  const openWindow = useCallback((app: PortosAppId) => {
+    setOpen((current) => [...current.filter((id) => id !== app), app]);
+  }, []);
+
+  const closeWindow = useCallback((app: PortosAppId) => {
+    setOpen((current) => current.filter((id) => id !== app));
+  }, []);
+
+  const focusWindow = useCallback((app: PortosAppId) => {
+    setOpen((current) =>
+      current[current.length - 1] === app
+        ? current
+        : [...current.filter((id) => id !== app), app],
+    );
+  }, []);
+
+  const renderBody = (app: PortosAppId) => {
+    switch (app) {
+      case "about":
+        return <AboutWindow />;
+      case "projects":
+        return <ProjectsWindow mode={projectsMode} />;
+      case "journal":
+        return <JournalWindow />;
+      case "contact":
+        return <ContactWindow />;
+      case "resume":
+        return <ResumeWindow />;
+      case "gallery":
+        return <GalleryWindow />;
+      case "recycleBin":
+        return <RecycleBinWindow />;
+      case "wallpaper":
+        return <WallpaperWindow />;
+    }
+  };
+
+  return (
+    <div className="portos-root">
+      {/* Wallpaper */}
+      <Image
+        src={`${PORTOS_ASSETS}/images/desktop-wallpaper.jpg`}
+        alt=""
+        fill
+        priority
+        sizes="100vw"
+        className="object-cover"
+      />
+      {/* Constant scrim — measured at rgba(0,0,0,0.24) whether or not a window is open. */}
+      <div className="absolute inset-0 bg-black/24" aria-hidden="true" />
+
+      <MenuBar />
+
+      {/* Desktop container: inset 50px (desktop) / 30px (tablet) / 20px (mobile),
+          24px from the bottom at every breakpoint. At the desktop breakpoint only, the
+          icon block and dock sit inside a further 16px left inset — measured on the live
+          site as Content `50,160 1340x716` vs its inner block `66,160 1324x255`, which is
+          also what puts the dock's centre at 340.5 rather than the container's 720. */}
+      <div className="absolute inset-x-5 bottom-6 top-[120px] flex flex-col justify-between min-[810px]:inset-x-[30px] min-[810px]:top-[130px] min-[1200px]:inset-x-[50px] min-[1200px]:top-40 min-[1200px]:pl-4">
+        <DesktopIcons onOpen={openWindow} />
+        <div className="flex w-full justify-center">
+          <Dock onOpen={openWindow} />
+        </div>
+      </div>
+
+      {open.map((app, index) => {
+        const def = WINDOWS[app];
+        return (
+          <WindowFrame
+            key={app}
+            title={def.title}
+            width={def.geometry.width}
+            height={def.geometry.height}
+            top={def.top}
+            titleFont={def.titleFont}
+            zIndex={BASE_Z + index}
+            onClose={() => closeWindow(app)}
+            onFocus={() => focusWindow(app)}
+            titleBarAccessory={
+              app === "projects" ? (
+                <ProjectsToggle mode={projectsMode} onChange={setProjectsMode} />
+              ) : undefined
+            }
+          >
+            {renderBody(app)}
+          </WindowFrame>
+        );
+      })}
+
+      <PreLoader />
+    </div>
+  );
+}

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="LinkedIn">
+  <!-- See dock-github.svg: the same 81.64% inset that every template dock PNG
+       carries, so this badge renders 62px inside the 76px dock box. -->
+  <g transform="translate(47 47) scale(0.81641)">
+    <rect width="512" height="512" rx="114" ry="114" fill="#0A66C2"/>
+    <g transform="translate(112 112) scale(12)">
+      <path fill="#ffffff" d="M4.98 3.5C4.98 4.88 3.87 6 2.49 6 1.12 6 0 4.88 0 3.5 0 2.12 1.12 1 2.49 1c1.38 0 2.49 1.12 2.49 2.5zM.22 8h4.53v14.5H.22V8zm7.2 0h4.34v1.98h.06c.6-1.14 2.08-2.34 4.28-2.34 4.58 0 5.43 3.01 5.43 6.93v7.93h-4.53v-7.03c0-1.68-.03-3.84-2.34-3.84-2.34 0-2.7 1.83-2.7 3.72v7.15H7.42V8z"/>
+    </g>
+  </g>
+</svg>

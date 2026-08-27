@@ -7,9 +7,46 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: "Geist", "Geist Fallback", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "Geist Mono", "Geist Mono Fallback", ui-monospace, monospace;
-  --font-heading: var(--font-sans);
+  --font-sans: var(--font-sf-text), -apple-system, BlinkMacSystemFont, ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-sf-display), -apple-system, BlinkMacSystemFont, ui-sans-serif, system-ui, sans-serif;
+  --font-signature: var(--font-signature), cursive;
+  --font-mono: ui-monospace, SFMono-Regular, monospace;
+  --font-heading: var(--font-display);
+
+  /* ---- PortOS design tokens (extracted from portos.framer.website) ---- */
+  --color-os-surface: #f7f7f7;
+  --color-os-white: #ffffff;
+  --color-os-white-70: #ffffffb3;
+  --color-os-white-80: #ffffffcc;
+  --color-os-white-20: #ffffff33;
+  --color-os-white-16: #ffffff29;
+  --color-os-white-6: #ffffff0f;
+  --color-os-black: #000000;
+  --color-os-black-70: #000000b3;
+  --color-os-black-60: #00000099;
+  --color-os-black-50: #00000080;
+  --color-os-black-40: #00000066;
+  --color-os-black-24: #0000003d;
+  --color-os-black-20: #00000033;
+  --color-os-black-10: #0000001a;
+  --color-os-gray: #86868b;
+  --color-os-gray-line: #e5e5ea;
+  --color-os-divider: #686868;
+  --color-os-ink: #484848;
+  --color-os-ink-6: #4848480f;
+  --color-os-dock: #28282899;
+  --color-os-green: #50a25a;
+  --color-os-red: #ff2244;
+  --color-os-red-15: #ff224426;
+  --color-os-traffic-red: #fd5d5c;
+  --color-os-traffic-red-hover: #ff6157;
+  --color-os-traffic-red-active: #e24640;
+  --color-os-traffic-yellow: #fac900;
+  --color-os-traffic-yellow-hover: #ffc12f;
+  --color-os-traffic-yellow-active: #dfa023;
+  --color-os-traffic-green: #34c75a;
+  --color-os-traffic-green-hover: #2acb42;
+  --color-os-traffic-green-active: #1bac2c;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -126,5 +163,98 @@
   }
   html {
     @apply font-sans;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* PortOS desktop shell                                                */
+/* The target renders as a single non-scrolling 100vh macOS desktop.   */
+/* Scoped under .portos-root so it cannot affect other routes.         */
+/* ------------------------------------------------------------------ */
+.portos-root {
+  background: var(--color-os-surface);
+  overflow: hidden;
+  height: 100dvh;
+  width: 100%;
+  position: relative;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Window bodies scroll internally with a hidden scrollbar, as on the target. */
+.portos-scroll {
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  overscroll-behavior: contain;
+}
+.portos-scroll::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+/* Per-letter reveal used by the pre-loader headline. */
+@keyframes portos-letter-in {
+  from {
+    opacity: 0.001;
+    filter: blur(10px);
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+  }
+}
+
+/* Windows open with a centred zoom + fade — see WindowFrame.tsx.
+
+   This is applied to WindowFrame's inner wrapper, never to the positioning
+   element. That element's `transform` carries the window's -50% centring and its
+   drag offset, and a keyframe animating `transform` there would replace that
+   whole value for the animation's duration, dropping the centring so the window
+   appeared to fly in from the right. Keeping the scale on a separate wrapper
+   lets the two compose instead of fighting.
+
+   The entrance is CSS rather than JS because `requestAnimationFrame` is
+   throttled to roughly 1fps in a background tab, which left the window stuck at
+   opacity 0 until the tab regained focus. */
+@keyframes portos-window-in {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* The exit is a keyframe rather than a `transition`, deliberately. Swapping the
+   entrance animation out for a transition in the same React render does not start
+   a transition: the browser has no stable "before" value to interpolate from,
+   because the value it would use was itself being supplied by the animation's
+   `both` fill. The window then jumped straight to opacity 0 with no fade. Two
+   symmetric keyframes avoid the interaction entirely. */
+@keyframes portos-window-out {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .portos-root *,
+  .portos-root *::before,
+  .portos-root *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
   }
 }
