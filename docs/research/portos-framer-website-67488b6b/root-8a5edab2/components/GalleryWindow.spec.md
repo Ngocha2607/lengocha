@@ -119,3 +119,52 @@ export function GalleryWindow()
   measured crop.
 - This component needs no client-side state — leave it a server component (no `"use client"`).
 - Verify `npx tsc --noEmit` passes before finishing.
+
+## Rebuilt on request — this no longer matches the live site
+
+Everything above describes the ORIGINAL and is kept as the record of it.
+
+| | Live site | Here |
+| --- | --- | --- |
+| Tiles | 9 stock photos | 6 project screenshots |
+| Layout | 3 portrait masonry columns, 264px wide, 240-367px tall | 2-column mosaic, one full-width tile alternating with a pair |
+| Tile sizes | nine measured crops | 824x392 (wide) and 404x192 |
+| Cropping | crops are the point | nothing cropped — every shot keeps its 2.1 ratio |
+
+The originals are stock photography, where a tall ragged crop is the whole
+effect. These are UI screenshots at 1913x912, so a 264px portrait crop would
+have thrown away most of every interface. LMS Platform and the B2B storefront
+take the two wide slots: they are the densest interfaces, so they are the two
+that reward the extra 420px.
+
+### Still image-only and completely static, on purpose
+
+No hover, no lightbox, no links. That is the live site's behaviour AND what
+keeps this window from becoming a second copy of Projects, which already carries
+the titles, periods, stack tags and outbound links for these same six projects.
+
+One thing did change: `alt` was `""` on the live site because the photos are
+decorative. These screenshots are not, so each carries the real alt text from
+the portfolio.
+
+### `min-h-0` on every tile
+
+Same trap the Projects cards hit, and it applies to grid items exactly as it does
+to flex items: the automatic minimum size is the content height, so for any
+screenshot flatter than the 2.1 ratio that minimum is taller than the ratio asks
+for and silently overrides `aspect-ratio`. Two of the six are flatter (Newsletter
+2.061, EVN 2.093). Measured after the fix: wide tiles 392.38px, narrow tiles
+192.38px, no spread within either group.
+
+### The shared type stays
+
+`GalleryImage` in `src/types/portos.ts` carries a measured pixel height for the
+portrait masonry this window no longer has, so the tiles use a local
+`GalleryTile` instead. The type is NOT deleted — `RecycleBinWindow` still uses it.
+
+### Leftover assets
+
+Only `gallery-01`, `gallery-02` and `gallery-03` fall out of use. The other five
+`gallery-*` files stay referenced, and so do `projects-08.png` and
+`projects-10.png` — `RecycleBinWindow` reuses all of them. Do not sweep
+`gallery-*` or `projects-*` by prefix; it will break that window.

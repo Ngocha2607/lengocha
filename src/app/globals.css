@@ -258,3 +258,157 @@
     transition-duration: 0.001ms !important;
   }
 }
+/**
+ * Article body inside the Writing window.
+ *
+ * The markup is server-rendered from Notion Markdown, so the selectors below are
+ * element-level rather than class-level — `marked` emits plain tags and there is
+ * nothing to hook a utility onto.
+ *
+ * `pre` and `table` scroll on their own axis. That is not polish: the posts carry
+ * up to nine tables and eleven code blocks each, and the window body is only
+ * 640px wide, so without an overflow container of their own they would push the
+ * whole window into horizontal scrolling.
+ */
+.portos-prose {
+  font-family: var(--font-sf-text), ui-sans-serif, system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 21px;
+  color: rgb(0 0 0 / 0.78);
+}
+
+.portos-prose > * + * {
+  margin-top: 16px;
+}
+
+.portos-prose h1,
+.portos-prose h2,
+.portos-prose h3,
+.portos-prose h4 {
+  font-family: var(--font-sf-display), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: rgb(0 0 0);
+}
+
+.portos-prose h2 {
+  margin-top: 34px;
+  font-size: 19px;
+  line-height: 25px;
+}
+
+.portos-prose h3 {
+  margin-top: 26px;
+  font-size: 15px;
+  line-height: 21px;
+}
+
+.portos-prose h4 {
+  margin-top: 22px;
+  font-size: 13px;
+  line-height: 19px;
+}
+
+.portos-prose ul,
+.portos-prose ol {
+  padding-left: 20px;
+}
+
+.portos-prose ul {
+  list-style: disc;
+}
+
+.portos-prose ol {
+  list-style: decimal;
+}
+
+.portos-prose li + li {
+  margin-top: 6px;
+}
+
+.portos-prose a {
+  color: rgb(0 0 0);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-color: rgb(0 0 0 / 0.3);
+}
+
+.portos-prose a:hover {
+  text-decoration-color: rgb(0 0 0);
+}
+
+.portos-prose strong {
+  font-weight: 600;
+  color: rgb(0 0 0);
+}
+
+/* Inline code. `pre code` resets this so a block does not get a second chip. */
+.portos-prose code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  background: rgb(0 0 0 / 0.06);
+  border-radius: 4px;
+  padding: 1px 5px;
+}
+
+.portos-prose pre {
+  overflow-x: auto;
+  background: #1d1d1f;
+  color: #f5f5f7;
+  border-radius: 8px;
+  padding: 14px 16px;
+  font-size: 12px;
+  line-height: 19px;
+}
+
+.portos-prose pre code {
+  background: none;
+  border-radius: 0;
+  padding: 0;
+  color: inherit;
+  font-size: inherit;
+}
+
+/* The table itself cannot be the scroll container — `display: table` ignores
+   `overflow` — so the wrapper carries it and the table is free to exceed it. */
+.portos-prose table {
+  display: block;
+  overflow-x: auto;
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  line-height: 17px;
+  white-space: nowrap;
+}
+
+.portos-prose th,
+.portos-prose td {
+  border: 1px solid rgb(0 0 0 / 0.12);
+  padding: 6px 10px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.portos-prose th {
+  background: rgb(0 0 0 / 0.04);
+  font-weight: 600;
+  color: rgb(0 0 0);
+}
+
+.portos-prose blockquote {
+  border-left: 2px solid rgb(0 0 0 / 0.15);
+  padding-left: 14px;
+  color: rgb(0 0 0 / 0.6);
+}
+
+.portos-prose img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+}
+
+.portos-prose hr {
+  border: 0;
+  border-top: 1px solid rgb(0 0 0 / 0.12);
+  margin-top: 28px;
+}

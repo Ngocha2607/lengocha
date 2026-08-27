@@ -72,7 +72,12 @@ const SITE_URL = "https://lengocha.vercel.app";
  *
  * `favicon.svg` replaces the template's `favicon.png`: an SVG favicon scales to
  * every tab size from one file, and Safari falls back to `apple-touch-icon.png`
- * anyway. The old PNG is left on disk, unreferenced.
+ * anyway. The old PNG has since been deleted.
+ *
+ * `src/app/favicon.ico` had to go too, and that one is easy to miss: in the App
+ * Router, file convention beats configuration, so while it existed Next.js
+ * emitted `<link rel="icon" href="/favicon.ico">` and ignored the value below
+ * entirely. `/favicon.ico` now 404s, which is harmless — browsers follow the tag.
  */
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
