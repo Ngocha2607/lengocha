@@ -95,9 +95,16 @@ export function DesktopShell() {
 
   return (
     <div className="portos-root">
-      {/* Wallpaper */}
+      {/* Wallpaper — swapped on request from the template's forest
+          (`desktop-wallpaper.jpg`, 3840x2160) to the beach sunset already in the
+          Wallpaper window's carousel. That file stays on disk, unreferenced, so
+          switching back is a one-line change.
+
+          Note the drop in source resolution: 1920x1080 against the old 3840x2160.
+          `object-cover` upscales it on anything wider than 1920 or on a Retina
+          display, so it will be softer there than the forest was. */}
       <Image
-        src={`${PORTOS_ASSETS}/images/desktop-wallpaper.jpg`}
+        src={`${PORTOS_ASSETS}/images/wallpaper-02.png`}
         alt=""
         fill
         priority

@@ -93,6 +93,20 @@ const BLOCK_ROW_CLASS =
 /** Each half of that frame — half the column, matching one counter cell. */
 const BLOCK_COL_CLASS = "min-[560px]:flex-1";
 
+/**
+ * The right half, which needs the left list's 8px indent ONLY while stacked.
+ *
+ * The live site gives the left list `padding-left: 8px` and the right list none.
+ * Side by side that is invisible — each column starts at its own edge. Below
+ * 560px they stack into one column, and the indent that used to be private to
+ * the left list becomes a visible 8px step between the two groups: "Frontend
+ * Architecture" sits 8px right of "Monorepo Design" under the same heading.
+ *
+ * So the indent is matched while stacked and dropped again at 560px, where the
+ * measured two-column layout takes over.
+ */
+const BLOCK_RIGHT_COL_CLASS = `pl-2 min-[560px]:pl-0 ${BLOCK_COL_CLASS}`;
+
 /** The timeline marker colour. Not a token — introduced with the timeline. */
 const TIMELINE_ACCENT = "#8B5CF6";
 /** Marker diameter; the rail is anchored to marker centres, so both use this. */
@@ -144,7 +158,7 @@ export function AboutBulletBlocks() {
             ))}
           </div>
         </div>
-        <div className={`flex flex-col ${BLOCK_COL_CLASS}`}>
+        <div className={`flex flex-col ${BLOCK_RIGHT_COL_CLASS}`}>
           {EXPERTISE_BLOCK.right.map((item) => (
             <p key={item} className={BULLET_CLASS}>
               {item}
@@ -171,7 +185,7 @@ export function AboutBulletBlocks() {
             })}
           </div>
         </div>
-        <div className={`flex flex-col gap-[6px] ${BLOCK_COL_CLASS}`}>
+        <div className={`flex flex-col gap-[6px] ${BLOCK_RIGHT_COL_CLASS}`}>
           {STACK_RIGHT.map((name) => {
             const Icon = STACK_ICONS[name];
             return (
