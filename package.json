@@ -23,9 +23,6 @@
     "tailwindcss",
     "shadcn-ui"
   ],
-  "engines": {
-    "node": ">=24"
-  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
