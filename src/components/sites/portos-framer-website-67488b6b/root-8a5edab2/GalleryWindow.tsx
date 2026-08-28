@@ -1,7 +1,7 @@
 "use client";
 
 import { Dialog } from "@base-ui/react/dialog";
-import { X } from "lucide-react";
+import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
@@ -97,6 +97,19 @@ const SHOT_ASPECT = "aspect-[2.1]";
  * 1-column steps are our own adaptation.
  */
 /**
+ * Prev and next, pinned to the viewport edges.
+ *
+ * The arrow KEYS were wired first and that was not enough: nothing on screen
+ * said the set could be stepped through, so with a mouse there was no way to
+ * reach image two. Same treatment as the close button, but a larger target,
+ * since these are the viewer's primary control rather than its escape hatch.
+ */
+const NAV_BUTTON_CLASS =
+  "absolute top-1/2 flex size-11 -translate-y-1/2 cursor-pointer items-center justify-center " +
+  "rounded-full bg-white/10 text-white/70 outline-none transition-colors " +
+  "hover:bg-white/20 hover:text-white focus-visible:ring-2 focus-visible:ring-white/60";
+
+/**
  * Full-screen viewer for one tile.
  *
  * PORTALLED, and that is not optional. `WindowFrame`'s shell carries a
@@ -180,6 +193,23 @@ function GalleryLightbox({
                   {index + 1}/{GALLERY_TILES.length}
                 </span>
               </p>
+
+              <button
+                type="button"
+                aria-label="Previous image"
+                onClick={() => onIndexChange((index - 1 + GALLERY_TILES.length) % GALLERY_TILES.length)}
+                className={cn(NAV_BUTTON_CLASS, "left-4 sm:left-6")}
+              >
+                <ChevronLeft size={22} aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                aria-label="Next image"
+                onClick={() => onIndexChange((index + 1) % GALLERY_TILES.length)}
+                className={cn(NAV_BUTTON_CLASS, "right-4 sm:right-6")}
+              >
+                <ChevronRight size={22} aria-hidden="true" />
+              </button>
 
               <Dialog.Close
                 aria-label="Close"
