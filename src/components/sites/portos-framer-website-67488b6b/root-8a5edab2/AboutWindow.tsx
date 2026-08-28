@@ -157,8 +157,14 @@ export function AboutWindow() {
             className="aspect-[330/371] w-full rounded-none object-cover min-[880px]:sticky min-[880px]:top-[94px] min-[880px]:aspect-auto min-[880px]:h-[371px] min-[880px]:w-[330px] min-[880px]:shrink-0 min-[880px]:self-start"
           />
 
-          {/* The 470px column — three children on the 52px rhythm. */}
-          <div className="flex w-full flex-col items-start gap-[52px] min-[880px]:w-[470px] min-[880px]:shrink-0">
+          {/* The text column. `flex-1` rather than the measured `w-[470px]`, and
+              that is not a loosening — it DERIVES the same 470. The content box
+              is 824, the portrait is a fixed 330, the gap is 24, so what is left
+              is exactly 470. Writing it as a constraint instead of a constant
+              means the column also absorbs the extra width when the window is
+              maximised, where a hard 470 would leave the row marooned in the
+              middle with the portrait. */}
+          <div className="flex w-full flex-col items-start gap-[52px] min-[880px]:flex-1">
             {/* Title Wrapper */}
             <div className="flex w-full flex-col items-start gap-8">
               {/* Intro */}

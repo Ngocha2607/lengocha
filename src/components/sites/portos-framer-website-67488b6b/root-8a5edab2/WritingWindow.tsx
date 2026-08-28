@@ -160,6 +160,11 @@ export function WritingWindow() {
   if (openSlug) {
     return (
       <div data-no-drag className="px-5 pt-[50px] pb-[60px]">
+        {/* The article deliberately does NOT follow `--portos-content-max`. Every
+            other window widens when maximised; prose should not. At 13px, 1112px
+            is roughly 150 characters a line, well past the point where the eye
+            loses its place returning to the left margin. This stays a reading
+            measure whatever the frame does. */}
         <div className="mx-auto w-full min-[880px]:max-w-[824px]">
           <button
             type="button"
@@ -217,7 +222,8 @@ export function WritingWindow() {
 
   return (
     <div className="px-5 pt-[50px] pb-[60px]">
-      <div className="mx-auto w-full min-[880px]:max-w-[824px]">
+      {/* The card list DOES follow the frame — cards are art, not prose. */}
+      <div className="mx-auto w-full min-[880px]:max-w-[var(--portos-content-max)]">
         <p className={LABEL_CLASS}>WRITING</p>
 
         {listError ? (
@@ -248,7 +254,7 @@ export function WritingWindow() {
                       alt=""
                       width={1200}
                       height={600}
-                      sizes="(min-width: 880px) 404px, 100vw"
+                      sizes="(min-width: 880px) 548px, 100vw"
                       className="h-full w-full object-cover transition-transform duration-300 ease-out group-hover:scale-[1.02]"
                     />
                   </div>

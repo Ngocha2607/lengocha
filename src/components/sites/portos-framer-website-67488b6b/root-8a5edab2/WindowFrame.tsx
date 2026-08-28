@@ -59,6 +59,30 @@ const MENU_BAR_HEIGHT = 29;
 const RESIZE_MS = 260;
 
 /**
+ * How wide the content column inside a window may grow, published to the body as
+ * `--portos-content-max`.
+ *
+ * 824 is measured: an 864px window less its 2 x 20px padding, which is exactly
+ * what the live site's content spans. Hard-coding it was fine until maximise
+ * existed — the window then goes to 100vw while the content stays at 824 and
+ * sits marooned in the middle. Measured at a maximised 1440px window: frame
+ * 1440, outer container 1152, content 824, cards 404, with ~300px of dead space
+ * either side.
+ *
+ * Maximised is `none`, not a bigger number. A first attempt used 1112 — what the
+ * template's own `max-w-[1152px]` outer container resolves to — but that outer
+ * container is a SECOND cap in the same chain, so the content still stopped
+ * 164px short of each edge and the window still read as padded. Both caps now
+ * read this one variable, so `none` releases the whole chain at once and the
+ * only thing left holding the content in is the window's own 20px padding.
+ *
+ * At the normal size this changes nothing measurable: the window is 864 wide, so
+ * the 1152 outer cap never bound anyway, and 824 is exactly 864 less padding.
+ */
+const CONTENT_MAX = "824px";
+const CONTENT_MAX_MAXIMIZED = "none";
+
+/**
  * Minimised windows keep this fraction of their original **area** — so 0.1 means
  * "shrunk by 90% of the original area", which is how the change was requested.
  *
@@ -215,6 +239,10 @@ export function WindowFrame({
         // element stays `left: 50%`, so only lengths change and the geometry can
         // transition smoothly instead of jumping.
         width: maximized ? "100vw" : width,
+        // Published to the subtree so a window's content can widen when the frame
+        // does. Without it maximise grows the chrome and leaves the content
+        // stranded at its 824px measured cap. See CONTENT_MAX.
+        "--portos-content-max": maximized ? CONTENT_MAX_MAXIMIZED : CONTENT_MAX,
         height: maximized ? `calc(100dvh - ${MENU_BAR_HEIGHT}px)` : height,
         top: maximized
           ? MENU_BAR_HEIGHT
@@ -245,7 +273,9 @@ export function WindowFrame({
         transition: dragging
           ? undefined
           : `width ${RESIZE_MS}ms ease, height ${RESIZE_MS}ms ease, top ${RESIZE_MS}ms ease, transform ${RESIZE_MS}ms ease`,
-      }}
+        // The cast is for `--portos-content-max`: React's CSSProperties has no
+        // index signature for custom properties, though it renders them fine.
+      } as React.CSSProperties}
       onPointerDown={onPointerDown}
     >
       {/* Zoom + fade wrapper. Separate from the positioning element above so the

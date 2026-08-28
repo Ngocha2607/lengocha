@@ -85,7 +85,7 @@ export function RecycleBinWindow() {
   return (
     <div className="pt-[50px]">
       {/* Container */}
-      <div className="mx-auto flex w-full max-w-[1152px] items-center justify-center px-5 pb-[60px]">
+      <div className="mx-auto flex w-full  items-center justify-center px-5 pb-[60px]">
         {/* Content */}
         <div className="flex w-full flex-col items-start justify-center gap-x-4 gap-y-5">
           {/* Menu Wrapper */}

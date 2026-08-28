@@ -190,7 +190,7 @@ function ProjectCardBody({ project, isList }: { project: Project; isList: boolea
           alt={project.alt}
           width={1913}
           height={912}
-          sizes={isList ? "(min-width: 880px) 824px, 100vw" : "(min-width: 880px) 404px, 100vw"}
+          sizes={isList ? "(min-width: 880px) 1112px, 100vw" : "(min-width: 880px) 548px, 100vw"}
           className="h-full w-full rounded-none object-cover transition-transform duration-300 ease-out group-hover:scale-[1.02]"
         />
       </div>
@@ -256,15 +256,15 @@ export function ProjectsWindow({ mode }: ProjectsWindowProps) {
   return (
     <div className="pt-[50px]">
       {/* Container */}
-      <div className="mx-auto flex w-full max-w-[1152px] items-center justify-center px-5 pb-[60px]">
+      <div className="flex w-full items-center justify-center px-5 pb-[60px]">
         {/* Content */}
         <div className="flex w-full flex-col items-center justify-center gap-16">
           <div
             className={cn(
               "grid w-full items-start gap-x-4 gap-y-10",
               isList
-                ? "grid-cols-1 min-[880px]:max-w-[824px]"
-                : "grid-cols-1 min-[880px]:grid-cols-2 min-[880px]:max-w-[824px]",
+                ? "grid-cols-1 min-[880px]:max-w-[var(--portos-content-max)]"
+                : "grid-cols-1 min-[880px]:grid-cols-2 min-[880px]:max-w-[var(--portos-content-max)]",
             )}
           >
             {PROJECTS.map((project) => {

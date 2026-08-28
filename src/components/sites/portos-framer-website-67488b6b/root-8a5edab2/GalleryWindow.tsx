@@ -83,9 +83,9 @@ export function GalleryWindow() {
   return (
     // Container. The 50px top gap is the live site's `Desktop` flex-column gap between
     // the sticky title bar and the body; WindowFrame renders children flush, so it lives here.
-    <div className="flex w-full max-w-[1152px] items-center justify-center px-5 pt-[50px] pb-[60px]">
+    <div className="flex w-full items-center justify-center px-5 pt-[50px] pb-[60px]">
       {/* Content */}
-      <div className="grid w-full grid-cols-1 gap-4 min-[521px]:grid-cols-2 min-[880px]:max-w-[824px] min-[880px]:grid-cols-4">
+      <div className="grid w-full grid-cols-1 gap-4 min-[521px]:grid-cols-2 min-[880px]:max-w-[var(--portos-content-max)] min-[880px]:grid-cols-4">
         {GALLERY_TILES.map((tile) => (
           <div key={tile.src} className={cn("w-full min-h-0 overflow-clip", SHOT_ASPECT)}>
             <Image
@@ -93,7 +93,7 @@ export function GalleryWindow() {
               alt={tile.alt}
               width={1913}
               height={912}
-              sizes="(min-width: 880px) 194px, (min-width: 521px) 50vw, 100vw"
+              sizes="(min-width: 880px) 266px, (min-width: 521px) 50vw, 100vw"
               className="h-full w-full rounded-none object-cover"
             />
           </div>
