@@ -166,7 +166,13 @@ function GalleryLightbox({
     <Dialog.Root open={open} onOpenChange={(next) => !next && onClose()}>
       <Dialog.Portal>
         <Dialog.Backdrop className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-[6px] transition-opacity duration-200 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0" />
-        <Dialog.Popup className="fixed inset-0 z-[61] flex flex-col items-center justify-center gap-4 p-6 outline-none transition-opacity duration-200 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0">
+        {/* The horizontal padding is the nav buttons: 24px inset plus their 44px
+            makes 68, and 88 leaves a 20px gap so the image never runs under one.
+            Below `sm` it drops back to 24 and the buttons float over the image
+            instead — reserving the gutter on a narrow screen would cost more
+            width than the overlap does, and buttons over the picture is the
+            usual pattern at that size anyway. */}
+        <Dialog.Popup className="fixed inset-0 z-[61] flex flex-col items-center justify-center gap-4 px-6 py-6 outline-none transition-opacity duration-200 sm:px-[88px] data-[ending-style]:opacity-0 data-[starting-style]:opacity-0">
           {tile !== null && index !== null ? (
             <>
               {/* The title is what a screen reader announces on open; it is the
@@ -180,10 +186,10 @@ function GalleryLightbox({
                 alt={tile.alt}
                 width={1913}
                 height={912}
-                sizes="92vw"
+                sizes="(min-width: 640px) calc(100vw - 176px), calc(100vw - 48px)"
                 quality={90}
                 priority
-                className="h-auto max-h-[82vh] w-auto max-w-[92vw] rounded-[10px] object-contain shadow-[0_24px_80px_rgba(0,0,0,0.5)]"
+                className="h-auto max-h-[82vh] w-auto max-w-full rounded-[10px] object-contain shadow-[0_24px_80px_rgba(0,0,0,0.5)]"
               />
 
               <p aria-hidden="true" className="font-sans text-[13px] leading-[18px] text-white/80">
