@@ -58,7 +58,9 @@ const PROJECTS: readonly Project[] = [
     tags: ["Next.js 14", "App Router", "Turborepo", "TanStack Query"],
     image: "project-lms-platform.png",
     alt: "SAPP Academy learning-management system dashboard",
-    writingSlug: "ban-lms-theo-module-kien-truc-plugin-trong-monorepo-next-js",
+    // Same article as the Operations card below, deliberately: these two ARE
+    // the "hai frontend" that write-up is about, so one piece covers both.
+    writingSlug: "ben-trong-sapp-lms-hai-frontend-mot-he-van-hanh-dao-tao",
   },
   {
     period: "2025 — Present",
