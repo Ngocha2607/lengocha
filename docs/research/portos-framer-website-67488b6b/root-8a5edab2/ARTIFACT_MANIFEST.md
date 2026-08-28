@@ -150,6 +150,27 @@ Notes:
 - **SEO artwork is now the owner's.** `seo/favicon.svg` and `seo/apple-touch-icon.png` were
   supplied by him; `seo/og-image.png` is a 1200x630 capture of this build's own desktop.
   `seo/favicon.png` (the template's) is left on disk, unreferenced.
+- **The Wallpaper window is gone; "Experience" holds the long-form career.** The template used
+  it for a four-image carousel that changed the desktop background. It now carries five role
+  cards — exact CV date ranges, what each job was, and what came out of it — carried across from
+  the career section of the owner's portfolio so the two stay in step. The app id was renamed
+  `wallpaper` -> `experience` across the contract, shell, desktop icons and WindowFrame notes,
+  and the desktop folder is relabelled to match.
+
+  It deliberately DISAGREES with the About timeline on order: that runs oldest-first because a
+  trajectory reads left to right, these run newest-first because that is what a reviewer wants
+  at the top. The About timeline is the five-second index; this is what it indexes.
+
+  The measured 720x596 geometry at `top: 89` is kept even though the contents changed, because
+  it leaves a 680px text column — a better reading width than the standard 864 window would give.
+  Verified: window renders 720x596 at 360,89, five cards, five outbound links, no horizontal
+  scroll.
+
+  Four wallpaper assets are now unreferenced — `wallpaper-01.png`, `wallpaper-03.png`,
+  `wallpaper-04.jpg` and `desktop-wallpaper.jpg` (the template forest, replaced as the desktop
+  background by `wallpaper-02.png`). All four are left on disk. Note that grepping for
+  `desktop-wallpaper.jpg` returns a hit in a DesktopShell comment, not in code — a filename
+  search alone will call it referenced when it is not.
 - **The Journal window is gone; "Writing" reads live from Notion.** The template's two-slide
   carousel plus six invented design essays is replaced by the owner's real Writing database —
   the same one behind lengocha.vercel.app/#writing — so editing a post in Notion updates this

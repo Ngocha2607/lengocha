@@ -14,7 +14,8 @@ import { PreLoader } from "./PreLoader";
 import { ProjectsToggle, ProjectsWindow, type ProjectsMode } from "./ProjectsWindow";
 import { RecycleBinWindow } from "./RecycleBinWindow";
 import { ResumeWindow } from "./ResumeWindow";
-import { WallpaperWindow } from "./WallpaperWindow";
+import { DecisionsWindow } from "./DecisionsWindow";
+import { ExperienceWindow } from "./ExperienceWindow";
 import { WindowFrame } from "./WindowFrame";
 
 interface WindowDef {
@@ -27,8 +28,10 @@ interface WindowDef {
 }
 
 /**
- * Measured on the live site. Every window is 864×630 at `top: 68` except Wallpaper,
- * which is 720×596 and sits 21px lower at `top: 89`.
+ * Measured on the live site. Every window is 864×630 at `top: 68` except one:
+ * the window the template used for Wallpaper, now Experience, which is 720×596
+ * and sits 21px lower at `top: 89`. The geometry is kept as measured even though
+ * its contents changed — 680px of text is a better reading width than 824.
  */
 const STANDARD: WindowGeometry = { width: 864, height: 630 };
 
@@ -42,7 +45,8 @@ const WINDOWS: Record<PortosAppId, WindowDef> = {
   resume: { title: "Resume", geometry: STANDARD, top: 68 },
   gallery: { title: "Gallery", geometry: STANDARD, top: 68 },
   recycleBin: { title: "Recycle Bin", geometry: STANDARD, top: 68 },
-  wallpaper: { title: "Wallpaper", geometry: { width: 720, height: 596 }, top: 89 },
+  experience: { title: "Experience", geometry: { width: 720, height: 596 }, top: 89 },
+  decisions: { title: "Highlights & Decisions", geometry: STANDARD, top: 68 },
 };
 
 const BASE_Z = 4;
@@ -88,17 +92,20 @@ export function DesktopShell() {
         return <GalleryWindow />;
       case "recycleBin":
         return <RecycleBinWindow />;
-      case "wallpaper":
-        return <WallpaperWindow />;
+      case "experience":
+        return <ExperienceWindow />;
+      case "decisions":
+        return <DecisionsWindow />;
     }
   };
 
   return (
     <div className="portos-root">
-      {/* Wallpaper — swapped on request from the template's forest
-          (`desktop-wallpaper.jpg`, 3840x2160) to the beach sunset already in the
-          Wallpaper window's carousel. That file stays on disk, unreferenced, so
-          switching back is a one-line change.
+      {/* Desktop background — swapped on request from the template's forest
+          (`desktop-wallpaper.jpg`, 3840x2160) to the beach sunset that used to be
+          one of four options in the Wallpaper window, before that window became
+          Experience. The forest stays on disk, unreferenced, so switching back is
+          a one-line change.
 
           Note the drop in source resolution: 1920x1080 against the old 3840x2160.
           `object-cover` upscales it on anything wider than 1920 or on a Retina

@@ -38,7 +38,7 @@ const DOCK_ITEMS: DockItem[] = [
     alt: "LinkedIn",
     href: "https://www.linkedin.com/in/ng%E1%BB%8Dc-h%C3%A0-l%C3%AA-886aa3228/",
   },
-  { name: "Notes", icon: `${PORTOS_ASSETS}/images/dock-notes.png`, alt: "Notes", app: "about" },
+  { name: "Notes", icon: `${PORTOS_ASSETS}/images/dock-notes.png`, alt: "Notes", app: "decisions" },
   {
     name: "GitHub",
     icon: `${PORTOS_ASSETS}/images/dock-github.svg`,

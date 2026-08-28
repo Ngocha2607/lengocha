@@ -104,7 +104,7 @@ export function ContactWindow() {
           </div>
 
           {/* Form & Contact */}
-          <div className="flex w-full flex-col items-start gap-10 min-[880px]:flex-row min-[880px]:justify-center">
+          <div className="flex w-full flex-col items-start gap-10 min-[880px]:flex-row min-[880px]:justify-between">
             {/* `data-no-drag` keeps typing and clicking inside the card from
                 starting a window drag — `WindowFrame` checks for it. */}
             <form
