@@ -1,6 +1,7 @@
 "use client";
 
 import { CircleCheck, FileText, Globe, Mail, MapPin } from "lucide-react";
+import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { GitHubGlyph, LinkedInGlyph } from "./SocialIcons";
 
@@ -55,6 +56,27 @@ const SOCIAL_LINKS = [
   },
 ] as const;
 
+/**
+ * Where the form actually delivers. FormSubmit's AJAX endpoint forwards the
+ * POST body to this inbox — no account, no API key. The address is no secret:
+ * it is already printed as a mailto link in the column beside the form.
+ *
+ * One-time setup: the FIRST submission makes FormSubmit email an activation
+ * link to this address; until it is clicked, submissions are held, not lost.
+ */
+const CONTACT_EMAIL = "ngocha2k0.ln@gmail.com";
+const FORMSUBMIT_ENDPOINT = `https://formsubmit.co/ajax/${CONTACT_EMAIL}`;
+
+type SendStatus = "idle" | "sending" | "sent" | "error";
+
+/** What the submit button reads in each state — both stacked copies of it. */
+const BUTTON_LABEL: Record<SendStatus, string> = {
+  idle: "Send Message",
+  sending: "Sending…",
+  sent: "Send Message",
+  error: "Send Message",
+};
+
 /** Every icon in the right column renders at this size. */
 const ICON_CLASS = "size-[13px] shrink-0";
 
@@ -77,14 +99,55 @@ const SLIDE_TRANSITION = "transition-transform duration-300 ease-[ease]";
  * hover the inner column slides up by exactly one step (35px on the button,
  * 24px on the links) so the second copy replaces the first.
  *
- * Submitting is out of scope: there is no backend, so `onSubmit` only calls
- * `preventDefault()`. Native `required` still runs first, so the browser's own
- * validation bubbles are the only validation UI.
+ * Submitting DELIVERS: the form posts to FormSubmit's AJAX endpoint (see
+ * `FORMSUBMIT_ENDPOINT`), which forwards the message to the owner's inbox.
+ * Native `required` still runs first, so the browser's own validation bubbles
+ * remain the pre-flight validation UI; a status line under the button carries
+ * the sent/error outcome, with a mailto fallback when the service is down.
  *
  * Below 880px the live site clips rather than reflows; stacking the two columns
  * and stepping the 72px heading down is our own graceful fallback.
  */
 export function ContactWindow() {
+  const [status, setStatus] = useState<SendStatus>("idle");
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (status === "sending") return;
+
+    const form = event.currentTarget;
+    const data = new FormData(form);
+    // A filled honeypot means a bot; drop the submission silently.
+    if (data.get("_honey")) return;
+
+    setStatus("sending");
+    try {
+      const response = await fetch(FORMSUBMIT_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({
+          // The field names carry the live site's odd casing (see
+          // CONTACT_FIELDS); they are mapped to plain keys here so the email
+          // that lands in the inbox reads normally.
+          name: data.get("Name"),
+          email: data.get("EMAIL"),
+          message: data.get("MESSAGE"),
+          _subject: "Portfolio contact — lengocha.vercel.app",
+          // A table-layout email instead of raw key/value lines.
+          _template: "table",
+          // The AJAX endpoint cannot show FormSubmit's captcha page, so it
+          // must be off; the honeypot above is the spam gate instead.
+          _captcha: "false",
+        }),
+      });
+      if (!response.ok) throw new Error(`FormSubmit responded ${response.status}`);
+      form.reset();
+      setStatus("sent");
+    } catch {
+      setStatus("error");
+    }
+  };
+
   return (
     <div className="pt-[50px]">
       {/* Container */}
@@ -109,9 +172,21 @@ export function ContactWindow() {
                 starting a window drag — `WindowFrame` checks for it. */}
             <form
               data-no-drag
-              onSubmit={(event) => event.preventDefault()}
+              onSubmit={handleSubmit}
               className="flex w-full flex-col items-start gap-8 bg-white p-5 min-[880px]:w-[533px] min-[880px]:shrink-0"
             >
+              {/* Honeypot — invisible to people (and to their screen readers),
+                  filled by form bots. `handleSubmit` drops any submission that
+                  carries a value here, and FormSubmit checks `_honey` too. */}
+              <input
+                type="text"
+                name="_honey"
+                tabIndex={-1}
+                autoComplete="off"
+                aria-hidden="true"
+                className="hidden"
+              />
+
               {/* All Forms */}
               <div className="flex w-full flex-col gap-6">
                 {CONTACT_FIELDS.map((field) => (
@@ -155,7 +230,8 @@ export function ContactWindow() {
               {/* Submit — two stacked copies 35px apart, clipped down to one. */}
               <button
                 type="submit"
-                className="group flex h-[41px] w-[191px] shrink-0 cursor-pointer items-center justify-center overflow-clip rounded-[40px] bg-black px-[54px] py-3"
+                disabled={status === "sending"}
+                className="group flex h-[41px] w-[191px] shrink-0 cursor-pointer items-center justify-center overflow-clip rounded-[40px] bg-black px-[54px] py-3 disabled:cursor-default disabled:opacity-70"
               >
                 <span className="flex h-[16.8px] w-full flex-col items-center overflow-clip">
                   <span
@@ -165,17 +241,44 @@ export function ContactWindow() {
                     )}
                   >
                     <span className="font-sans text-[12px] font-normal leading-[16.8px] whitespace-nowrap text-white">
-                      Send Message
+                      {BUTTON_LABEL[status]}
                     </span>
                     <span
                       aria-hidden="true"
                       className="font-sans text-[12px] font-normal leading-[16.8px] whitespace-nowrap text-white"
                     >
-                      Send Message
+                      {BUTTON_LABEL[status]}
                     </span>
                   </span>
                 </span>
               </button>
+
+              {/* Outcome line — a persistent polite live region, so the
+                  announcement lands reliably when the send settles. While empty
+                  it takes no space (`h-0` plus a margin cancelling the form's
+                  own gap), keeping the idle form at its measured height. */}
+              <p
+                aria-live="polite"
+                className={cn(
+                  "font-sans text-[12px] leading-[16.8px]",
+                  status === "sent" || status === "error" ? "-mt-4" : "-mt-8 h-0",
+                )}
+              >
+                {status === "sent" ? (
+                  <span className="text-os-green">
+                    Đã gửi thành công — tôi sẽ phản hồi sớm nhất có thể.
+                  </span>
+                ) : null}
+                {status === "error" ? (
+                  <span className="text-[#a03225]">
+                    Gửi không thành công. Vui lòng gửi trực tiếp tới{" "}
+                    <a href={`mailto:${CONTACT_EMAIL}`} className="underline">
+                      {CONTACT_EMAIL}
+                    </a>
+                    .
+                  </span>
+                ) : null}
+              </p>
             </form>
 
             {/* All Contact Details */}

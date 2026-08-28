@@ -2,7 +2,12 @@
 
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import { PORTOS_ASSETS, PORTOS_PROFILES, type DockItem, type PortosAppId } from "@/types/portos";
+import {
+  PORTOS_ASSETS,
+  PORTOS_PROFILES,
+  type DockItem,
+  type PortosAppId,
+} from "@/types/portos";
 
 interface DockProps {
   /**
@@ -18,31 +23,38 @@ interface DockProps {
 const DOCK_ITEMS: DockItem[] = [
   {
     name: "Finder",
-    icon: `${PORTOS_ASSETS}/images/dock-finder.png`,
+    icon: `${PORTOS_ASSETS}/images/dock-launchpad.png`,
     alt: "Finder",
     app: "projects",
     tooltip: "Projects",
   },
   {
     name: "Launchpad",
-    icon: `${PORTOS_ASSETS}/images/dock-launchpad.png`,
+    icon: `${PORTOS_ASSETS}/images/dock-finder.png`,
     alt: "Launchpad",
     app: "writing",
     tooltip: "Writing",
   },
   {
     name: "Contacts",
-    icon: `${PORTOS_ASSETS}/images/dock-contacts.png`,
+    icon: `${PORTOS_ASSETS}/images/dock-messages.png`,
     alt: "Contacts",
     app: "contact",
     tooltip: "Contact",
   },
   {
     name: "Messages",
-    icon: `${PORTOS_ASSETS}/images/dock-messages.png`,
+    icon: `${PORTOS_ASSETS}/images/dock-contacts.png`,
     alt: "Messages",
     app: "resume",
     tooltip: "Resume",
+  },
+  {
+    name: "Notes",
+    icon: `${PORTOS_ASSETS}/images/dock-notes.png`,
+    alt: "Notes",
+    app: "decisions",
+    tooltip: "Leadership & Technical Decisions",
   },
   // The template's two external icons pointed at its own author's Instagram and
   // Framer profiles. Swapped for Lê Ngọc Hà's real profiles — and the icons swapped
@@ -52,13 +64,6 @@ const DOCK_ITEMS: DockItem[] = [
     icon: `${PORTOS_ASSETS}/images/dock-linkedin.svg`,
     alt: "LinkedIn",
     href: PORTOS_PROFILES.linkedin,
-  },
-  {
-    name: "Notes",
-    icon: `${PORTOS_ASSETS}/images/dock-notes.png`,
-    alt: "Notes",
-    app: "decisions",
-    tooltip: "Leadership & Technical Decisions",
   },
   {
     name: "GitHub",
@@ -89,7 +94,8 @@ const ICON_BASE =
   "block shrink-0 cursor-pointer rounded-none transition-transform duration-200 ease-[ease-out] hover:scale-90";
 
 /** 34px on mobile, 73px on tablet, 76px on desktop. */
-const APP_ICON_SIZE = "size-[34px] min-[810px]:size-[73px] min-[1200px]:size-[76px]";
+const APP_ICON_SIZE =
+  "size-[34px] min-[810px]:size-[73px] min-[1200px]:size-[76px]";
 
 /**
  * The hover label macOS puts above a dock icon.
@@ -192,7 +198,10 @@ function DockIcon({
       alt={item.alt}
       width={76}
       height={76}
-      className={cn("h-full w-full rounded-none object-contain", ICON_INSET[item.name])}
+      className={cn(
+        "h-full w-full rounded-none object-contain",
+        ICON_INSET[item.name],
+      )}
     />
   );
 
@@ -229,7 +238,10 @@ function DockIcon({
     // and it is what `group-hover` keys off — the control itself scales to 0.9
     // on hover, and a tooltip inside it would shrink along with it.
     <div
-      className={cn("group relative flex shrink-0", item.hideOnMobile && "max-[809px]:hidden")}
+      className={cn(
+        "group relative flex shrink-0",
+        item.hideOnMobile && "max-[809px]:hidden",
+      )}
     >
       {control}
       {/* Decorative: the control already carries the same text as `aria-label`. */}
@@ -275,7 +287,12 @@ export function Dock({ onOpen, dimmed = false }: DockProps) {
         )}
       >
         {DOCK_ITEMS.map((item) => (
-          <DockIcon key={item.name} item={item} sizeClass={APP_ICON_SIZE} onOpen={onOpen} />
+          <DockIcon
+            key={item.name}
+            item={item}
+            sizeClass={APP_ICON_SIZE}
+            onOpen={onOpen}
+          />
         ))}
       </div>
       <div
