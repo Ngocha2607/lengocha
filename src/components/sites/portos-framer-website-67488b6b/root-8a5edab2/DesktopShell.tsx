@@ -142,7 +142,7 @@ export function DesktopShell() {
       {/* Constant scrim — measured at rgba(0,0,0,0.24) whether or not a window is open. */}
       <div className="absolute inset-0 bg-black/24" aria-hidden="true" />
 
-      <MenuBar />
+      <MenuBar onOpen={openWindow} />
 
       {/* Desktop container: inset 50px (desktop) / 30px (tablet) / 20px (mobile),
           24px from the bottom at every breakpoint. At the desktop breakpoint only, the
@@ -161,6 +161,7 @@ export function DesktopShell() {
         return (
           <WindowFrame
             key={app}
+            app={app}
             title={def.title}
             width={def.geometry.width}
             height={def.geometry.height}

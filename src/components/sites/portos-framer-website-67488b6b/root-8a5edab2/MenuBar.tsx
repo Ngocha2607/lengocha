@@ -3,10 +3,13 @@
 import Image from "next/image";
 import { useSyncExternalStore } from "react";
 import { cn } from "@/lib/utils";
-import { PORTOS_ASSETS } from "@/types/portos";
+import { type PortosAppId, PORTOS_ASSETS } from "@/types/portos";
+import { AppleMenu } from "./AppleMenu";
 
 interface MenuBarProps {
   name?: string;
+  /** Lets the logo menu open the same windows the dock and folders do. */
+  onOpen: (app: PortosAppId) => void;
 }
 
 interface Clock {
@@ -92,13 +95,14 @@ function getServerClockSnapshot(): Clock | null {
 }
 
 /**
- * macOS menu bar pinned to the top of the desktop. Nothing here is interactive on
- * the live site — the icon "buttons" are plain boxes, not focusable controls — apart
- * from the clock, which shows the visitor's local date and time.
+ * macOS menu bar pinned to the top of the desktop. On the live site nothing here
+ * was interactive — the icon "buttons" are plain boxes, not focusable controls —
+ * and the four status icons on the right still are not. The clock shows the
+ * visitor's local date and time, and the logo is now a real menu; see AppleMenu.
  *
  * Below 810px only the wifi icon and the time survive.
  */
-export function MenuBar({ name = "Lê Ngọc Hà" }: MenuBarProps) {
+export function MenuBar({ name = "Lê Ngọc Hà", onOpen }: MenuBarProps) {
   const clock = useSyncExternalStore(subscribeToClock, getClockSnapshot, getServerClockSnapshot);
 
   return (
@@ -106,15 +110,7 @@ export function MenuBar({ name = "Lê Ngọc Hà" }: MenuBarProps) {
       <div className="flex h-[29px] w-full items-center justify-between overflow-clip bg-black/10 pb-[2px] pl-[4px] pr-[11px] pt-[3px] backdrop-blur-[82px]">
         {/* Icon & Name */}
         <div className="flex items-center gap-[3px]">
-          <div className={ICON_BOX}>
-            <Image
-              src={`${PORTOS_ASSETS}/seo/favicon.svg`}
-              alt=""
-              width={13}
-              height={16}
-              className={ICON_IMAGE}
-            />
-          </div>
+          <AppleMenu onOpen={onOpen} />
           <p className="whitespace-pre font-display text-[12px] font-bold leading-[18px] tracking-normal text-white">
             {name}
           </p>

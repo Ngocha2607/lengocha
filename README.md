@@ -53,7 +53,7 @@ everything else works untouched.
 
 | Variable | Purpose |
 | --- | --- |
-| `SITE_URL` | Absolute OG and canonical URLs |
+| `NEXT_PUBLIC_SITE_URL` | Absolute OG and canonical URLs |
 | `NOTION_TOKEN` | Internal integration secret |
 | `NOTION_WRITING_DB_ID` | Database backing the Writing window |
 
