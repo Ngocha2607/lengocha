@@ -6,6 +6,32 @@ import { cn } from "@/lib/utils";
 import { PORTOS_ASSETS } from "@/types/portos";
 
 const BG_SRC = `${PORTOS_ASSETS}/images/preloader-bg.png`;
+/**
+ * `200vw` is deliberately not the layout width, and that is the point.
+ *
+ * `sizes` is what `next/image` uses to pick a width off its ladder, and it
+ * describes LAYOUT size — which here is one viewport. But the intro animates
+ * this layer from `scale(3)`, so for the first second the bitmap is painted
+ * three viewports wide. Declaring `100vw` fetched w=1920 for a 1440 viewport
+ * and then stretched it across 4320px: a 2.25x upscale, which is the blur.
+ * Asking for two viewports takes it to 2880, which rounds up to 3840 — the top
+ * of the ladder, and so the most real pixels there are to put behind the zoom.
+ * Anything wider resolves to the same 3840; `200vw` is simply where it lands.
+ *
+ * Both copies use it so they resolve to one URL and one download.
+ */
+const BG_SIZES = "200vw";
+
+/**
+ * 90 rather than the default 75.
+ *
+ * This wallpaper is dark and smooth — mean brightness 44/255, standard
+ * deviation 23 — which is exactly the content WebP bands worst on, and q75
+ * squeezed a 1920-wide render to 24KB. At q90 and 3840 wide it is ~186KB.
+ * That is a real cost on the first paint, and it buys the one full-screen
+ * image every visitor sees before anything else.
+ */
+const BG_QUALITY = 90;
 
 /** Verbatim copy from the live site. The apostrophe is a straight U+0027. */
 const HEADING_KICKER = "Hey, I'm Hà! Welcome to my";
@@ -119,7 +145,15 @@ export function PreLoader({ onFinish }: PreLoaderProps) {
               transition: reduced ? undefined : `border-radius ${EXIT_DURATION}ms ${EASE}`,
             }}
           >
-            <Image src={BG_SRC} alt="" fill priority sizes="100vw" className="object-cover" />
+            <Image
+              src={BG_SRC}
+              alt=""
+              fill
+              priority
+              sizes={BG_SIZES}
+              quality={BG_QUALITY}
+              className="object-cover"
+            />
 
             {/* content-container — carries the scale(3) → scale(1) entrance. */}
             <div
@@ -128,7 +162,14 @@ export function PreLoader({ onFinish }: PreLoaderProps) {
                 !reduced && "portos-preloader-content",
               )}
             >
-              <Image src={BG_SRC} alt="" fill sizes="100vw" className="object-cover" />
+              <Image
+                src={BG_SRC}
+                alt=""
+                fill
+                sizes={BG_SIZES}
+                quality={BG_QUALITY}
+                className="object-cover"
+              />
 
               <div className="flex items-center justify-center">
                 {/* Title Wrapper */}
