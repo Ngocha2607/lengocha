@@ -133,7 +133,7 @@ export function DesktopShell() {
         fill
         loading="eager"
         fetchPriority="low"
-        sizes="100vw"
+        sizes="150vw"
         quality={90}
         placeholder="blur"
         blurDataURL={MOUNTAIN_BLUR}

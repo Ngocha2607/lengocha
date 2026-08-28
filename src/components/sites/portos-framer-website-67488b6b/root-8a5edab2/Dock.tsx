@@ -86,8 +86,7 @@ const ICON_BASE =
 const APP_ICON_SIZE = "size-[34px] min-[810px]:size-[73px] min-[1200px]:size-[76px]";
 
 /**
- * The hover label, in the style macOS puts above a dock icon: a small light
- * plate on a dark bar.
+ * The hover label macOS puts above a dock icon.
  *
  * `pointer-events-none` matters — the plate sits directly over the icon above
  * it in the stack, and without it hovering the label would count as leaving the
@@ -96,14 +95,18 @@ const APP_ICON_SIZE = "size-[34px] min-[810px]:size-[73px] min-[1200px]:size-[76
  * Shown on keyboard focus too, via `group-has-[:focus-visible]`, because the
  * focus lands on the control INSIDE the group rather than on the group itself.
  *
- * OPAQUE on purpose, where a first pass used a translucent plate. The caret
- * below is a separate box that overlaps the plate's bottom edge, so with any
- * alpha the overlap would stack and draw a visible seam across the join.
+ * The offset is measured, not guessed. The requirement is that the caret's tip
+ * clears the dock bar by 8px, and the plate is anchored to the ICON, which sits
+ * a different distance below the bar's top edge at each breakpoint: 9px on
+ * mobile and desktop, where the bar's 9px padding exactly contains the icons,
+ * but 10.5px on tablet, where 73px icons are centred in the same 94px bar.
+ * So the margin is that offset, plus the 8px gap, plus the caret's 6px height.
  */
 const TOOLTIP_CLASS =
-  "pointer-events-none absolute bottom-full left-1/2 z-10 mb-[10px] -translate-x-1/2 " +
-  "rounded-[6px] border border-black/10 bg-[#f5f5f7] px-[10px] py-[3px] " +
-  "font-sans text-[12px] leading-[17px] whitespace-nowrap text-black/85 " +
+  "pointer-events-none absolute bottom-full left-1/2 z-10 -translate-x-1/2 " +
+  "mb-[23px] min-[810px]:mb-[24.5px] min-[1200px]:mb-[23px] " +
+  "rounded-[6px] bg-black/20 px-[20px] py-[12px] " +
+  "font-sans text-[12px] leading-[17px] whitespace-nowrap text-[#e5e5e5] " +
   "shadow-[0_2px_10px_rgba(0,0,0,0.22)] " +
   "opacity-0 transition-opacity duration-150 ease-out " +
   "group-hover:opacity-100 group-has-[:focus-visible]:opacity-100";
@@ -111,17 +114,20 @@ const TOOLTIP_CLASS =
 /**
  * The caret that points down at the icon.
  *
- * A square rotated 45 degrees, centred on the plate's bottom edge so only its
- * lower half shows. `border-r` and `border-b` are the two edges that end up
- * facing out once rotated, which is what continues the plate's own border
- * around the point instead of stopping at it.
+ * A border triangle sitting flush BELOW the plate, where an earlier pass used a
+ * square rotated 45 degrees and overlapping the plate's bottom edge. That only
+ * worked while the plate was opaque: now that it is `black/60`, any overlap
+ * would stack two translucent layers and draw a darker band across the join.
+ * Flush and non-overlapping keeps one uniform alpha through the whole shape.
+ *
+ * Its 6px height is what the plate's bottom margin above accounts for.
  *
  * The plate is `absolute`, and an absolutely positioned box is itself a
  * containing block, so this needs no extra `relative` to anchor against.
  */
 const TOOLTIP_CARET_CLASS =
-  "absolute top-full left-1/2 size-[8px] -translate-x-1/2 -translate-y-1/2 rotate-45 " +
-  "border-r border-b border-black/10 bg-[#f5f5f7]";
+  "absolute top-full left-1/2 h-0 w-0 -translate-x-1/2 " +
+  "border-x-[6px] border-x-transparent border-t-[6px] border-t-black/60";
 
 /** 34px on mobile, 76px from tablet up — the trash never shrinks to 73. */
 const TRASH_ICON_SIZE = "size-[34px] min-[810px]:size-[76px]";
