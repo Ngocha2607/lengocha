@@ -17,6 +17,21 @@ interface WindowFrameProps {
   titleBarAccessory?: React.ReactNode;
   /** The About window is the one window whose title uses Inter, not SF Pro Display. */
   titleFont?: "sf" | "inter";
+  /**
+   * Where this window sits in the cascade, in pixels down and right of the
+   * measured position. Seeds the drag offset rather than the `top` prop so a
+   * window that is then dragged keeps one source of truth for its position.
+   */
+  cascadeOffset?: number;
+  /**
+   * Bumped by the shell every time this window's dock icon is clicked. A
+   * minimised window restores itself in response.
+   *
+   * A signal rather than a `minimized` prop because the mode lives here: the
+   * shell knows the icon was clicked, but not whether this window is parked, and
+   * lifting the whole mode up would drag the genie's timing with it.
+   */
+  restoreSignal?: number;
   /** Which app this window is, so the genie knows which dock icon to aim at. */
   app?: PortosAppId;
   onClose: () => void;
@@ -181,13 +196,15 @@ export function WindowFrame({
   top,
   titleBarAccessory,
   titleFont = "sf",
+  cascadeOffset = 0,
+  restoreSignal = 0,
   app,
   onClose,
   onFocus,
   zIndex,
   children,
 }: WindowFrameProps) {
-  const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const [offset, setOffset] = useState({ x: cascadeOffset, y: cascadeOffset });
   const [dragging, setDragging] = useState(false);
   // Read once, on the first render, rather than in an effect. An effect would
   // let the genie measure the window at its normal size a frame before it
@@ -350,6 +367,19 @@ export function WindowFrame({
     },
     [mode, normalRect, onFocus, parkedRect],
   );
+
+  // Clicking a dock icon for a parked window puts it back. Held in refs so the
+  // effect depends on the signal alone — depending on `mode` or on `toggleMode`
+  // would re-fire it on every unrelated change and pop the window open again.
+  const modeRef = useRef(mode);
+  modeRef.current = mode;
+  const toggleModeRef = useRef(toggleMode);
+  toggleModeRef.current = toggleMode;
+  useEffect(() => {
+    if (restoreSignal === 0) return;
+    if (modeRef.current !== "minimized") return;
+    toggleModeRef.current("minimized");
+  }, [restoreSignal]);
 
   const onPointerDown = useCallback(
     (event: React.PointerEvent<HTMLDivElement>) => {
