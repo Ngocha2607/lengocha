@@ -58,6 +58,23 @@ const HANDOVER_MS = 48;
  */
 const STAGGER = 0.55;
 
+/**
+ * How far each band paints past its own bottom edge, in destination pixels.
+ *
+ * The bands meet exactly — the maths puts band i's bottom where band i+1's top
+ * lands, measured at 0.23px across a whole flight. Exactly is not enough. Each
+ * band is composited as its own layer, so both antialias the shared edge: two
+ * halves of coverage compose to about three quarters, and the remaining quarter
+ * is the backdrop showing through as a hairline. Against a dark desktop that
+ * reads as a black line drawn across the window.
+ *
+ * A band is overlapped rather than a gap closed, because the band below is
+ * painted after and covers the overlap completely. Only bands with a neighbour
+ * get it: the last one keeps its exact height, so the flight still ends on the
+ * target rect to the pixel, which is what stops the hand-over jumping.
+ */
+const SEAM_OVERLAP = 1;
+
 /** Sampled positions along the flight. Keyframes are cheap; only bands cost. */
 const STEPS = 18;
 
@@ -245,7 +262,13 @@ export function runGenie({
         offset: p,
         transform:
           `translate(${cTop.toFixed(2)}px, ${ty.toFixed(2)}px) ` +
-          trapezoid(bandH, sTop, sBottom, Math.max(destBottom - destTop, 0.01), cBottom - cTop),
+          trapezoid(
+            bandH,
+            sTop,
+            sBottom,
+            Math.max(destBottom - destTop, 0.01) + (i < SLICES - 1 ? SEAM_OVERLAP : 0),
+            cBottom - cTop,
+          ),
       });
     }
 
