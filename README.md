@@ -19,16 +19,12 @@ Give your AI coding agent a URL and watch it recreate the website as a clean Nex
 <br />
 <sub><strong>SPONSORED BY</strong></sub>
 <br /><br />
-<a href="https://www.rapidproxy.io/?ref=JCM"><img src="docs/assets/sponsors/rapidproxy-banner.png" alt="RapidProxy residential proxy service" width="680" /></a>
+<a href="https://www.rapidproxy.io/?ref=JCM"><strong>RapidProxy</strong></a>
 <br />
 <sub>Power your scraping and automation with 90M+ residential IPs, 500MB free traffic, and non-expiring bandwidth. <a href="https://www.rapidproxy.io/?ref=JCM">Explore RapidProxy →</a></sub>
 <br /><br />
 <a href="https://www.atlascloud.ai/?utm_source=github&amp;utm_medium=sponsor&amp;utm_campaign=ai-website-cloner-template">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/sponsors/atlas-cloud-logo-white.svg" />
-    <source media="(prefers-color-scheme: light)" srcset="docs/assets/sponsors/atlas-cloud-logo.svg" />
-    <img src="docs/assets/sponsors/atlas-cloud-logo.svg" alt="Atlas Cloud" width="240" />
-  </picture>
+  <strong>Atlas Cloud</strong>
 </a>
 <br />
 <sub>Generate AI images, video, audio, and 3D assets through one API. <a href="https://www.atlascloud.ai/?utm_source=github&amp;utm_medium=sponsor&amp;utm_campaign=ai-website-cloner-template">Explore Atlas Cloud →</a></sub>
@@ -39,9 +35,7 @@ Give your AI coding agent a URL and watch it recreate the website as a clean Nex
 
 ## Demo
 
-[![Watch the demo](docs/design-references/comparison.png)](https://youtu.be/O669pVZ_qr0)
-
-> Click the image above to watch the full demo on YouTube.
+[**Watch the full demo on YouTube →**](https://youtu.be/O669pVZ_qr0)
 
 ## Quick Start
 
@@ -205,7 +199,7 @@ Each script regenerates the platform-specific copies automatically. Agents that 
 
 ## Star History
 
-![Star History Chart](docs/assets/star-history.png)
+[![Star History Chart](https://api.star-history.com/svg?repos=JamesCanning/ai-website-cloner-template&type=Date)](https://star-history.com/#JamesCanning/ai-website-cloner-template&Date)
 
 ## License
 
