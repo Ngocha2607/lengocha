@@ -10,7 +10,7 @@ interface WindowFrameProps {
   /** Hard-cornered window box, matching the live site's per-app size. */
   width: number;
   height: number;
-  /** Distance from the top of the viewport. 68px for every window except Wallpaper (89px). */
+  /** Distance from the top of the viewport. 68px for every window except Experience (89px). */
   top: number;
   /** Rendered at the right edge of the title bar (the Projects Masonry/Grid toggle). */
   titleBarAccessory?: React.ReactNode;
@@ -84,7 +84,7 @@ type WindowMode = "normal" | "maximized" | "minimized";
  * `portos-window-out` keyframes in globals.css.
  *
  * The 0.8 is measured, not chosen. Caught repeatedly mid-animation on the live
- * site: an 864x630 window renders at `691x504`, and the 720x596 Wallpaper window
+ * site: an 864x630 window renders at `691x504`, and the 720x596 Experience window
  * at `576x476` — both exactly 0.8, both centred on the same point the settled
  * window occupies (720,383 at 1440x900).
  *

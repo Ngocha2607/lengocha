@@ -16,7 +16,7 @@ interface DesktopIconButtonProps {
 const FOLDER_SRC = `${PORTOS_ASSETS}/images/folder.png`;
 
 const ABOUT: DesktopIcon = { label: "About", app: "about" };
-const WALLPAPER: DesktopIcon = { label: "Wallpaper", app: "wallpaper" };
+const EXPERIENCE: DesktopIcon = { label: "Experience", app: "experience" };
 const PROJECTS: DesktopIcon = { label: "Projects", app: "projects" };
 
 /**
@@ -48,17 +48,17 @@ function DesktopIconButton({ icon, onOpen }: DesktopIconButtonProps) {
 }
 
 /**
- * The three folders sitting on the desktop wallpaper: About and Wallpaper on a
+ * The three folders sitting on the desktop wallpaper: About and Experience on a
  * `space-between` row, Projects on its own left-aligned row 85px below (30px
  * below 810px, where the row also loses its 100px right padding).
  */
 export function DesktopIcons({ onOpen }: DesktopIconsProps) {
   return (
     <div className="flex w-full flex-col items-start justify-center gap-[85px] overflow-clip max-[809px]:gap-[30px]">
-      {/* About & Wallpaper Card */}
+      {/* About & Experience Card — the live site's layer name said Wallpaper. */}
       <div className="flex h-[78.59px] w-full flex-row items-center justify-between pr-[100px] max-[809px]:pr-0">
         <DesktopIconButton icon={ABOUT} onOpen={onOpen} />
-        <DesktopIconButton icon={WALLPAPER} onOpen={onOpen} />
+        <DesktopIconButton icon={EXPERIENCE} onOpen={onOpen} />
       </div>
       {/* "Journal File & Title Wrapper" — the live site's own Framer layer name,
           kept for provenance. It holds the Projects icon, not a journal, and the
