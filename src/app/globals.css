@@ -209,45 +209,6 @@
   }
 }
 
-/* Windows open with a centred zoom + fade — see WindowFrame.tsx.
-
-   This is applied to WindowFrame's inner wrapper, never to the positioning
-   element. That element's `transform` carries the window's -50% centring and its
-   drag offset, and a keyframe animating `transform` there would replace that
-   whole value for the animation's duration, dropping the centring so the window
-   appeared to fly in from the right. Keeping the scale on a separate wrapper
-   lets the two compose instead of fighting.
-
-   The entrance is CSS rather than JS because `requestAnimationFrame` is
-   throttled to roughly 1fps in a background tab, which left the window stuck at
-   opacity 0 until the tab regained focus. */
-@keyframes portos-window-in {
-  from {
-    opacity: 0;
-    transform: scale(0.8);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-/* The exit is a keyframe rather than a `transition`, deliberately. Swapping the
-   entrance animation out for a transition in the same React render does not start
-   a transition: the browser has no stable "before" value to interpolate from,
-   because the value it would use was itself being supplied by the animation's
-   `both` fill. The window then jumped straight to opacity 0 with no fade. Two
-   symmetric keyframes avoid the interaction entirely. */
-@keyframes portos-window-out {
-  from {
-    opacity: 1;
-    transform: scale(1);
-  }
-  to {
-    opacity: 0;
-    transform: scale(0.8);
-  }
-}
 
 @media (prefers-reduced-motion: reduce) {
   .portos-root *,

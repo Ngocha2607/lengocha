@@ -161,6 +161,7 @@ export function DesktopShell() {
         return (
           <WindowFrame
             key={app}
+            app={app}
             title={def.title}
             width={def.geometry.width}
             height={def.geometry.height}

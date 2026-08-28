@@ -3,7 +3,8 @@
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
-import { PORTOS_ASSETS } from "@/types/portos";
+import { prefersReducedMotion, runGenie } from "./genie";
+import { PORTOS_ASSETS, type PortosAppId } from "@/types/portos";
 
 interface WindowFrameProps {
   title: string;
@@ -16,6 +17,8 @@ interface WindowFrameProps {
   titleBarAccessory?: React.ReactNode;
   /** The About window is the one window whose title uses Inter, not SF Pro Display. */
   titleFont?: "sf" | "inter";
+  /** Which app this window is, so the genie knows which dock icon to aim at. */
+  app?: PortosAppId;
   onClose: () => void;
   onFocus: () => void;
   zIndex: number;
@@ -103,27 +106,50 @@ const MINIMIZED_MARGIN = 16;
 type WindowMode = "normal" | "maximized" | "minimized";
 
 /**
- * Open and close are a centred zoom + fade: `scale(0.8) -> scale(1)` together with
- * `opacity 0 -> 1`, and the reverse on close. See the `portos-window-in` /
- * `portos-window-out` keyframes in globals.css.
+ * Open and close are the macOS genie — see `genie.ts` for why the warp cannot
+ * be a keyframe, and for the cost of doing it with clones.
  *
- * The 0.8 is measured, not chosen. Caught repeatedly mid-animation on the live
- * site: an 864x630 window renders at `691x504`, and the 720x596 Experience window
- * at `576x476` — both exactly 0.8, both centred on the same point the settled
- * window occupies (720,383 at 1440x900).
+ * This REPLACES the live site's own transition, which is worth recording since
+ * the rest of this file is transcribed from it. That was a centred zoom + fade:
+ * `scale(0.8) -> scale(1)` with `opacity 0 -> 1`, reversed on close, over
+ * roughly 300ms. The 0.8 was measured rather than chosen — an 864x630 window
+ * caught mid-animation renders at 691x504, and the 720x596 Experience window at
+ * 576x476, both exactly 0.8 about the settled window's own centre. The duration
+ * never could be read exactly: the live container declares `transition: all`
+ * with no time or curve, and Framer drives it in a way that leaves
+ * `getAnimations()` empty.
  *
- * Duration and easing could NOT be read exactly. The live container declares
- * `transition: all` with no time or curve, so browser defaults apply, and Framer
- * drives the values in a way that leaves `getAnimations()` empty. `ease` is what
- * `transition: all` resolves to; 300ms matches the observed feel. These two
- * constants are the only numbers to tune if the timing needs adjusting.
+ * The `portos-window-in` / `portos-window-out` keyframes that implemented it have
+ * been removed from globals.css.
  *
- * The pre-loader's `cubic-bezier(0.86, 0, 0.14, 1)` is deliberately NOT reused
- * here: it stays below 0.1 opacity for roughly the first 60% of its run, which
- * over 300ms reads as an abrupt pop rather than a fade.
+ * That CSS carried a warning worth carrying forward: the entrance was written as
+ * a keyframe precisely BECAUSE a JS-driven one left the window stuck invisible in
+ * a background tab, where the document timeline stops. The genie is JS, so it
+ * reintroduces that risk — see the wall-clock guard at the end of `runGenie`,
+ * which un-hides the window even when the animation never advances.
  */
-const FADE_MS = 300;
-const FADE_EASING = "ease";
+
+/**
+ * Where a window collapses to, and unfolds out of.
+ *
+ * Preference order is deliberate. The dock icon that opens the window is the
+ * macOS answer, but only six of the nine windows have one — About and
+ * Experience are opened from desktop folders, so those fall back to their
+ * folder icon, and anything still unmatched aims at the dock as a whole. The
+ * viewport-bottom-centre last resort only fires if the dock has not mounted.
+ */
+function genieTargetRect(app: PortosAppId | undefined): DOMRect {
+  const dockIcon = app ? document.querySelector(`[data-portos-app="${app}"]`) : null;
+  if (dockIcon) return dockIcon.getBoundingClientRect();
+
+  const dock = document.querySelector('[data-framer-name="Menu Bar"]');
+  if (dock) {
+    const r = dock.getBoundingClientRect();
+    return new DOMRect(r.left + r.width / 2 - 38, r.top, 76, r.height);
+  }
+  return new DOMRect(window.innerWidth / 2 - 38, window.innerHeight - 76, 76, 76);
+}
+
 
 
 /**
@@ -138,6 +164,7 @@ export function WindowFrame({
   top,
   titleBarAccessory,
   titleFont = "sf",
+  app,
   onClose,
   onFocus,
   zIndex,
@@ -148,31 +175,106 @@ export function WindowFrame({
   const [mode, setMode] = useState<WindowMode>("normal");
   const maximized = mode === "maximized";
   const minimized = mode === "minimized";
-  // The entrance is a CSS animation (see `portos-window-in`), so it needs no
-  // state. Only the exit does: hold the window mounted while it fades, then drop it.
-  const [closing, setClosing] = useState(false);
+  // The genie clones this element, so it has to be the plain block that wraps
+  // the chrome — not the positioned shell, whose `left:50%` would misplace a clone.
+  const frameRef = useRef<HTMLDivElement>(null);
+  // Hidden while a genie is in flight: the clones are what the eye follows, and
+  // showing the real window at the same time would double it.
+  const [warping, setWarping] = useState(!prefersReducedMotion());
   const closeRequested = useRef(false);
   const drag = useRef<{ startX: number; startY: number; originX: number; originY: number } | null>(
     null,
   );
 
-  // Fade out, then unmount. Without this the window vanished instantly on close.
+  // Entrance: unfold out of the dock icon. The window is laid out but hidden via
+  // `visibility`, not `display`, so it still has the rect the genie measures.
+  useEffect(() => {
+    if (!warping) return;
+    const source = frameRef.current;
+    if (!source) {
+      setWarping(false);
+      return;
+    }
+    let live = true;
+    void runGenie({ source, target: genieTargetRect(app), direction: "out" }).then(() => {
+      if (live) setWarping(false);
+    });
+    return () => {
+      live = false;
+    };
+    // Runs once: `warping` starts true and is only ever set false from here.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Exit: collapse into the dock icon, then unmount. Reduced motion skips
+  // straight to the unmount rather than holding an empty frame on screen.
   const requestClose = useCallback(() => {
     if (closeRequested.current) return;
     closeRequested.current = true;
-    setClosing(true);
-    window.setTimeout(onClose, FADE_MS);
-  }, [onClose]);
+    const source = frameRef.current;
+    if (!source || prefersReducedMotion()) {
+      onClose();
+      return;
+    }
+    const target = genieTargetRect(app);
+    setWarping(true);
+    void runGenie({ source, target, direction: "in" }).then(onClose);
+  }, [app, onClose]);
 
   // Green fills the desktop; yellow shrinks into the bottom-left corner. Each
   // toggles against `normal`. The drag offset is kept rather than cleared, so
   // restoring puts the window back where the user had dragged it.
+  /**
+   * Where a minimised window parks: bottom-left, MINIMIZED_MARGIN in from both
+   * edges, at MINIMIZED_SCALE. Computed rather than measured because the genie
+   * has to know the destination BEFORE the mode changes and the element moves.
+   *
+   * Minimise aims here rather than at the dock icon, and that is deliberate.
+   * About and Experience have no dock icon — they open from desktop folders —
+   * so a window that genied into the dock and vanished would have nothing left
+   * to click. Parking it keeps every window recoverable.
+   */
+  const parkedRect = useCallback(
+    () =>
+      new DOMRect(
+        MINIMIZED_MARGIN,
+        window.innerHeight - MINIMIZED_MARGIN - height * MINIMIZED_SCALE,
+        width * MINIMIZED_SCALE,
+        height * MINIMIZED_SCALE,
+      ),
+    [height, width],
+  );
+
   const toggleMode = useCallback(
     (target: Exclude<WindowMode, "normal">) => {
       onFocus();
-      setMode((current) => (current === target ? "normal" : target));
+      // Only minimise and restore warp. Maximise already has its own geometry
+      // transition, and a genie on top of it would fight that.
+      if (target !== "minimized" || prefersReducedMotion() || !frameRef.current) {
+        setMode((current) => (current === target ? "normal" : target));
+        return;
+      }
+      const source = frameRef.current;
+      const goingDown = mode !== "minimized";
+      setWarping(true);
+      if (goingDown) {
+        // Collapse from where the window is now into the parking space, then let
+        // the real element reappear already parked.
+        void runGenie({ source, target: parkedRect(), direction: "in" }).then(() => {
+          setMode("minimized");
+          setWarping(false);
+        });
+        return;
+      }
+      // Restoring runs the other way: the element is put back to full size while
+      // still hidden, so the genie can measure the size it is unfolding INTO.
+      const from = parkedRect();
+      setMode("normal");
+      requestAnimationFrame(() => {
+        void runGenie({ source, target: from, direction: "out" }).then(() => setWarping(false));
+      });
     },
-    [onFocus],
+    [mode, onFocus, parkedRect],
   );
 
   const onPointerDown = useCallback(
@@ -283,9 +385,12 @@ export function WindowFrame({
           centring translate. `transform-origin` is the default centre, so the
           window grows and shrinks about its own middle. */}
       <div
+        ref={frameRef}
         className="h-full w-full"
         style={{
-          animation: `${closing ? "portos-window-out" : "portos-window-in"} ${FADE_MS}ms ${FADE_EASING} both`,
+          // Hidden rather than unmounted while a genie is in flight: the effect
+          // measures and clones this element, so it has to keep its layout box.
+          visibility: warping ? "hidden" : "visible",
         }}
       >
         <div className="portos-scroll h-full w-full bg-[#f7f7f7]">

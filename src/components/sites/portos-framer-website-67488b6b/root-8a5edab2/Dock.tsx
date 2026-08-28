@@ -207,6 +207,8 @@ function DockIcon({
   ) : (
     <button
       type="button"
+      // Lets the genie effect find the icon a window should collapse into.
+      data-portos-app={app}
       aria-label={item.alt}
       data-framer-name={item.name}
       className={className}
