@@ -245,6 +245,17 @@ export function WindowFrame({
     [height, width],
   );
 
+  /**
+   * The window's rect at full size, computed rather than measured, so restoring
+   * never has to wait for a layout to settle. Mirrors what the shell's own
+   * styles resolve to: centred on the viewport, offset by any drag, and capped
+   * the same way `max-w-[calc(100vw-16px)]` caps it.
+   */
+  const normalRect = useCallback(() => {
+    const w = Math.min(width, window.innerWidth - 16);
+    return new DOMRect(window.innerWidth / 2 - w / 2 + offset.x, top + offset.y, w, height);
+  }, [height, offset.x, offset.y, top, width]);
+
   const toggleMode = useCallback(
     (target: Exclude<WindowMode, "normal">) => {
       onFocus();
@@ -260,21 +271,25 @@ export function WindowFrame({
       if (goingDown) {
         // Collapse from where the window is now into the parking space, then let
         // the real element reappear already parked.
-        void runGenie({ source, target: parkedRect(), direction: "in" }).then(() => {
+        void runGenie({ source, target: parkedRect(), direction: "in", collapse: "rect" }).then(() => {
           setMode("minimized");
           setWarping(false);
         });
         return;
       }
-      // Restoring runs the other way: the element is put back to full size while
-      // still hidden, so the genie can measure the size it is unfolding INTO.
-      const from = parkedRect();
+      // Restoring runs the other way, out of the parking space and back into the
+      // full-size rect — which is computed, not measured, so this never depends
+      // on the shell's geometry transition having finished.
+      void runGenie({
+        source,
+        target: parkedRect(),
+        direction: "out",
+        collapse: "rect",
+        sourceRect: normalRect(),
+      }).then(() => setWarping(false));
       setMode("normal");
-      requestAnimationFrame(() => {
-        void runGenie({ source, target: from, direction: "out" }).then(() => setWarping(false));
-      });
     },
-    [mode, onFocus, parkedRect],
+    [mode, normalRect, onFocus, parkedRect],
   );
 
   const onPointerDown = useCallback(

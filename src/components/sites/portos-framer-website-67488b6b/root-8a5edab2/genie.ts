@@ -58,6 +58,33 @@ export interface GenieOptions {
   target: DOMRect;
   /** `in` collapses the window into the target; `out` unfolds it back. */
   direction: GenieDirection;
+  /**
+   * What the window becomes at the end of an inward flight.
+   *
+   * `point` converges every band on the target's centre, so the window narrows
+   * to nothing. Right for closing, where it then disappears.
+   *
+   * `rect` lands it as a scaled copy filling the target instead. Minimise needs
+   * this: a real, parked window takes over the moment the effect ends, and
+   * against a `point` finish that swap is a visible jump from a thin sliver to a
+   * whole small window.
+   */
+  collapse?: "point" | "rect";
+  /**
+   * Overrides the rect read off `source`.
+   *
+   * Restoring a minimised window needs this. The element is still parked when
+   * the effect is set up, and putting it back is not instantaneous — the shell
+   * carries a CSS transition on width, height, top and transform, so measuring
+   * straight after the state change returns the parked geometry mid-transition,
+   * not the full size being unfolded into.
+   *
+   * Waiting a frame was the obvious fix and the wrong one: `requestAnimationFrame`
+   * is throttled, and in a hidden tab suspended, which is the very failure this
+   * component was warned about. Passing the rect computed rather than measured
+   * removes the timing question altogether.
+   */
+  sourceRect?: DOMRect;
 }
 
 export function prefersReducedMotion(): boolean {
@@ -125,8 +152,14 @@ function progressAt(yNorm: number, p: number): number {
   return ease(Math.min(Math.max((p - start) / (1 - STAGGER), 0), 1));
 }
 
-export function runGenie({ source, target, direction }: GenieOptions): Promise<void> {
-  const rect = source.getBoundingClientRect();
+export function runGenie({
+  source,
+  target,
+  direction,
+  collapse = "point",
+  sourceRect,
+}: GenieOptions): Promise<void> {
+  const rect = sourceRect ?? source.getBoundingClientRect();
   if (rect.width === 0 || rect.height === 0) return Promise.resolve();
 
   const overlay = document.createElement("div");
@@ -156,7 +189,7 @@ export function runGenie({ source, target, direction }: GenieOptions): Promise<v
     const clone = source.cloneNode(true) as HTMLElement;
     clone.style.cssText +=
       `;position:absolute;left:0;top:${-srcTop}px;width:${rect.width}px;` +
-      `height:${rect.height}px;margin:0;transform:none;animation:none;transition:none`;
+      `height:${rect.height}px;margin:0;visibility:visible;transform:none;animation:none;transition:none`;
     band.appendChild(clone);
     overlay.appendChild(band);
 
@@ -167,9 +200,17 @@ export function runGenie({ source, target, direction }: GenieOptions): Promise<v
       const p = k / (STEPS - 1);
       const qTop = progressAt(yTop, p);
       const qBottom = progressAt(yBottom, p);
-      // Where this strip's own two edges have got to.
-      const destTop = lerp(rect.top + srcTop, targetCY, qTop);
-      const destBottom = lerp(rect.top + srcTop + bandH, targetCY, qBottom);
+      // Where this strip's own two edges have got to. Under `rect` the strip
+      // keeps its share of the target's height, so the window stays a window;
+      // under `point` every strip aims at the same spot and it closes up.
+      const endTop =
+        collapse === "rect" ? target.top + (srcTop / rect.height) * target.height : targetCY;
+      const endBottom =
+        collapse === "rect"
+          ? target.top + ((srcTop + bandH) / rect.height) * target.height
+          : targetCY;
+      const destTop = lerp(rect.top + srcTop, endTop, qTop);
+      const destBottom = lerp(rect.top + srcTop + bandH, endBottom, qBottom);
       // Width and centreline are read at BOTH edges of the band, never averaged
       // across it — averaging is what produced the staircase.
       const sTop = lerp(1, minScaleX, qTop);
