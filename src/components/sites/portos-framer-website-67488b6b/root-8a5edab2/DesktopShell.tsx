@@ -61,16 +61,17 @@ const WINDOWS: Record<PortosAppId, WindowDef> = {
 const BASE_Z = 4;
 
 /**
- * How far each new window steps down and right from the one before it, and how
- * many steps before the stack starts over.
+ * How many cascade steps before the stack starts over.
  *
- * Offsets are assigned to the LOWEST FREE slot rather than counted off the
- * number of open windows: open two, close the first, open a third, and a count
- * would hand the third the second's position and stack them exactly. Wrapping
- * at eight keeps the last window from marching off the bottom-right — there are
- * nine apps, and 8 x 5px is already 40px of drift.
+ * Slots go to the LOWEST FREE one rather than being counted off the number of
+ * open windows: open two, close the first, open a third, and a count would hand
+ * the third the second's slot and stack them exactly. Wrapping at eight keeps
+ * the ninth from marching off the corner.
+ *
+ * What a slot is worth in pixels is WindowFrame's business — an open window and
+ * a parked one step by different amounts, and only that file knows the scale
+ * each is drawn at.
  */
-const CASCADE_STEP = 5;
 const CASCADE_WRAP = 8;
 
 /** Above every window. Windows sit at BASE_Z upward, nine apps at most. */
@@ -96,7 +97,7 @@ export function DesktopShell() {
    * window rather than silently doing nothing.
    */
   const [openCount, setOpenCount] = useState<Partial<Record<PortosAppId, number>>>({});
-  /** Per-window cascade offset in pixels, held only while the window is open. */
+  /** Per-window cascade slot, held only while the window is open. */
   const [cascade, setCascade] = useState<Partial<Record<PortosAppId, number>>>({});
 
   /** Claims the lowest step nobody is standing on. */
@@ -105,8 +106,8 @@ export function DesktopShell() {
       if (current[app] !== undefined) return current;
       const taken = new Set(Object.values(current));
       let slot = 0;
-      while (taken.has((slot % CASCADE_WRAP) * CASCADE_STEP)) slot++;
-      return { ...current, [app]: (slot % CASCADE_WRAP) * CASCADE_STEP };
+      while (taken.has(slot % CASCADE_WRAP)) slot++;
+      return { ...current, [app]: slot % CASCADE_WRAP };
     });
   }, []);
 
@@ -238,7 +239,7 @@ export function DesktopShell() {
             height={def.geometry.height}
             top={def.top}
             titleFont={def.titleFont}
-            cascadeOffset={cascade[app] ?? 0}
+            cascadeSlot={cascade[app] ?? 0}
             restoreSignal={openCount[app] ?? 0}
             zIndex={BASE_Z + index}
             onClose={() => closeWindow(app)}

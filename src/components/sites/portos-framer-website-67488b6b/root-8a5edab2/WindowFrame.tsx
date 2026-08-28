@@ -18,11 +18,11 @@ interface WindowFrameProps {
   /** The About window is the one window whose title uses Inter, not SF Pro Display. */
   titleFont?: "sf" | "inter";
   /**
-   * Where this window sits in the cascade, in pixels down and right of the
-   * measured position. Seeds the drag offset rather than the `top` prop so a
-   * window that is then dragged keeps one source of truth for its position.
+   * Which step of the cascade this window stands on. An index, not a distance:
+   * the same slot has to produce two different offsets, one for the open window
+   * and a wider one for the parked card, and only this file knows either.
    */
-  cascadeOffset?: number;
+  cascadeSlot?: number;
   /**
    * Bumped by the shell every time this window's dock icon is clicked. A
    * minimised window restores itself in response.
@@ -115,6 +115,20 @@ const MINIMIZED_SCALE = Math.sqrt(MINIMIZED_AREA_RATIO);
 const MINIMIZED_MARGIN = 16;
 
 /**
+ * How far apart windows sit, in pixels per cascade step.
+ *
+ * Two values because the two states are at different scales. Open windows are
+ * full size and 5px is plenty to read as a stack. A PARKED window is scaled to
+ * MINIMIZED_SCALE, about a third, so 5px of a 273px card is almost nothing —
+ * parked windows stepped that finely still looked like one window.
+ *
+ * Parked windows step up and to the right, away from the corner they are
+ * anchored to, so each one shows an edge of the one behind it.
+ */
+const CASCADE_STEP = 5;
+const PARKED_STEP = 10;
+
+/**
  * Yellow and green each toggle their own mode against `normal`, so a maximised
  * window that is then minimised goes straight to minimised rather than stacking.
  */
@@ -205,7 +219,7 @@ export function WindowFrame({
   top,
   titleBarAccessory,
   titleFont = "sf",
-  cascadeOffset = 0,
+  cascadeSlot = 0,
   restoreSignal = 0,
   app,
   onClose,
@@ -213,6 +227,8 @@ export function WindowFrame({
   zIndex,
   children,
 }: WindowFrameProps) {
+  const cascadeOffset = cascadeSlot * CASCADE_STEP;
+  const parkedOffset = cascadeSlot * PARKED_STEP;
   const [offset, setOffset] = useState({ x: cascadeOffset, y: cascadeOffset });
   const [dragging, setDragging] = useState(false);
   // Read once, on the first render, rather than in an effect. An effect would
@@ -310,12 +326,12 @@ export function WindowFrame({
   const parkedRect = useCallback(
     () =>
       new DOMRect(
-        MINIMIZED_MARGIN,
-        window.innerHeight - MINIMIZED_MARGIN - height * MINIMIZED_SCALE,
+        MINIMIZED_MARGIN + parkedOffset,
+        window.innerHeight - MINIMIZED_MARGIN - height * MINIMIZED_SCALE - parkedOffset,
         width * MINIMIZED_SCALE,
         height * MINIMIZED_SCALE,
       ),
-    [height, width],
+    [height, parkedOffset, width],
   );
 
   /**
@@ -465,7 +481,7 @@ export function WindowFrame({
             ? // Bottom edge sits MINIMIZED_MARGIN above the viewport floor. The
               // scale is anchored bottom-left, so the visible box grows upward
               // from here rather than from the element's unscaled top.
-              `calc(100dvh - ${MINIMIZED_MARGIN}px - ${height}px)`
+              `calc(100dvh - ${MINIMIZED_MARGIN + parkedOffset}px - ${height}px)`
             : top,
         zIndex,
         // Anchoring the scale bottom-left keeps the minimised window pinned to the
@@ -482,7 +498,7 @@ export function WindowFrame({
           : minimized
             ? // Put the element's left edge at MINIMIZED_MARGIN. It sits at 50vw
               // because of `left: 50%`, so shift it back by that much.
-              `translate(calc(${MINIMIZED_MARGIN}px - 50vw), 0px) scale(${MINIMIZED_SCALE})`
+              `translate(calc(${MINIMIZED_MARGIN + parkedOffset}px - 50vw), 0px) scale(${MINIMIZED_SCALE})`
             : `translate(calc(-50% + ${offset.x}px), ${offset.y}px)`,
         // Do not transition while dragging, or the window lags behind the pointer.
         // Nor on a commit the genie has already animated: minimising otherwise
