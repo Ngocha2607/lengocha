@@ -97,6 +97,54 @@ const SHOT_ASPECT = "aspect-[2.1]";
  * 1-column steps are our own adaptation.
  */
 /**
+ * Horizontal swipe, for the touch devices where the arrow buttons are hidden.
+ *
+ * Gated on distance AND on the gesture being more horizontal than vertical, so
+ * a scroll or a stray drag does not flick the image. Multi-touch is ignored
+ * outright: a pinch is the visitor trying to zoom into the screenshot, which is
+ * the whole point of this viewer, and stealing it to change image would be
+ * exactly wrong. `touch-action` is left alone for the same reason — the browser
+ * keeps its own pinch and pan.
+ */
+const SWIPE_MIN_PX = 50;
+/** How much more horizontal than vertical the movement has to be. */
+const SWIPE_RATIO = 1.5;
+/** Beyond this it is a slow drag, not a flick. */
+const SWIPE_MAX_MS = 700;
+
+function useSwipe(onSwipe: (direction: -1 | 1) => void) {
+  const start = useRef<{ x: number; y: number; t: number } | null>(null);
+
+  return {
+    onTouchStart: (event: React.TouchEvent) => {
+      if (event.touches.length !== 1) {
+        start.current = null;
+        return;
+      }
+      const t = event.touches[0];
+      start.current = { x: t.clientX, y: t.clientY, t: Date.now() };
+    },
+    onTouchMove: (event: React.TouchEvent) => {
+      // A second finger mid-gesture means a pinch; abandon the swipe.
+      if (event.touches.length > 1) start.current = null;
+    },
+    onTouchEnd: (event: React.TouchEvent) => {
+      const from = start.current;
+      start.current = null;
+      if (!from || event.changedTouches.length !== 1) return;
+      const t = event.changedTouches[0];
+      const dx = t.clientX - from.x;
+      const dy = t.clientY - from.y;
+      if (Date.now() - from.t > SWIPE_MAX_MS) return;
+      if (Math.abs(dx) < SWIPE_MIN_PX) return;
+      if (Math.abs(dx) < Math.abs(dy) * SWIPE_RATIO) return;
+      // Swiping left pulls the next image in, as it does everywhere else.
+      onSwipe(dx < 0 ? 1 : -1);
+    },
+  };
+}
+
+/**
  * Prev and next, pinned to the viewport edges.
  *
  * The arrow KEYS were wired first and that was not enough: nothing on screen
@@ -105,6 +153,11 @@ const SHOT_ASPECT = "aspect-[2.1]";
  * since these are the viewer's primary control rather than its escape hatch.
  */
 const NAV_BUTTON_CLASS =
+  // Hidden where the pointer is coarse: on a phone the swipe replaces these, and
+  // they would only sit on top of the picture. Keyed on the POINTER rather than
+  // the width, because a narrow desktop window is still a mouse and would
+  // otherwise be left with no way to move but the keyboard.
+  "[@media(pointer:coarse)]:hidden " +
   "absolute top-1/2 flex size-11 -translate-y-1/2 cursor-pointer items-center justify-center " +
   "rounded-full bg-white/10 text-white/70 outline-none transition-colors " +
   "hover:bg-white/20 hover:text-white focus-visible:ring-2 focus-visible:ring-white/60";
@@ -139,6 +192,15 @@ function GalleryLightbox({
   const open = index !== null;
   const tile = open ? GALLERY_TILES[index] : null;
 
+  const step = useCallback(
+    (direction: -1 | 1) => {
+      if (index === null) return;
+      onIndexChange((index + direction + GALLERY_TILES.length) % GALLERY_TILES.length);
+    },
+    [index, onIndexChange],
+  );
+  const swipe = useSwipe(step);
+
   // Left and right step through the set, wrapping. Bound to the document
   // because focus sits on whichever control the dialog moved it to, and the
   // arrows should work wherever that is.
@@ -152,8 +214,7 @@ function GalleryLightbox({
     const onKey = (event: KeyboardEvent) => {
       if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
       event.preventDefault();
-      const step = event.key === "ArrowRight" ? 1 : -1;
-      onIndexChange((from + step + GALLERY_TILES.length) % GALLERY_TILES.length);
+      onIndexChange((from + (event.key === "ArrowRight" ? 1 : -1) + GALLERY_TILES.length) % GALLERY_TILES.length);
     };
     // CAPTURE phase. The dialog handles keys for its own focus management and
     // stops them before they bubble as far as the document, so a listener on the
@@ -166,13 +227,15 @@ function GalleryLightbox({
     <Dialog.Root open={open} onOpenChange={(next) => !next && onClose()}>
       <Dialog.Portal>
         <Dialog.Backdrop className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-[6px] transition-opacity duration-200 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0" />
-        {/* The horizontal padding is the nav buttons: 24px inset plus their 44px
-            makes 68, and 88 leaves a 20px gap so the image never runs under one.
-            Below `sm` it drops back to 24 and the buttons float over the image
-            instead — reserving the gutter on a narrow screen would cost more
-            width than the overlap does, and buttons over the picture is the
-            usual pattern at that size anyway. */}
-        <Dialog.Popup className="fixed inset-0 z-[61] flex flex-col items-center justify-center gap-4 px-6 py-6 outline-none transition-opacity duration-200 sm:px-[88px] data-[ending-style]:opacity-0 data-[starting-style]:opacity-0">
+        {/* The horizontal padding exists to clear the nav buttons: 24px of inset
+            plus their 44px makes 68, and 88 leaves a 20px gap. It is reserved
+            wherever those buttons are, which is wherever the pointer is fine —
+            the same condition that shows them, so the two cannot fall out of
+            step. On touch there are no buttons to clear, so the picture gets
+            the full width instead. */}
+        <Dialog.Popup {...swipe}
+          className="fixed inset-0 z-[61] flex flex-col items-center justify-center gap-4 px-6 py-6 outline-none transition-opacity duration-200 [@media(pointer:fine)]:px-[88px] data-[ending-style]:opacity-0 data-[starting-style]:opacity-0"
+        >
           {tile !== null && index !== null ? (
             <>
               {/* The title is what a screen reader announces on open; it is the
@@ -203,7 +266,7 @@ function GalleryLightbox({
               <button
                 type="button"
                 aria-label="Previous image"
-                onClick={() => onIndexChange((index - 1 + GALLERY_TILES.length) % GALLERY_TILES.length)}
+                onClick={() => step(-1)}
                 className={cn(NAV_BUTTON_CLASS, "left-4 sm:left-6")}
               >
                 <ChevronLeft size={22} aria-hidden="true" />
@@ -211,7 +274,7 @@ function GalleryLightbox({
               <button
                 type="button"
                 aria-label="Next image"
-                onClick={() => onIndexChange((index + 1) % GALLERY_TILES.length)}
+                onClick={() => step(1)}
                 className={cn(NAV_BUTTON_CLASS, "right-4 sm:right-6")}
               >
                 <ChevronRight size={22} aria-hidden="true" />
