@@ -28,6 +28,14 @@ export interface DockItem {
   app?: PortosAppId;
   /** Set for the two external icons (Instagram, Framer). */
   href?: string;
+  /**
+   * What the hover tooltip says. Deliberately NOT `name`: that is the live
+   * site's Framer layer name, which is the macOS app the icon is borrowed
+   * from (Launchpad, Messages, Notes) rather than what clicking it opens
+   * (Writing, Resume, Highlights & Decisions). A tooltip's job is to say
+   * what the control does. Falls back to `name` when unset.
+   */
+  tooltip?: string;
   /** Hidden below 810px on the live site. */
   hideOnMobile?: boolean;
 }

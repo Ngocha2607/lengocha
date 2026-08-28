@@ -6,6 +6,17 @@ const nextConfig: NextConfig = {
 
   images: {
     /**
+     * Next 16 narrowed `images.qualities` from "anything" to `[75]`, and a
+     * `quality` prop outside the list is COERCED to the nearest allowed value
+     * rather than rejected. Nothing warns: the build stays green and the image
+     * is silently served at 75.
+     *
+     * 90 is here for the pre-loader wallpaper, which is dark and smooth enough
+     * that 75 bands visibly. See `BG_QUALITY` in PreLoader.tsx.
+     */
+    qualities: [75, 90],
+
+    /**
      * The ONLY remote image host this site is allowed to use, and it exists for
      * exactly one reason: the Writing window reads its posts live from Notion,
      * and their cover images live in the owner's Vercel Blob store.

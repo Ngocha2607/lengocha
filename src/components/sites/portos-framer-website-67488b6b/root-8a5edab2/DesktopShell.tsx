@@ -111,11 +111,12 @@ export function DesktopShell() {
           `object-cover` upscales it on anything wider than 1920 or on a Retina
           display, so it will be softer there than the forest was. */}
       <Image
-        src={`${PORTOS_ASSETS}/images/wallpaper-02.png`}
+        src={`${PORTOS_ASSETS}/images/mountain-bg.jpg`}
         alt=""
         fill
         priority
-        sizes="100vw"
+        sizes="200vw"
+        quality={90}
         className="object-cover"
       />
       {/* Constant scrim — measured at rgba(0,0,0,0.24) whether or not a window is open. */}
