@@ -323,15 +323,28 @@ export function WindowFrame({
    * so a window that genied into the dock and vanished would have nothing left
    * to click. Parking it keeps every window recoverable.
    */
+  /**
+   * The width the shell actually renders at, which is not always the `width`
+   * prop: a normal window carries `max-w-[calc(100vw-16px)]`, so on a narrow
+   * screen it is the viewport that decides.
+   *
+   * Shared by both rect helpers because they used to disagree. `normalRect`
+   * clamped and `parkedRect` did not, so on a 375px screen the genie collapsed
+   * into a 273px-wide box while the parked card rendered 113px wide — a landscape
+   * shape snapping to a portrait one at the end of every minimise. It only
+   * showed on mobile, since above 880px there is nothing to clamp.
+   */
+  const renderedWidth = useCallback(() => Math.min(width, window.innerWidth - 16), [width]);
+
   const parkedRect = useCallback(
     () =>
       new DOMRect(
         MINIMIZED_MARGIN + parkedOffset,
         window.innerHeight - MINIMIZED_MARGIN - height * MINIMIZED_SCALE - parkedOffset,
-        width * MINIMIZED_SCALE,
+        renderedWidth() * MINIMIZED_SCALE,
         height * MINIMIZED_SCALE,
       ),
-    [height, parkedOffset, width],
+    [height, parkedOffset, renderedWidth],
   );
 
   /**
@@ -341,9 +354,9 @@ export function WindowFrame({
    * the same way `max-w-[calc(100vw-16px)]` caps it.
    */
   const normalRect = useCallback(() => {
-    const w = Math.min(width, window.innerWidth - 16);
+    const w = renderedWidth();
     return new DOMRect(window.innerWidth / 2 - w / 2 + offset.x, top + offset.y, w, height);
-  }, [height, offset.x, offset.y, top, width]);
+  }, [height, offset.x, offset.y, renderedWidth, top]);
 
   const toggleMode = useCallback(
     (target: Exclude<WindowMode, "normal">) => {
