@@ -70,7 +70,7 @@ const SITE_DESCRIPTION =
  * the production one. Read at build time in a server component, so it needs no
  * NEXT_PUBLIC_ prefix — that is only for values the browser bundle must see.
  */
-const SITE_URL = process.env.SITE_URL ?? "https://lengocha.vercel.app";
+const NEXT_PUBLIC_SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://lengocha.vercel.app";
 
 /**
  * Metadata, favicon, apple-touch icon and OG image are all the owner's.
@@ -85,7 +85,7 @@ const SITE_URL = process.env.SITE_URL ?? "https://lengocha.vercel.app";
  * entirely. `/favicon.ico` now 404s, which is harmless — browsers follow the tag.
  */
 export const metadata: Metadata = {
-  metadataBase: new URL(SITE_URL),
+  metadataBase: new URL(NEXT_PUBLIC_SITE_URL),
   title: SITE_TITLE,
   description: SITE_DESCRIPTION,
   icons: {
@@ -94,7 +94,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: "website",
-    url: SITE_URL,
+    url: NEXT_PUBLIC_SITE_URL,
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
     images: [`${ASSETS}/seo/og-image.png`],
