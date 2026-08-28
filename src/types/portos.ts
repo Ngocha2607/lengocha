@@ -15,6 +15,15 @@ export type PortosAppId =
   | "experience"
   | "decisions";
 
+/**
+ * The owner profile links. Shared because both the dock and the menu bar offer
+ * them, and two copies of a URL are two chances for one to go stale.
+ */
+export const PORTOS_PROFILES = {
+  github: "https://github.com/Ngocha2607",
+  linkedin: "https://www.linkedin.com/in/ng%E1%BB%8Dc-h%C3%A0-l%C3%AA-886aa3228/",
+} as const;
+
 /** Root of every downloaded asset for this page. */
 export const PORTOS_ASSETS = "/sites/portos-framer-website-67488b6b/root-8a5edab2";
 

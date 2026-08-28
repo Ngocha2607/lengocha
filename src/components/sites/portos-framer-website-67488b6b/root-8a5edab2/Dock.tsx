@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import { PORTOS_ASSETS, type DockItem, type PortosAppId } from "@/types/portos";
+import { PORTOS_ASSETS, PORTOS_PROFILES, type DockItem, type PortosAppId } from "@/types/portos";
 
 interface DockProps {
   onOpen: (app: PortosAppId) => void;
@@ -45,7 +45,7 @@ const DOCK_ITEMS: DockItem[] = [
     name: "LinkedIn",
     icon: `${PORTOS_ASSETS}/images/dock-linkedin.svg`,
     alt: "LinkedIn",
-    href: "https://www.linkedin.com/in/ng%E1%BB%8Dc-h%C3%A0-l%C3%AA-886aa3228/",
+    href: PORTOS_PROFILES.linkedin,
   },
   {
     name: "Notes",
@@ -58,7 +58,7 @@ const DOCK_ITEMS: DockItem[] = [
     name: "GitHub",
     icon: `${PORTOS_ASSETS}/images/dock-github.svg`,
     alt: "GitHub",
-    href: "https://github.com/Ngocha2607",
+    href: PORTOS_PROFILES.github,
     hideOnMobile: true,
   },
   {
