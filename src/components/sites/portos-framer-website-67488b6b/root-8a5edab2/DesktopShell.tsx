@@ -35,6 +35,15 @@ interface WindowDef {
  */
 const STANDARD: WindowGeometry = { width: 864, height: 630 };
 
+/**
+ * 12px-wide WebP of the wallpaper, inline at 84 bytes. Only ever visible to
+ * `prefers-reduced-motion` visitors, for whom the splash leaves after 200ms
+ * rather than 2.6s — everyone else has the real bitmap long before the desktop
+ * is uncovered. See the matching note in PreLoader.tsx.
+ */
+const MOUNTAIN_BLUR =
+  "data:image/webp;base64,UklGRkwAAABXRUJQVlA4IEAAAADQAQCdASoMAAgAA8BgJbACdADSR0UAAAD+WmpGwRqyZyd3ic+8FcYoLYPKqBF+fBLzMr8HdnKl8rNhJKVsAAAA";
+
 const WINDOWS: Record<PortosAppId, WindowDef> = {
   // Title is the owner's, not the template's ("Our work with Norma"). The Inter
   // title font is kept — that is a real quirk of the source, see WindowFrame.
@@ -102,21 +111,32 @@ export function DesktopShell() {
   return (
     <div className="portos-root">
       {/* Desktop background — swapped on request from the template's forest
-          (`desktop-wallpaper.jpg`, 3840x2160) to the beach sunset that used to be
-          one of four options in the Wallpaper window, before that window became
-          Experience. The forest stays on disk, unreferenced, so switching back is
-          a one-line change.
+          (`desktop-wallpaper.jpg`, 3840x2160) to a mountain shot. The forest stays
+          on disk, unreferenced, so switching back is a one-line change.
 
-          Note the drop in source resolution: 1920x1080 against the old 3840x2160.
-          `object-cover` upscales it on anything wider than 1920 or on a Retina
-          display, so it will be softer there than the forest was. */}
+          The source is 6000x4000, comfortably past the ladder's 3840 ceiling, so
+          this is never upscaled at any viewport or DPR.
+
+          Everything else here exists to keep this layer OFF the pre-loader's
+          critical path, because for the first 2.6s it is completely hidden behind
+          the splash:
+          - `sizes` is 100vw, not the pre-loader's 200vw. Nothing zooms this layer,
+            so the extra width bought nothing — and it pushed a 390px phone at
+            DPR 3 onto the 3840 render, measured at 1.5MB against 132KB for 1200.
+          - `loading="eager"` still starts the fetch immediately, but
+            `fetchPriority="low"` makes it yield to the splash bitmap, which is
+            what the visitor is actually looking at. This was `priority`
+            (deprecated in Next 16), which did the exact opposite. */}
       <Image
         src={`${PORTOS_ASSETS}/images/mountain-bg.jpg`}
         alt=""
         fill
-        priority
-        sizes="200vw"
+        loading="eager"
+        fetchPriority="low"
+        sizes="100vw"
         quality={90}
+        placeholder="blur"
+        blurDataURL={MOUNTAIN_BLUR}
         className="object-cover"
       />
       {/* Constant scrim — measured at rgba(0,0,0,0.24) whether or not a window is open. */}
