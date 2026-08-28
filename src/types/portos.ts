@@ -12,7 +12,8 @@ export type PortosAppId =
   | "resume"
   | "gallery"
   | "recycleBin"
-  | "experience";
+  | "experience"
+  | "decisions";
 
 /** Root of every downloaded asset for this page. */
 export const PORTOS_ASSETS = "/sites/portos-framer-website-67488b6b/root-8a5edab2";

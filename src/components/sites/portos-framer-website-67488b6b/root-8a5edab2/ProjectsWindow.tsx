@@ -264,7 +264,7 @@ export function ProjectsWindow({ mode }: ProjectsWindowProps) {
               "grid w-full items-start gap-x-4 gap-y-10",
               isList
                 ? "grid-cols-1 min-[880px]:max-w-[var(--portos-content-max)]"
-                : "grid-cols-1 min-[880px]:grid-cols-2 min-[880px]:max-w-[var(--portos-content-max)]",
+                : "grid-cols-1 min-[560px]:grid-cols-2 min-[880px]:grid-cols-3 min-[880px]:max-w-[var(--portos-content-max)]",
             )}
           >
             {PROJECTS.map((project) => {

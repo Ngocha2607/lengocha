@@ -14,6 +14,7 @@ import { PreLoader } from "./PreLoader";
 import { ProjectsToggle, ProjectsWindow, type ProjectsMode } from "./ProjectsWindow";
 import { RecycleBinWindow } from "./RecycleBinWindow";
 import { ResumeWindow } from "./ResumeWindow";
+import { DecisionsWindow } from "./DecisionsWindow";
 import { ExperienceWindow } from "./ExperienceWindow";
 import { WindowFrame } from "./WindowFrame";
 
@@ -45,6 +46,7 @@ const WINDOWS: Record<PortosAppId, WindowDef> = {
   gallery: { title: "Gallery", geometry: STANDARD, top: 68 },
   recycleBin: { title: "Recycle Bin", geometry: STANDARD, top: 68 },
   experience: { title: "Experience", geometry: { width: 720, height: 596 }, top: 89 },
+  decisions: { title: "Highlights & Decisions", geometry: STANDARD, top: 68 },
 };
 
 const BASE_Z = 4;
@@ -92,6 +94,8 @@ export function DesktopShell() {
         return <RecycleBinWindow />;
       case "experience":
         return <ExperienceWindow />;
+      case "decisions":
+        return <DecisionsWindow />;
     }
   };
 

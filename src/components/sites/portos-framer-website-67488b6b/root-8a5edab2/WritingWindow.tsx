@@ -233,7 +233,7 @@ export function WritingWindow() {
         ) : posts.length === 0 ? (
           <p className={cn(NOTE_CLASS, "mt-6")}>No published posts yet.</p>
         ) : (
-          <div className="mt-6 grid grid-cols-1 gap-x-4 gap-y-8 min-[880px]:grid-cols-2">
+          <div className="mt-6 grid grid-cols-1 gap-x-4 gap-y-8 min-[560px]:grid-cols-2 min-[880px]:grid-cols-3">
             {posts.map((post) => (
               <button
                 key={post.id}
