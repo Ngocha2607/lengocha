@@ -17,6 +17,21 @@ interface WindowFrameProps {
   titleBarAccessory?: React.ReactNode;
   /** The About window is the one window whose title uses Inter, not SF Pro Display. */
   titleFont?: "sf" | "inter";
+  /**
+   * Which step of the cascade this window stands on. An index, not a distance:
+   * the same slot has to produce two different offsets, one for the open window
+   * and a wider one for the parked card, and only this file knows either.
+   */
+  cascadeSlot?: number;
+  /**
+   * Bumped by the shell every time this window's dock icon is clicked. A
+   * minimised window restores itself in response.
+   *
+   * A signal rather than a `minimized` prop because the mode lives here: the
+   * shell knows the icon was clicked, but not whether this window is parked, and
+   * lifting the whole mode up would drag the genie's timing with it.
+   */
+  restoreSignal?: number;
   /** Which app this window is, so the genie knows which dock icon to aim at. */
   app?: PortosAppId;
   onClose: () => void;
@@ -100,6 +115,20 @@ const MINIMIZED_SCALE = Math.sqrt(MINIMIZED_AREA_RATIO);
 const MINIMIZED_MARGIN = 16;
 
 /**
+ * How far apart windows sit, in pixels per cascade step.
+ *
+ * Two values because the two states are at different scales. Open windows are
+ * full size and 5px is plenty to read as a stack. A PARKED window is scaled to
+ * MINIMIZED_SCALE, about a third, so 5px of a 273px card is almost nothing —
+ * parked windows stepped that finely still looked like one window.
+ *
+ * Parked windows step up and to the right, away from the corner they are
+ * anchored to, so each one shows an edge of the one behind it.
+ */
+const CASCADE_STEP = 5;
+const PARKED_STEP = 10;
+
+/**
  * Yellow and green each toggle their own mode against `normal`, so a maximised
  * window that is then minimised goes straight to minimised rather than stacking.
  */
@@ -166,13 +195,22 @@ function genieTargetRect(app: PortosAppId | undefined): DOMRect {
  * macOS window chrome: a sticky 44px title bar and a hidden-scrollbar body. The
  * whole window is draggable (`cursor: grab`), not just the title bar.
  *
- * The 10px corner radius is a DEPARTURE from the live site, which had square
- * corners and no shadow — worth saying plainly, since the rest of this file is
- * transcribed from it. 10px is what macOS itself uses on a windowed app.
+ * The 10px corner radius and the drop shadow are both DEPARTURES from the live
+ * site, which had square corners and no shadow — worth saying plainly, since the
+ * rest of this file is transcribed from it. 10px is what macOS itself uses on a
+ * windowed app.
  *
- * It has to sit on the scrolling element, with `overflow-hidden` alongside it:
- * the title bar and the body both paint `#f7f7f7` right out to the edge, so
+ * The shadow is two layers because one cannot do both jobs: a wide soft cast
+ * lifts the window off the wallpaper, and a tighter darker one under the edge
+ * stops it looking as though it is floating unattached. It matters more now
+ * that windows cascade — at 5px apart, the shadow is most of what separates one
+ * from the next.
+ *
+ * Both sit on the scrolling element, with `overflow-hidden` alongside them: the
+ * title bar and the body both paint `#f7f7f7` right out to the edge, so
  * rounding a parent instead would leave square corners drawn over the curve.
+ * `overflow-hidden` does not clip the shadow — that paints outside the border
+ * box — so the two are free to share an element.
  */
 export function WindowFrame({
   title,
@@ -181,13 +219,17 @@ export function WindowFrame({
   top,
   titleBarAccessory,
   titleFont = "sf",
+  cascadeSlot = 0,
+  restoreSignal = 0,
   app,
   onClose,
   onFocus,
   zIndex,
   children,
 }: WindowFrameProps) {
-  const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const cascadeOffset = cascadeSlot * CASCADE_STEP;
+  const parkedOffset = cascadeSlot * PARKED_STEP;
+  const [offset, setOffset] = useState({ x: cascadeOffset, y: cascadeOffset });
   const [dragging, setDragging] = useState(false);
   // Read once, on the first render, rather than in an effect. An effect would
   // let the genie measure the window at its normal size a frame before it
@@ -284,12 +326,12 @@ export function WindowFrame({
   const parkedRect = useCallback(
     () =>
       new DOMRect(
-        MINIMIZED_MARGIN,
-        window.innerHeight - MINIMIZED_MARGIN - height * MINIMIZED_SCALE,
+        MINIMIZED_MARGIN + parkedOffset,
+        window.innerHeight - MINIMIZED_MARGIN - height * MINIMIZED_SCALE - parkedOffset,
         width * MINIMIZED_SCALE,
         height * MINIMIZED_SCALE,
       ),
-    [height, width],
+    [height, parkedOffset, width],
   );
 
   /**
@@ -350,6 +392,19 @@ export function WindowFrame({
     },
     [mode, normalRect, onFocus, parkedRect],
   );
+
+  // Clicking a dock icon for a parked window puts it back. Held in refs so the
+  // effect depends on the signal alone — depending on `mode` or on `toggleMode`
+  // would re-fire it on every unrelated change and pop the window open again.
+  const modeRef = useRef(mode);
+  modeRef.current = mode;
+  const toggleModeRef = useRef(toggleMode);
+  toggleModeRef.current = toggleMode;
+  useEffect(() => {
+    if (restoreSignal === 0) return;
+    if (modeRef.current !== "minimized") return;
+    toggleModeRef.current("minimized");
+  }, [restoreSignal]);
 
   const onPointerDown = useCallback(
     (event: React.PointerEvent<HTMLDivElement>) => {
@@ -426,7 +481,7 @@ export function WindowFrame({
             ? // Bottom edge sits MINIMIZED_MARGIN above the viewport floor. The
               // scale is anchored bottom-left, so the visible box grows upward
               // from here rather than from the element's unscaled top.
-              `calc(100dvh - ${MINIMIZED_MARGIN}px - ${height}px)`
+              `calc(100dvh - ${MINIMIZED_MARGIN + parkedOffset}px - ${height}px)`
             : top,
         zIndex,
         // Anchoring the scale bottom-left keeps the minimised window pinned to the
@@ -443,7 +498,7 @@ export function WindowFrame({
           : minimized
             ? // Put the element's left edge at MINIMIZED_MARGIN. It sits at 50vw
               // because of `left: 50%`, so shift it back by that much.
-              `translate(calc(${MINIMIZED_MARGIN}px - 50vw), 0px) scale(${MINIMIZED_SCALE})`
+              `translate(calc(${MINIMIZED_MARGIN + parkedOffset}px - 50vw), 0px) scale(${MINIMIZED_SCALE})`
             : `translate(calc(-50% + ${offset.x}px), ${offset.y}px)`,
         // Do not transition while dragging, or the window lags behind the pointer.
         // Nor on a commit the genie has already animated: minimising otherwise
@@ -470,7 +525,7 @@ export function WindowFrame({
           visibility: warping ? "hidden" : "visible",
         }}
       >
-        <div className="portos-scroll h-full w-full overflow-hidden rounded-[10px] bg-[#f7f7f7]">
+        <div className="portos-scroll h-full w-full overflow-hidden rounded-[10px] bg-[#f7f7f7] shadow-[0_20px_60px_rgba(0,0,0,0.32),0_6px_18px_rgba(0,0,0,0.18)]">
           {/* Title bar — sticky so it stays pinned while the body scrolls. */}
           <div className="sticky top-0 z-[1] flex h-11 shrink-0 items-center gap-4 bg-[#f7f7f7] p-3">
             {/* While minimised the lights are under 4px across, so they are taken

@@ -5,6 +5,12 @@ import { cn } from "@/lib/utils";
 import { PORTOS_ASSETS, PORTOS_PROFILES, type DockItem, type PortosAppId } from "@/types/portos";
 
 interface DockProps {
+  /**
+   * Fades the bar back while a window is open, so it stops competing with what
+   * is being read. Hovering brings it straight back — it stays fully clickable
+   * either way, this is opacity only.
+   */
+  dimmed?: boolean;
   onOpen: (app: PortosAppId) => void;
 }
 
@@ -239,7 +245,7 @@ function DockIcon({
  * The macOS dock. Renders the bar only — the desktop positions it along the
  * bottom edge. 775x94 from 810px up, full-width and 52px tall below that.
  */
-export function Dock({ onOpen }: DockProps) {
+export function Dock({ onOpen, dimmed = false }: DockProps) {
   return (
     <div
       data-framer-name="Menu Bar"
@@ -253,6 +259,8 @@ export function Dock({ onOpen }: DockProps) {
         // scale DOWN on hover — so removing it changes nothing on screen.
         "flex items-center justify-center bg-[rgba(40,40,40,0.6)] px-[8px] py-[9px] backdrop-blur-[14px]",
         "shadow-[0px_3px_3px_0px_rgba(0,0,0,0.24)]",
+        "transition-opacity duration-300 ease-out hover:opacity-100",
+        dimmed ? "opacity-45" : "opacity-100",
         "h-[52px] w-full gap-[8px] rounded-[12px]",
         "min-[810px]:h-[94px] min-[810px]:w-[775px] min-[810px]:gap-[16px] min-[810px]:rounded-[24px]",
       )}

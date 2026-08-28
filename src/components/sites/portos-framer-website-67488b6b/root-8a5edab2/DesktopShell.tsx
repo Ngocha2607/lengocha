@@ -61,6 +61,23 @@ const WINDOWS: Record<PortosAppId, WindowDef> = {
 const BASE_Z = 4;
 
 /**
+ * How many cascade steps before the stack starts over.
+ *
+ * Slots go to the LOWEST FREE one rather than being counted off the number of
+ * open windows: open two, close the first, open a third, and a count would hand
+ * the third the second's slot and stack them exactly. Wrapping at eight keeps
+ * the ninth from marching off the corner.
+ *
+ * What a slot is worth in pixels is WindowFrame's business — an open window and
+ * a parked one step by different amounts, and only that file knows the scale
+ * each is drawn at.
+ */
+const CASCADE_WRAP = 8;
+
+/** Above every window. Windows sit at BASE_Z upward, nine apps at most. */
+const DOCK_Z = 20;
+
+/**
  * The macOS desktop: wallpaper, always-on scrim, menu bar, icons, dock, and the
  * stack of open windows. Multiple windows can be open at once; the most recently
  * opened or focused one renders on top, matching the live site's DOM-order stacking.
@@ -74,20 +91,55 @@ export function DesktopShell() {
    * way, so the dock icon always lands on the list.
    */
   const [writingSlug, setWritingSlug] = useState<string | null>(null);
+  /**
+   * Counts how many times each app has been asked to open. A window that is
+   * parked watches this and unparks itself, so a dock icon reaches a minimised
+   * window rather than silently doing nothing.
+   */
+  const [openCount, setOpenCount] = useState<Partial<Record<PortosAppId, number>>>({});
+  /** Per-window cascade slot, held only while the window is open. */
+  const [cascade, setCascade] = useState<Partial<Record<PortosAppId, number>>>({});
 
-  const openWindow = useCallback((app: PortosAppId) => {
-    if (app === "writing") setWritingSlug(null);
-    setOpen((current) => [...current.filter((id) => id !== app), app]);
+  /** Claims the lowest step nobody is standing on. */
+  const claimCascade = useCallback((app: PortosAppId) => {
+    setCascade((current) => {
+      if (current[app] !== undefined) return current;
+      const taken = new Set(Object.values(current));
+      let slot = 0;
+      while (taken.has(slot % CASCADE_WRAP)) slot++;
+      return { ...current, [app]: slot % CASCADE_WRAP };
+    });
   }, []);
+
+  const openWindow = useCallback(
+    (app: PortosAppId) => {
+      if (app === "writing") setWritingSlug(null);
+      claimCascade(app);
+      setOpenCount((current) => ({ ...current, [app]: (current[app] ?? 0) + 1 }));
+      setOpen((current) => [...current.filter((id) => id !== app), app]);
+    },
+    [claimCascade],
+  );
 
   /** A project card asking for its write-up: open Writing already on that article. */
-  const openWriting = useCallback((slug: string) => {
-    setWritingSlug(slug);
-    setOpen((current) => [...current.filter((id) => id !== "writing"), "writing"]);
-  }, []);
+  const openWriting = useCallback(
+    (slug: string) => {
+      setWritingSlug(slug);
+      claimCascade("writing");
+      setOpen((current) => [...current.filter((id) => id !== "writing"), "writing"]);
+    },
+    [claimCascade],
+  );
 
   const closeWindow = useCallback((app: PortosAppId) => {
     setOpen((current) => current.filter((id) => id !== app));
+    // Releases the step so the next window can stand on it.
+    setCascade((current) => {
+      if (current[app] === undefined) return current;
+      const next = { ...current };
+      delete next[app];
+      return next;
+    });
   }, []);
 
   const focusWindow = useCallback((app: PortosAppId) => {
@@ -167,8 +219,12 @@ export function DesktopShell() {
           also what puts the dock's centre at 340.5 rather than the container's 720. */}
       <div className="absolute inset-x-5 bottom-6 top-[120px] flex flex-col justify-between min-[810px]:inset-x-[30px] min-[810px]:top-[130px] min-[1200px]:inset-x-[50px] min-[1200px]:top-40 min-[1200px]:pl-4">
         <DesktopIcons onOpen={openWindow} />
-        <div className="flex w-full justify-center">
-          <Dock onOpen={openWindow} />
+        {/* Lifted above the window stack: the dock is how you reach the other
+            eight apps, and a maximised window used to bury it. It fades back
+            while a window has the focus so it does not compete with what is
+            being read, and comes back to full on hover. */}
+        <div className="relative flex w-full justify-center" style={{ zIndex: DOCK_Z }}>
+          <Dock onOpen={openWindow} dimmed={open.length > 0} />
         </div>
       </div>
 
@@ -183,6 +239,8 @@ export function DesktopShell() {
             height={def.geometry.height}
             top={def.top}
             titleFont={def.titleFont}
+            cascadeSlot={cascade[app] ?? 0}
+            restoreSignal={openCount[app] ?? 0}
             zIndex={BASE_Z + index}
             onClose={() => closeWindow(app)}
             onFocus={() => focusWindow(app)}
