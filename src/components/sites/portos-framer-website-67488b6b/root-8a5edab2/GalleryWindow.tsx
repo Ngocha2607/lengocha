@@ -1,4 +1,9 @@
+"use client";
+
+import { Dialog } from "@base-ui/react/dialog";
+import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import Image from "next/image";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { PORTOS_ASSETS } from "@/types/portos";
 
@@ -10,6 +15,12 @@ import { PORTOS_ASSETS } from "@/types/portos";
 interface GalleryTile {
   src: string;
   alt: string;
+  /**
+   * Shown under the tile. Deliberately the short half of the Projects title —
+   * "LMS Platform", not "LMS Platform · SAPP Academy" — because at 194px the
+   * full form wraps to two lines and the row stops reading as a grid.
+   */
+  label: string;
 }
 
 /**
@@ -21,26 +32,32 @@ const GALLERY_TILES: readonly GalleryTile[] = [
   {
     src: "project-lms-platform.png",
     alt: "SAPP Academy learning-management system dashboard",
+    label: "LMS Platform",
   },
   {
     src: "project-ops-portal.png",
     alt: "SAPP Academy operations portal showing the class list screen",
+    label: "Operations",
   },
   {
     src: "project-subscriber-platform.png",
     alt: "Tweet World Travel subscriber management platform interface",
+    label: "Subscriber Platform",
   },
   {
     src: "project-b2b-storefront.png",
     alt: "Tweet World Travel B2B e-commerce website homepage",
+    label: "B2B",
   },
   {
     src: "project-newsletter.png",
     alt: "Drag-and-drop email newsletter builder interface",
+    label: "Newsletter System",
   },
   {
     src: "project-evn.png",
     alt: "EVN Hanoi power-management system module interface",
+    label: "EVN Hanoi",
   },
 ];
 
@@ -66,10 +83,10 @@ const SHOT_ASPECT = "aspect-[2.1]";
  * natural grid flow and is left alone deliberately — stretching two tiles to
  * fill the row would break the one ratio every tile shares.
  *
- * Deliberately still image-only and completely static: no hover, no lightbox, no
- * links. That is both the live site's behaviour and what keeps this window from
- * becoming a second copy of Projects, which already carries the titles, the
- * stack tags and the outbound links for these same six.
+ * Each tile is captioned, on request, after the macOS Wallpapers browser. The
+ * label is the short half of the Projects title only — no description, no stack
+ * tags, no link, and still no hover or lightbox. Projects remains the place
+ * these six are actually explained; this stays a contact sheet with names on it.
  *
  * `min-h-0` on each tile is not cosmetic: a grid item's automatic minimum is its
  * content height, so for any screenshot flatter than 2.1 that minimum wins and
@@ -79,26 +96,267 @@ const SHOT_ASPECT = "aspect-[2.1]";
  * The live site clips rather than reflows below 880px, so the 2-column and
  * 1-column steps are our own adaptation.
  */
+/**
+ * Horizontal swipe, for the touch devices where the arrow buttons are hidden.
+ *
+ * Gated on distance AND on the gesture being more horizontal than vertical, so
+ * a scroll or a stray drag does not flick the image. Multi-touch is ignored
+ * outright: a pinch is the visitor trying to zoom into the screenshot, which is
+ * the whole point of this viewer, and stealing it to change image would be
+ * exactly wrong. `touch-action` is left alone for the same reason — the browser
+ * keeps its own pinch and pan.
+ */
+const SWIPE_MIN_PX = 50;
+/** How much more horizontal than vertical the movement has to be. */
+const SWIPE_RATIO = 1.5;
+/** Beyond this it is a slow drag, not a flick. */
+const SWIPE_MAX_MS = 700;
+
+function useSwipe(onSwipe: (direction: -1 | 1) => void) {
+  const start = useRef<{ x: number; y: number; t: number } | null>(null);
+
+  return {
+    onTouchStart: (event: React.TouchEvent) => {
+      if (event.touches.length !== 1) {
+        start.current = null;
+        return;
+      }
+      const t = event.touches[0];
+      start.current = { x: t.clientX, y: t.clientY, t: Date.now() };
+    },
+    onTouchMove: (event: React.TouchEvent) => {
+      // A second finger mid-gesture means a pinch; abandon the swipe.
+      if (event.touches.length > 1) start.current = null;
+    },
+    onTouchEnd: (event: React.TouchEvent) => {
+      const from = start.current;
+      start.current = null;
+      if (!from || event.changedTouches.length !== 1) return;
+      const t = event.changedTouches[0];
+      const dx = t.clientX - from.x;
+      const dy = t.clientY - from.y;
+      if (Date.now() - from.t > SWIPE_MAX_MS) return;
+      if (Math.abs(dx) < SWIPE_MIN_PX) return;
+      if (Math.abs(dx) < Math.abs(dy) * SWIPE_RATIO) return;
+      // Swiping left pulls the next image in, as it does everywhere else.
+      onSwipe(dx < 0 ? 1 : -1);
+    },
+  };
+}
+
+/**
+ * Prev and next, pinned to the viewport edges.
+ *
+ * The arrow KEYS were wired first and that was not enough: nothing on screen
+ * said the set could be stepped through, so with a mouse there was no way to
+ * reach image two. Same treatment as the close button, but a larger target,
+ * since these are the viewer's primary control rather than its escape hatch.
+ */
+const NAV_BUTTON_CLASS =
+  // Hidden where the pointer is coarse: on a phone the swipe replaces these, and
+  // they would only sit on top of the picture. Keyed on the POINTER rather than
+  // the width, because a narrow desktop window is still a mouse and would
+  // otherwise be left with no way to move but the keyboard.
+  "[@media(pointer:coarse)]:hidden " +
+  "absolute top-1/2 flex size-11 -translate-y-1/2 cursor-pointer items-center justify-center " +
+  "rounded-full bg-white/10 text-white/70 outline-none transition-colors " +
+  "hover:bg-white/20 hover:text-white focus-visible:ring-2 focus-visible:ring-white/60";
+
+/**
+ * Full-screen viewer for one tile.
+ *
+ * PORTALLED, and that is not optional. `WindowFrame`'s shell carries a
+ * `transform` for centring and dragging, and a transformed element is the
+ * containing block for its fixed-position descendants — so a `position: fixed`
+ * overlay rendered inside the Gallery would be trapped inside the Gallery.
+ * `Dialog.Portal` moves it to the body, where `inset-0` means the viewport.
+ *
+ * Base UI's Dialog rather than a hand-rolled overlay, for the focus trap, the
+ * Escape handling, the return of focus to the tile, and `aria-modal`. What it
+ * does not give is stepping between images, so that is wired below.
+ *
+ * Sized to the viewport rather than the window: at 1440 this shows the
+ * screenshot about 73% of its native 1913px, against 43% in Projects' list view
+ * and 10% in the grid it was opened from. That gap is the whole reason this
+ * exists — see the note above GALLERY_TILES.
+ */
+function GalleryLightbox({
+  index,
+  onIndexChange,
+  onClose,
+}: {
+  index: number | null;
+  onIndexChange: (next: number) => void;
+  onClose: () => void;
+}) {
+  const open = index !== null;
+  const tile = open ? GALLERY_TILES[index] : null;
+
+  const step = useCallback(
+    (direction: -1 | 1) => {
+      if (index === null) return;
+      onIndexChange((index + direction + GALLERY_TILES.length) % GALLERY_TILES.length);
+    },
+    [index, onIndexChange],
+  );
+  const swipe = useSwipe(step);
+
+  // Left and right step through the set, wrapping. Bound to the document
+  // because focus sits on whichever control the dialog moved it to, and the
+  // arrows should work wherever that is.
+  useEffect(() => {
+    // Narrowed on `index` rather than `open`: the latter is a derived boolean,
+    // which TypeScript cannot use to prove `index` is a number below.
+    if (index === null) return;
+    // Pinned to a local: `index` is a parameter, and TypeScript drops a
+    // narrowing on those once it crosses into a closure.
+    const from = index;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+      event.preventDefault();
+      onIndexChange((from + (event.key === "ArrowRight" ? 1 : -1) + GALLERY_TILES.length) % GALLERY_TILES.length);
+    };
+    // CAPTURE phase. The dialog handles keys for its own focus management and
+    // stops them before they bubble as far as the document, so a listener on the
+    // bubble phase never fired.
+    document.addEventListener("keydown", onKey, true);
+    return () => document.removeEventListener("keydown", onKey, true);
+  }, [index, onIndexChange]);
+
+  return (
+    <Dialog.Root open={open} onOpenChange={(next) => !next && onClose()}>
+      <Dialog.Portal>
+        <Dialog.Backdrop className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-[6px] transition-opacity duration-200 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0" />
+        {/* The horizontal padding exists to clear the nav buttons: 24px of inset
+            plus their 44px makes 68, and 88 leaves a 20px gap. It is reserved
+            wherever those buttons are, which is wherever the pointer is fine —
+            the same condition that shows them, so the two cannot fall out of
+            step. On touch there are no buttons to clear, so the picture gets
+            the full width instead. */}
+        <Dialog.Popup {...swipe}
+          className="fixed inset-0 z-[61] flex flex-col items-center justify-center gap-4 px-6 py-6 outline-none transition-opacity duration-200 [@media(pointer:fine)]:px-[88px] data-[ending-style]:opacity-0 data-[starting-style]:opacity-0"
+        >
+          {tile !== null && index !== null ? (
+            <>
+              {/* The title is what a screen reader announces on open; it is the
+                  tile's own label, so the visible caption below is redundant to
+                  it and marked away. */}
+              <Dialog.Title className="sr-only">{tile.label}</Dialog.Title>
+
+              <Image
+                key={tile.src}
+                src={`${PORTOS_ASSETS}/images/${tile.src}`}
+                alt={tile.alt}
+                width={1913}
+                height={912}
+                sizes="(min-width: 640px) calc(100vw - 176px), calc(100vw - 48px)"
+                quality={90}
+                priority
+                className="h-auto max-h-[82vh] w-auto max-w-full rounded-[10px] object-contain shadow-[0_24px_80px_rgba(0,0,0,0.5)]"
+              />
+
+              <p aria-hidden="true" className="font-sans text-[13px] leading-[18px] text-white/80">
+                {tile.label}
+                <span className="text-white/40">
+                  {"  ·  "}
+                  {index + 1}/{GALLERY_TILES.length}
+                </span>
+              </p>
+
+              <button
+                type="button"
+                aria-label="Previous image"
+                onClick={() => step(-1)}
+                className={cn(NAV_BUTTON_CLASS, "left-4 sm:left-6")}
+              >
+                <ChevronLeft size={22} aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                aria-label="Next image"
+                onClick={() => step(1)}
+                className={cn(NAV_BUTTON_CLASS, "right-4 sm:right-6")}
+              >
+                <ChevronRight size={22} aria-hidden="true" />
+              </button>
+
+              <Dialog.Close
+                aria-label="Close"
+                className="absolute top-5 right-5 flex size-8 cursor-pointer items-center justify-center rounded-full bg-white/10 text-white/70 outline-none transition-colors hover:bg-white/20 hover:text-white focus-visible:ring-2 focus-visible:ring-white/60"
+              >
+                <X size={16} aria-hidden="true" />
+              </Dialog.Close>
+            </>
+          ) : null}
+        </Dialog.Popup>
+      </Dialog.Portal>
+    </Dialog.Root>
+  );
+}
+
 export function GalleryWindow() {
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const tileRefs = useRef<(HTMLButtonElement | null)[]>([]);
+
+  /**
+   * Returns focus to the tile on the way out, which Base UI cannot do for us:
+   * it restores focus to a `Dialog.Trigger`, and there is no trigger here — the
+   * viewer is opened from state so that six tiles can share one dialog.
+   *
+   * Focus goes to the tile the viewer ENDED on, not the one it started from, so
+   * arrowing to the sixth image and closing leaves the keyboard on the sixth
+   * tile rather than jumping back across the grid.
+   */
+  const closeLightbox = useCallback(() => {
+    const last = openIndex;
+    setOpenIndex(null);
+    if (last === null) return;
+    // Deferred by a tick: the dialog moves focus itself while unmounting, and
+    // doing this in the same task would simply be overwritten.
+    window.setTimeout(() => tileRefs.current[last]?.focus(), 0);
+  }, [openIndex]);
+
   return (
     // Container. The 50px top gap is the live site's `Desktop` flex-column gap between
     // the sticky title bar and the body; WindowFrame renders children flush, so it lives here.
     <div className="flex w-full items-center justify-center px-5 pt-[50px] pb-[60px]">
       {/* Content */}
-      <div className="grid w-full grid-cols-1 gap-4 min-[521px]:grid-cols-2 min-[880px]:max-w-[var(--portos-content-max)] min-[880px]:grid-cols-4">
-        {GALLERY_TILES.map((tile) => (
-          <div key={tile.src} className={cn("w-full min-h-0 overflow-clip", SHOT_ASPECT)}>
-            <Image
-              src={`${PORTOS_ASSETS}/images/${tile.src}`}
-              alt={tile.alt}
-              width={1913}
-              height={912}
-              sizes="(min-width: 880px) 266px, (min-width: 521px) 50vw, 100vw"
-              className="h-full w-full rounded-none object-cover"
-            />
-          </div>
+      <div className="grid w-full grid-cols-1 gap-x-4 gap-y-5 min-[521px]:grid-cols-2 min-[880px]:max-w-[var(--portos-content-max)] min-[880px]:grid-cols-4">
+        {GALLERY_TILES.map((tile, i) => (
+          <figure key={tile.src} className="flex min-w-0 flex-col gap-[6px]">
+            {/* `data-no-drag` so opening a tile is not read as the start of a
+                window drag — the whole window is a drag handle. */}
+            <button
+              type="button"
+              data-no-drag
+              ref={(el) => {
+                tileRefs.current[i] = el;
+              }}
+              onClick={() => setOpenIndex(i)}
+              aria-label={`View ${tile.label} full size`}
+              className={cn(
+                "group min-h-0 w-full cursor-pointer overflow-clip rounded-[8px] border border-black/10",
+                "outline-none focus-visible:ring-2 focus-visible:ring-black/40",
+                SHOT_ASPECT,
+              )}
+            >
+              <Image
+                src={`${PORTOS_ASSETS}/images/${tile.src}`}
+                alt={tile.alt}
+                width={1913}
+                height={912}
+                sizes="(min-width: 880px) 266px, (min-width: 521px) 50vw, 100vw"
+                className="h-full w-full rounded-none object-cover transition-transform duration-300 ease-out group-hover:scale-[1.03]"
+              />
+            </button>
+            <figcaption className="truncate text-center font-sans text-[12px] leading-[16px] font-normal text-black/70">
+              {tile.label}
+            </figcaption>
+          </figure>
         ))}
       </div>
+
+      <GalleryLightbox index={openIndex} onIndexChange={setOpenIndex} onClose={closeLightbox} />
     </div>
   );
 }

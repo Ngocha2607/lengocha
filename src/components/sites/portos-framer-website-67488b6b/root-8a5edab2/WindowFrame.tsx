@@ -106,6 +106,16 @@ const MINIMIZED_MARGIN = 16;
 type WindowMode = "normal" | "maximized" | "minimized";
 
 /**
+ * Below this a window opens maximised.
+ *
+ * The desktop metaphor stops paying for itself on a phone: an 864px frame on a
+ * 390px screen is mostly chrome that has to be scrolled past, and dragging a
+ * window is not a gesture anyone performs with a thumb. The site's own 810px
+ * breakpoint, so it lines up with everything else here.
+ */
+const MOBILE_QUERY = "(max-width: 809px)";
+
+/**
  * Open and close are the macOS genie — see `genie.ts` for why the warp cannot
  * be a keyframe, and for the cost of doing it with clones.
  *
@@ -179,7 +189,16 @@ export function WindowFrame({
 }: WindowFrameProps) {
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [dragging, setDragging] = useState(false);
-  const [mode, setMode] = useState<WindowMode>("normal");
+  // Read once, on the first render, rather than in an effect. An effect would
+  // let the genie measure the window at its normal size a frame before it
+  // maximised, and the flight would start from the wrong box. Safe to touch
+  // `window` in the initialiser because this component never renders on the
+  // server — the desktop opens with no windows.
+  const [mode, setMode] = useState<WindowMode>(() =>
+    typeof window !== "undefined" && window.matchMedia(MOBILE_QUERY).matches
+      ? "maximized"
+      : "normal",
+  );
   const maximized = mode === "maximized";
   const minimized = mode === "minimized";
   // The genie clones this element, so it has to be the plain block that wraps
