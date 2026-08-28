@@ -65,6 +65,47 @@ export function prefersReducedMotion(): boolean {
 }
 
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+
+/**
+ * A band as a TRAPEZOID rather than a rectangle, which is what stops the funnel
+ * looking like a staircase.
+ *
+ * Scaling a band by one factor gives it a single width down its whole height, so
+ * neighbouring bands meet at a visible step. At eight bands those steps ARE the
+ * silhouette — the first version of this read as stacked blocks, not a bending
+ * sheet. What is needed is a width that varies WITHIN each band, from `sTop` at
+ * its top edge to `sBottom` at its bottom, so every band picks up exactly where
+ * the one above it left off.
+ *
+ * An affine matrix cannot do that; a projective one can. `matrix3d` carries a
+ * perspective term and CSS divides by w after transforming, so putting y into w
+ * makes the horizontal scale fall away down the band:
+ *
+ *   x' = (a·x + c·y) / (1 + h·y)      y' = (f·y) / (1 + h·y)
+ *
+ * Solving at the two edges gives 1 + h·H = sTop/sBottom, which fixes h; f and c
+ * then follow from the band's target height and how far its centreline drifts.
+ * The taper is hyperbolic rather than straight-sided, which is what a real genie
+ * does anyway — that one is a perspective effect too.
+ *
+ * `transform-origin` is the band's top centre, so x is measured from the
+ * centreline and y from the top edge, which is what these formulae assume.
+ */
+function trapezoid(
+  bandHeight: number,
+  sTop: number,
+  sBottom: number,
+  destHeight: number,
+  centreDrift: number,
+): string {
+  // A fully collapsed band would divide by zero; hold it just above.
+  const ratio = Math.min(sTop / Math.max(sBottom, 1e-4), 1e4);
+  const h = (ratio - 1) / bandHeight;
+  const f = (destHeight * ratio) / bandHeight;
+  const c = (centreDrift * ratio) / bandHeight;
+  // Column-major: these are the four columns of the 4x4.
+  return `matrix3d(${sTop},0,0,0, ${c},${f},0,${h}, 0,0,1,0, 0,0,0,1)`;
+}
 /** Smoothstep. Keeps the bands from starting and stopping abruptly. */
 const ease = (t: number) => t * t * (3 - 2 * t);
 
@@ -129,14 +170,18 @@ export function runGenie({ source, target, direction }: GenieOptions): Promise<v
       // Where this strip's own two edges have got to.
       const destTop = lerp(rect.top + srcTop, targetCY, qTop);
       const destBottom = lerp(rect.top + srcTop + bandH, targetCY, qBottom);
-      const qMid = (qTop + qBottom) / 2;
-      const sx = lerp(1, minScaleX, qMid);
-      const sy = Math.max((destBottom - destTop) / bandH, 0.001);
-      const tx = lerp(0, targetCX - rectCX, qMid);
+      // Width and centreline are read at BOTH edges of the band, never averaged
+      // across it — averaging is what produced the staircase.
+      const sTop = lerp(1, minScaleX, qTop);
+      const sBottom = lerp(1, minScaleX, qBottom);
+      const cTop = lerp(0, targetCX - rectCX, qTop);
+      const cBottom = lerp(0, targetCX - rectCX, qBottom);
       const ty = destTop - (rect.top + srcTop);
       frames.push({
         offset: p,
-        transform: `translate(${tx.toFixed(2)}px, ${ty.toFixed(2)}px) scale(${sx.toFixed(4)}, ${sy.toFixed(4)})`,
+        transform:
+          `translate(${cTop.toFixed(2)}px, ${ty.toFixed(2)}px) ` +
+          trapezoid(bandH, sTop, sBottom, Math.max(destBottom - destTop, 0.01), cBottom - cTop),
       });
     }
 
