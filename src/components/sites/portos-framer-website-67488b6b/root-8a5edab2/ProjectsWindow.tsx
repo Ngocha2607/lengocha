@@ -32,9 +32,13 @@ interface Project {
    * the write-up instead of a login screen — the portfolio's own convention.
    */
   href?: string;
+  /**
+   * Set instead of `href` when the write-up lives in this site's own Writing
+   * window. These used to be absolute links to `/writing/<slug>`, which 404s:
+   * the articles are read inside the desktop and no such page route exists.
+   */
+  writingSlug?: string;
 }
-
-const PORTFOLIO = "https://lengocha.vercel.app";
 
 /**
  * Six projects, newest first — content, wording and screenshots all taken from
@@ -54,7 +58,9 @@ const PROJECTS: readonly Project[] = [
     tags: ["Next.js 14", "App Router", "Turborepo", "TanStack Query"],
     image: "project-lms-platform.png",
     alt: "SAPP Academy learning-management system dashboard",
-    href: `${PORTFOLIO}/writing/ban-lms-theo-module-kien-truc-plugin-trong-monorepo-next-js`,
+    // Same article as the Operations card below, deliberately: these two ARE
+    // the "hai frontend" that write-up is about, so one piece covers both.
+    writingSlug: "ben-trong-sapp-lms-hai-frontend-mot-he-van-hanh-dao-tao",
   },
   {
     period: "2025 — Present",
@@ -64,7 +70,7 @@ const PROJECTS: readonly Project[] = [
     tags: ["React", "TypeScript", "Vite", "Ant Design"],
     image: "project-ops-portal.png",
     alt: "SAPP Academy operations portal showing the class list screen",
-    href: `${PORTFOLIO}/writing/ben-trong-sapp-lms-hai-frontend-mot-he-van-hanh-dao-tao`,
+    writingSlug: "ben-trong-sapp-lms-hai-frontend-mot-he-van-hanh-dao-tao",
   },
   {
     period: "2023 — 2025",
@@ -213,7 +219,7 @@ function ProjectCardBody({ project, isList }: { project: Project; isList: boolea
 
       <p className="font-display mt-[6px] flex items-center gap-1 text-[15px] leading-[21px] font-medium tracking-[-0.3px] text-black">
         {project.title}
-        {project.href ? (
+        {project.href || project.writingSlug ? (
           // Only ever an affordance — the whole card is the link.
           <span
             aria-hidden="true"
@@ -243,6 +249,8 @@ function ProjectCardBody({ project, isList }: { project: Project; isList: boolea
 }
 
 interface ProjectsWindowProps {
+  /** Opens the Writing window on a given article. */
+  onOpenWriting: (slug: string) => void;
   mode: ProjectsMode;
 }
 
@@ -262,7 +270,7 @@ interface ProjectsWindowProps {
  * Below 880px both modes collapse to one column. The live site clips instead of
  * reflowing, so that step is an adaptation rather than a measurement.
  */
-export function ProjectsWindow({ mode }: ProjectsWindowProps) {
+export function ProjectsWindow({ mode, onOpenWriting }: ProjectsWindowProps) {
   const isList = mode === "list";
 
   return (
@@ -282,6 +290,25 @@ export function ProjectsWindow({ mode }: ProjectsWindowProps) {
             {PROJECTS.map((project) => {
               const shared =
                 "group flex w-full flex-col items-start text-left transition-opacity duration-200";
+              const interactive = cn(shared, "cursor-pointer hover:opacity-95");
+
+              // An internal write-up opens the Writing window rather than
+              // navigating. There is no /writing/<slug> route — the articles are
+              // read inside the desktop — so linking to one only ever 404'd.
+              if (project.writingSlug) {
+                const slug = project.writingSlug;
+                return (
+                  <button
+                    key={project.image}
+                    type="button"
+                    data-no-drag
+                    onClick={() => onOpenWriting(slug)}
+                    className={interactive}
+                  >
+                    <ProjectCardBody project={project} isList={isList} />
+                  </button>
+                );
+              }
 
               return project.href ? (
                 <a
@@ -290,7 +317,7 @@ export function ProjectsWindow({ mode }: ProjectsWindowProps) {
                   target="_blank"
                   rel="noreferrer noopener"
                   data-no-drag
-                  className={cn(shared, "cursor-pointer hover:opacity-95")}
+                  className={interactive}
                 >
                   <ProjectCardBody project={project} isList={isList} />
                 </a>

@@ -56,11 +56,19 @@ const TAG_CLASS =
   "font-sans rounded-full border border-black/10 px-2 py-[2px] text-[11px] leading-[15px] text-black/55";
 const NOTE_CLASS = "font-sans text-[12px] leading-[16.8px] text-black/50";
 
-export function WritingWindow() {
+interface WritingWindowProps {
+  /**
+   * Opens directly on this article instead of the list. Set when something else
+   * on the desktop links to a write-up — a project card, for instance.
+   */
+  initialSlug?: string | null;
+}
+
+export function WritingWindow({ initialSlug = null }: WritingWindowProps) {
   const [posts, setPosts] = useState<PostMeta[] | null>(null);
   const [listError, setListError] = useState<string | null>(null);
 
-  const [openSlug, setOpenSlug] = useState<string | null>(null);
+  const [openSlug, setOpenSlug] = useState<string | null>(initialSlug);
 
   /**
    * The loaded article is TAGGED with the slug it belongs to, rather than being

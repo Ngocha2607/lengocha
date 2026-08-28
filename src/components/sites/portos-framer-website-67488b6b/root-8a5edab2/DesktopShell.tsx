@@ -68,9 +68,22 @@ const BASE_Z = 4;
 export function DesktopShell() {
   const [open, setOpen] = useState<PortosAppId[]>([]);
   const [projectsMode, setProjectsMode] = useState<ProjectsMode>("grid");
+  /**
+   * Which article the Writing window should open on. Set when a project card
+   * points at an internal write-up; cleared when Writing is opened any other
+   * way, so the dock icon always lands on the list.
+   */
+  const [writingSlug, setWritingSlug] = useState<string | null>(null);
 
   const openWindow = useCallback((app: PortosAppId) => {
+    if (app === "writing") setWritingSlug(null);
     setOpen((current) => [...current.filter((id) => id !== app), app]);
+  }, []);
+
+  /** A project card asking for its write-up: open Writing already on that article. */
+  const openWriting = useCallback((slug: string) => {
+    setWritingSlug(slug);
+    setOpen((current) => [...current.filter((id) => id !== "writing"), "writing"]);
   }, []);
 
   const closeWindow = useCallback((app: PortosAppId) => {
@@ -90,9 +103,12 @@ export function DesktopShell() {
       case "about":
         return <AboutWindow />;
       case "projects":
-        return <ProjectsWindow mode={projectsMode} />;
+        return <ProjectsWindow mode={projectsMode} onOpenWriting={openWriting} />;
       case "writing":
-        return <WritingWindow />;
+        // Keyed by slug so arriving from a project card re-opens the body on
+        // that article even when the window is already up. Only the body
+        // remounts; the frame stays, so this does not replay the genie.
+        return <WritingWindow key={writingSlug ?? "list"} initialSlug={writingSlug} />;
       case "contact":
         return <ContactWindow />;
       case "resume":
