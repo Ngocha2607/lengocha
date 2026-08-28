@@ -11,17 +11,19 @@ interface AppleMenuProps {
 
 /**
  * The windows this menu offers, in the order macOS would put them: identity
- * first, then the things you would go looking for.
+ * first, then the work, then how to get in touch.
  *
- * These are the four long-form windows. Projects, Gallery and Contact are left
- * out on purpose — they already have a folder or a dock icon each, and a menu
- * that simply repeats the desktop is a menu nobody opens twice.
+ * Projects and Gallery are left out. Both already have a folder or a dock icon,
+ * and a menu that simply repeats the desktop is a menu nobody opens twice.
+ * Contact has a dock icon too and is here anyway, at the owner's request — it is
+ * the one thing a visitor may go looking for without knowing which icon hides it.
  */
 const MENU_APPS: { app: PortosAppId; label: string }[] = [
   { app: "about", label: "About Lê Ngọc Hà" },
   { app: "experience", label: "Experience" },
   { app: "resume", label: "Resume" },
   { app: "decisions", label: "Highlights & Decisions" },
+  { app: "contact", label: "Contact" },
 ];
 
 /**
