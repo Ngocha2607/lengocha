@@ -8,16 +8,24 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 <!-- END:nextjs-agent-rules -->
 
-# Website Reverse-Engineer Template
+# Portfolio — Lê Ngọc Hà
 
 ## What This Is
-A reusable template for reverse-engineering any website into a clean, modern Next.js codebase using AI coding agents. The Next.js + shadcn/ui + Tailwind v4 base is pre-scaffolded — just run `/clone-website <url1> [<url2> ...]`.
+A personal portfolio that presents itself as a macOS desktop: a wallpaper, a
+menu bar, folder icons, a dock, and draggable windows for About, Experience,
+Projects, Writing, Resume, Gallery, Contact and Highlights & Decisions.
+
+It began life as a clone of a Framer template and was matched to it 1:1 first;
+it has since diverged deliberately. The build is now in its **maintenance and
+customisation phase** — changes are made on their own merit, and no longer need
+to match any reference site.
 
 ## Tech Stack
 - **Framework:** Next.js 16 (App Router, React 19, TypeScript strict)
-- **UI:** shadcn/ui (Radix primitives, Tailwind CSS v4, `cn()` utility)
-- **Icons:** Lucide React (default — will be replaced/supplemented by extracted SVGs)
+- **UI:** shadcn/ui (Tailwind CSS v4, `cn()` utility), Base UI primitives
+- **Icons:** Lucide React, plus SVGs served from `public/sites/.../images/`
 - **Styling:** Tailwind CSS v4 with oklch design tokens
+- **Content:** Notion drives the Writing window via `@notionhq/client` — see `.env.example`
 - **Deployment:** Vercel
 
 ## Commands
@@ -34,115 +42,40 @@ A reusable template for reverse-engineering any website into a clean, modern Nex
 - 2-space indentation
 - Responsive: mobile-first
 
-## Design Principles
-- **Pixel-perfect emulation** — match the target's spacing, colors, typography exactly
-- **No personal aesthetic changes during emulation phase** — match 1:1 first, customize later
-- **Real content** — use actual text and assets from the target site, not placeholders
-- **Beauty-first** — every pixel matters
+## Working On This Codebase
+- Many values here are **measured from the original site**, not chosen. Where a
+  comment explains why a number is what it is, keep the comment truthful if you
+  change the number.
+- The breakpoints are `810px` and `1200px`, expressed as arbitrary variants
+  (`min-[810px]:`, `max-[809px]:`) because Tailwind's defaults do not line up.
+- Verify visually before claiming a UI change works. `npm run check` proves it
+  compiles, not that it looks right.
 
 ## Project Structure
 ```
 src/
-  app/              # Next.js routes
-  components/       # React components
+  app/
+    api/writing/    # Notion-backed routes for the Writing window
+    layout.tsx      # Root layout, fonts, metadata
+    page.tsx        # Renders the desktop shell
+    globals.css     # Tailwind v4 theme + design tokens
+  components/
+    sites/portos-framer-website-67488b6b/root-8a5edab2/
+                    # The desktop shell and every window, one file each
     ui/             # shadcn/ui primitives
-    icons.tsx       # Extracted SVG icons as React components
   lib/
     utils.ts        # cn() utility (shadcn)
-  types/            # TypeScript interfaces
-  hooks/            # Custom React hooks
+    notion.ts       # Notion client and query helpers
+    markdown.ts     # Notion blocks -> HTML
+  types/
+    portos.ts       # Shared types and the PORTOS_ASSETS path constant
 public/
-  images/           # Downloaded images from target site
-  videos/           # Downloaded videos from target site
-  seo/              # Favicons, OG images, webmanifest
-docs/
-  research/         # Inspection output (design tokens, components, layout)
-  design-references/ # Screenshots and visual references
-scripts/            # Asset download scripts
+  sites/portos-framer-website-67488b6b/root-8a5edab2/
+    images/         # Wallpapers, dock and folder artwork
+    fonts/          # Self-hosted SF Pro faces
+    seo/            # Favicons, OG images, webmanifest
 ```
 
-## MOST IMPORTANT NOTES
-- When launching Claude Code agent teams, ALWAYS have each teammate work in their own worktree branch and merge everyone's work at the end, resolving any merge conflicts smartly since you are basically serving the orchestrator role and have full context to our goals, work given, work achieved, and desired outcomes.
-- After editing `AGENTS.md`, run `bash scripts/sync-agent-rules.sh` to regenerate platform-specific instruction files.
-- After editing `.claude/skills/clone-website/SKILL.md`, run `node scripts/sync-skills.mjs` to regenerate the skill for all platforms.
-
-# Website Inspection Guide
-
-## How to Reverse-Engineer Any Website
-
-This guide outlines what to capture when inspecting a target website via Chrome MCP or browser DevTools.
-
-## Phase 1: Visual Audit
-
-### Screenshots to Capture
-- [ ] Every distinct page — desktop, tablet, mobile
-- [ ] Dark mode variants (if applicable)
-- [ ] Light mode variants (if applicable)
-- [ ] Key interaction states (hover, active, open menus, modals)
-- [ ] Loading/skeleton states
-- [ ] Empty states
-- [ ] Error states
-
-### Design Tokens to Extract
-- [ ] **Colors** — background, text (primary/secondary/muted), accent, border, hover, error, success, warning
-- [ ] **Typography** — font family, sizes (h1-h6, body, caption, label), weights, line heights, letter spacing
-- [ ] **Spacing** — padding/margin patterns (look for a scale: 4px, 8px, 12px, 16px, 24px, 32px, etc.)
-- [ ] **Border radius** — buttons, cards, avatars, inputs
-- [ ] **Shadows/elevation** — card shadows, dropdown shadows, modal overlay
-- [ ] **Breakpoints** — when does the layout shift? (inspect with DevTools responsive mode)
-- [ ] **Icons** — which icon library? custom SVGs? sizes?
-- [ ] **Avatars** — sizes, shapes, fallback behavior
-- [ ] **Buttons** — all variants (primary, secondary, ghost, icon-only, danger)
-- [ ] **Inputs** — text fields, textareas, selects, checkboxes, toggles
-
-## Phase 2: Component Inventory
-
-For each distinct UI component, document:
-1. **Name** — what would you call this component?
-2. **Structure** — what HTML elements / child components does it contain?
-3. **Variants** — does it have different sizes, colors, or states?
-4. **States** — default, hover, active, disabled, loading, error, empty
-5. **Responsive behavior** — how does it change at different breakpoints?
-6. **Interactions** — click, hover, focus, keyboard navigation
-7. **Animations** — transitions, entrance/exit animations, micro-interactions
-
-### Common Components to Look For
-- Navigation (top bar, sidebar, bottom bar)
-- Cards / list items
-- Buttons and links
-- Forms and inputs
-- Modals and dialogs
-- Dropdowns and menus
-- Tabs and segmented controls
-- Avatars and user badges
-- Loading skeletons
-- Toast notifications
-- Tooltips and popovers
-
-## Phase 3: Layout Architecture
-
-- [ ] **Grid system** — CSS Grid? Flexbox? Fixed widths?
-- [ ] **Column layout** — how many columns at each breakpoint?
-- [ ] **Max-width** — main content area max-width
-- [ ] **Sticky elements** — header, sidebar, floating buttons
-- [ ] **Z-index layers** — navigation, modals, tooltips, overlays
-- [ ] **Scroll behavior** — infinite scroll, pagination, virtual scrolling
-
-## Phase 4: Technical Stack Analysis
-
-- [ ] **Framework** — React? Vue? Angular? Check `__NEXT_DATA__`, `__NUXT__`, `ng-version`
-- [ ] **CSS approach** — Tailwind (utility classes), CSS Modules, Styled Components, Emotion, vanilla CSS
-- [ ] **State management** — Redux (check DevTools), React Query, Zustand, Pinia
-- [ ] **API patterns** — REST, GraphQL (check network tab for `/graphql` requests)
-- [ ] **Font loading** — Google Fonts, self-hosted, system fonts
-- [ ] **Image strategy** — CDN, lazy loading, srcset, WebP/AVIF
-- [ ] **Animation library** — Framer Motion, GSAP, CSS transitions only
-
-## Phase 5: Documentation Output
-
-After inspection, create these files in `docs/research/`:
-1. `DESIGN_TOKENS.md` — All extracted colors, typography, spacing
-2. `COMPONENT_INVENTORY.md` — Every component with structure notes
-3. `LAYOUT_ARCHITECTURE.md` — Page layouts, grid system, responsive behavior
-4. `INTERACTION_PATTERNS.md` — Animations, transitions, hover states
-5. `TECH_STACK_ANALYSIS.md` — What the site uses and our chosen equivalents
+The long `sites/<site-key>/<page-key>/` path is a leftover of how this project
+was generated. `PORTOS_ASSETS` in `src/types/portos.ts` is the single source of
+that prefix — asset URLs are built from it rather than written out by hand.
