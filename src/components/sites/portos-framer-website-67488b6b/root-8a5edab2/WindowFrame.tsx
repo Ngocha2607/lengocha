@@ -153,9 +153,16 @@ function genieTargetRect(app: PortosAppId | undefined): DOMRect {
 
 
 /**
- * macOS window chrome. Matches the live site exactly: no border radius, no drop
- * shadow, a sticky 44px title bar and a hidden-scrollbar body. The whole window
- * is draggable (`cursor: grab`), not just the title bar.
+ * macOS window chrome: a sticky 44px title bar and a hidden-scrollbar body. The
+ * whole window is draggable (`cursor: grab`), not just the title bar.
+ *
+ * The 10px corner radius is a DEPARTURE from the live site, which had square
+ * corners and no shadow — worth saying plainly, since the rest of this file is
+ * transcribed from it. 10px is what macOS itself uses on a windowed app.
+ *
+ * It has to sit on the scrolling element, with `overflow-hidden` alongside it:
+ * the title bar and the body both paint `#f7f7f7` right out to the edge, so
+ * rounding a parent instead would leave square corners drawn over the curve.
  */
 export function WindowFrame({
   title,
@@ -444,7 +451,7 @@ export function WindowFrame({
           visibility: warping ? "hidden" : "visible",
         }}
       >
-        <div className="portos-scroll h-full w-full bg-[#f7f7f7]">
+        <div className="portos-scroll h-full w-full overflow-hidden rounded-[10px] bg-[#f7f7f7]">
           {/* Title bar — sticky so it stays pinned while the body scrolls. */}
           <div className="sticky top-0 z-[1] flex h-11 shrink-0 items-center gap-4 bg-[#f7f7f7] p-3">
             {/* While minimised the lights are under 4px across, so they are taken

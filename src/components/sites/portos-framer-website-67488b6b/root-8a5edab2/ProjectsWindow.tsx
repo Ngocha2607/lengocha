@@ -1,5 +1,6 @@
 "use client";
 
+import { LayoutGrid, Rows3 } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { PORTOS_ASSETS } from "@/types/portos";
@@ -114,9 +115,6 @@ const PROJECTS: readonly Project[] = [
  */
 const SHOT_ASPECT = "aspect-[2.1]";
 
-/** Knob travel and the label cross-fade share one duration. */
-const TOGGLE_TRANSITION = "duration-[250ms] ease-[ease]";
-
 interface ProjectsToggleProps {
   mode: ProjectsMode;
   onChange: (mode: ProjectsMode) => void;
@@ -132,45 +130,59 @@ interface ProjectsToggleProps {
  * does it, so the transition runs on `padding`. All of that is kept; only the
  * labels and what they switch have changed.
  */
-export function ProjectsToggle({ mode, onChange }: ProjectsToggleProps) {
-  const isList = mode === "list";
+/**
+ * The two layouts, as a Finder-style segmented control.
+ *
+ * This replaces a labelled switch — the words "Grid" and "List" either side of a
+ * sliding knob — which is what the live site had. Icons say the same thing in a
+ * third of the width, and a segmented control is also the honest control here:
+ * a switch implies on and off, while these are two peers.
+ *
+ * `role="radiogroup"` rather than a switch for the same reason. Each segment is
+ * a radio, so a screen reader announces which of the two is chosen instead of
+ * reading one label and a checked state.
+ */
+const VIEWS = [
+  { mode: "grid" as const, Icon: LayoutGrid, label: "Grid" },
+  { mode: "list" as const, Icon: Rows3, label: "List" },
+];
 
+/** 22px tall so the 13px glyphs have room; the title bar has 44px to spare. */
+const SEGMENT_CLASS =
+  "flex h-[22px] w-[28px] cursor-pointer items-center justify-center rounded-[5px] " +
+  "transition-colors duration-150 ease-out outline-none " +
+  "focus-visible:ring-1 focus-visible:ring-black/40";
+
+export function ProjectsToggle({ mode, onChange }: ProjectsToggleProps) {
   return (
-    <div className="flex h-[17px] items-center justify-center gap-1">
-      <span
-        className={cn(
-          "font-sans text-[12px] leading-[16.8px] font-normal tracking-normal transition-colors",
-          TOGGLE_TRANSITION,
-          isList ? "text-black/20" : "text-black",
-        )}
-      >
-        Grid
-      </span>
-      <button
-        type="button"
-        role="switch"
-        aria-checked={isList}
-        aria-label="Switch between the two-column and single-column project layouts"
-        data-no-drag
-        onClick={() => onChange(isList ? "grid" : "list")}
-        className={cn(
-          "flex h-[17px] w-[33px] cursor-pointer items-center rounded-[46px] border-[0.57px] border-black bg-transparent py-1 transition-[padding]",
-          TOGGLE_TRANSITION,
-          isList ? "pr-1 pl-5" : "pr-5 pl-1",
-        )}
-      >
-        {/* Black Dot */}
-        <span className="size-[9px] shrink-0 rounded-full bg-black" />
-      </button>
-      <span
-        className={cn(
-          "font-sans text-[12px] leading-[16.8px] font-normal tracking-normal transition-colors",
-          TOGGLE_TRANSITION,
-          isList ? "text-black" : "text-black/20",
-        )}
-      >
-        List
-      </span>
+    <div
+      role="radiogroup"
+      aria-label="Project layout"
+      data-no-drag
+      className="flex items-center gap-[2px] rounded-[7px] border-[0.5px] border-black/15 bg-black/5 p-[2px]"
+    >
+      {VIEWS.map(({ mode: value, Icon, label }) => {
+        const active = mode === value;
+        return (
+          <button
+            key={value}
+            type="button"
+            role="radio"
+            aria-checked={active}
+            aria-label={label}
+            title={label}
+            onClick={() => onChange(value)}
+            className={cn(
+              SEGMENT_CLASS,
+              active
+                ? "bg-white text-black shadow-[0_1px_2px_rgba(0,0,0,0.16)]"
+                : "text-black/35 hover:text-black/60",
+            )}
+          >
+            <Icon size={13} strokeWidth={2} aria-hidden="true" />
+          </button>
+        );
+      })}
     </div>
   );
 }
