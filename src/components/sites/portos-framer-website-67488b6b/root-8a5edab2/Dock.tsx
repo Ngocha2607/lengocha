@@ -105,7 +105,7 @@ const APP_ICON_SIZE = "size-[34px] min-[810px]:size-[73px] min-[1200px]:size-[76
 const TOOLTIP_CLASS =
   "pointer-events-none absolute bottom-full left-1/2 z-10 -translate-x-1/2 " +
   "mb-[23px] min-[810px]:mb-[24.5px] min-[1200px]:mb-[23px] " +
-  "rounded-[6px] bg-black/20 px-[20px] py-[12px] " +
+  "rounded-[6px] bg-black/50 px-[20px] py-[12px] " +
   "font-sans text-[12px] leading-[17px] whitespace-nowrap text-[#e5e5e5] " +
   "shadow-[0_2px_10px_rgba(0,0,0,0.22)] " +
   "opacity-0 transition-opacity duration-150 ease-out " +

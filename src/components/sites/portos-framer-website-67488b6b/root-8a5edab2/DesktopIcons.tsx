@@ -60,9 +60,13 @@ function DesktopIconButton({ icon, onOpen }: DesktopIconButtonProps) {
     >
       <span aria-hidden="true" className={HOVER_PLATE_CLASS} />
       <span className="relative flex h-[59px] w-[58px] cursor-pointer items-center justify-center transition-transform duration-200 ease-out group-hover:scale-90">
+        {/* Decorative, so the button takes its accessible name from the visible
+            label below instead. Repeating the label in `alt` made every folder
+            announce itself twice — "About About". The live site's own alt was
+            the meaningless "Logo", so nothing is lost by dropping it. */}
         <Image
           src={FOLDER_SRC}
-          alt={icon.label}
+          alt=""
           width={58}
           height={59}
           className="h-[59px] w-[58px]"

@@ -65,7 +65,9 @@ button (58 × 78.59)                   flex-col, items-center, justify-center, c
 
 All three use the **same** folder image:
 `/sites/portos-framer-website-67488b6b/root-8a5edab2/images/folder.png` (intrinsic 236×236,
-rendered at 58×59, `alt="Logo"` on the live site — use the label as alt in the clone).
+rendered at 58×59, `alt="Logo"` on the live site — render it decorative (`alt=""`) in the clone, NOT the label: the visible
+label sits directly below and is already the button accessible name, so repeating it in `alt`
+makes every folder announce twice).
 
 ## States & Behaviours
 
