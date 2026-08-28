@@ -39,6 +39,18 @@ const SLICES = 8;
 export const GENIE_MS = 420;
 
 /**
+ * How long the finished bands stay up after the caller has been told to bring
+ * the real element back.
+ *
+ * The overlap is deliberate and invisible: an inward flight ends exactly on the
+ * target rect and an outward one exactly on the window, so for these few frames
+ * the clone and the real thing are drawn in the same place. Removing the overlay
+ * first is what caused a flash. Three frames is enough for React to commit and
+ * the browser to paint.
+ */
+const HANDOVER_MS = 48;
+
+/**
  * How much of the flight is stagger. The funnel IS the stagger: at 0.55 the top
  * of the window has not begun to move until the bottom is more than half way
  * down, so mid-flight the shape necks. At 0 every band moves together and this
@@ -85,6 +97,16 @@ export interface GenieOptions {
    * removes the timing question altogether.
    */
   sourceRect?: DOMRect;
+  /**
+   * Fired the moment the bands land, while they are all still on screen.
+   *
+   * This is where the caller un-hides the real element. Doing it from the
+   * returned promise instead leaves a hole: the overlay is already gone and the
+   * window is not back yet, so one frame paints neither and it reads as a flash.
+   * Handing over under cover of the last frame, and only then tearing the
+   * overlay down, keeps something on screen throughout.
+   */
+  onArrive?: () => void;
 }
 
 export function prefersReducedMotion(): boolean {
@@ -158,6 +180,7 @@ export function runGenie({
   direction,
   collapse = "point",
   sourceRect,
+  onArrive,
 }: GenieOptions): Promise<void> {
   const rect = sourceRect ?? source.getBoundingClientRect();
   if (rect.width === 0 || rect.height === 0) return Promise.resolve();
@@ -248,7 +271,13 @@ export function runGenie({
   // timer is wall-clock, so it resolves either way.
   const guard = new Promise<void>((resolve) => window.setTimeout(resolve, GENIE_MS + 120));
   return Promise.race([done, guard]).then(() => {
-    for (const a of animations) a.cancel();
-    overlay.remove();
+    onArrive?.();
+    return new Promise<void>((resolve) => {
+      window.setTimeout(() => {
+        for (const a of animations) a.cancel();
+        overlay.remove();
+        resolve();
+      }, HANDOVER_MS);
+    });
   });
 }

@@ -181,6 +181,22 @@ export function WindowFrame({
   // Hidden while a genie is in flight: the clones are what the eye follows, and
   // showing the real window at the same time would double it.
   const [warping, setWarping] = useState(!prefersReducedMotion());
+  /**
+   * Suppresses the shell's own width/height/top/transform transition for one
+   * commit, so a mode change the genie has already animated does not get
+   * animated a second time.
+   *
+   * Without it, minimising played the genie and then the old corner-shrink
+   * immediately after, because `setMode` moves the same geometry the transition
+   * is watching. A ref rather than state on purpose: it is read during the
+   * render that `setMode` triggers, and clearing it must NOT cause another
+   * render before paint, or the browser would see the geometry change with
+   * transitions back on and animate it after all.
+   */
+  const geometryJump = useRef(false);
+  useEffect(() => {
+    geometryJump.current = false;
+  });
   const closeRequested = useRef(false);
   const drag = useRef<{ startX: number; startY: number; originX: number; originY: number } | null>(
     null,
@@ -196,8 +212,13 @@ export function WindowFrame({
       return;
     }
     let live = true;
-    void runGenie({ source, target: genieTargetRect(app), direction: "out" }).then(() => {
-      if (live) setWarping(false);
+    void runGenie({
+      source,
+      target: genieTargetRect(app),
+      direction: "out",
+      onArrive: () => {
+        if (live) setWarping(false);
+      },
     });
     return () => {
       live = false;
@@ -269,25 +290,37 @@ export function WindowFrame({
       const goingDown = mode !== "minimized";
       setWarping(true);
       if (goingDown) {
-        // Collapse from where the window is now into the parking space, then let
-        // the real element reappear already parked.
-        void runGenie({ source, target: parkedRect(), direction: "in", collapse: "rect" }).then(() => {
-          setMode("minimized");
-          setWarping(false);
+        // Collapse into the parking space, then take over there. `collapse: rect`
+        // means the last frame already matches the parked window exactly, so the
+        // swap under the still-visible bands is invisible.
+        void runGenie({
+          source,
+          target: parkedRect(),
+          direction: "in",
+          collapse: "rect",
+          onArrive: () => {
+            geometryJump.current = true;
+            setMode("minimized");
+            setWarping(false);
+          },
         });
         return;
       }
-      // Restoring runs the other way, out of the parking space and back into the
-      // full-size rect — which is computed, not measured, so this never depends
-      // on the shell's geometry transition having finished.
+      // Restoring unfolds out of the parking space. The shell is put back to full
+      // size straight away, jumping rather than transitioning, while still hidden
+      // behind the bands; the rect it unfolds into is computed, not measured, so
+      // nothing here waits on layout.
+      const from = parkedRect();
+      geometryJump.current = true;
+      setMode("normal");
       void runGenie({
         source,
-        target: parkedRect(),
+        target: from,
         direction: "out",
         collapse: "rect",
         sourceRect: normalRect(),
-      }).then(() => setWarping(false));
-      setMode("normal");
+        onArrive: () => setWarping(false),
+      });
     },
     [mode, normalRect, onFocus, parkedRect],
   );
@@ -387,9 +420,12 @@ export function WindowFrame({
               `translate(calc(${MINIMIZED_MARGIN}px - 50vw), 0px) scale(${MINIMIZED_SCALE})`
             : `translate(calc(-50% + ${offset.x}px), ${offset.y}px)`,
         // Do not transition while dragging, or the window lags behind the pointer.
-        transition: dragging
-          ? undefined
-          : `width ${RESIZE_MS}ms ease, height ${RESIZE_MS}ms ease, top ${RESIZE_MS}ms ease, transform ${RESIZE_MS}ms ease`,
+        // Nor on a commit the genie has already animated: minimising otherwise
+        // played the effect and then the old corner-shrink straight after it.
+        transition:
+          dragging || geometryJump.current
+            ? undefined
+            : `width ${RESIZE_MS}ms ease, height ${RESIZE_MS}ms ease, top ${RESIZE_MS}ms ease, transform ${RESIZE_MS}ms ease`,
         // The cast is for `--portos-content-max`: React's CSSProperties has no
         // index signature for custom properties, though it renders them fine.
       } as React.CSSProperties}
