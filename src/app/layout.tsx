@@ -65,7 +65,12 @@ const ASSETS = "/sites/portos-framer-website-67488b6b/root-8a5edab2";
 const SITE_TITLE = "Lê Ngọc Hà — Senior Frontend Engineer";
 const SITE_DESCRIPTION =
   "Frontend Tech Lead at SAPP Academy. I build fast, scalable web systems with React, Next.js and TypeScript — explore this portfolio like a Mac.";
-const SITE_URL = "https://lengocha.vercel.app";
+/**
+ * Overridable so a preview deployment can advertise its own origin instead of
+ * the production one. Read at build time in a server component, so it needs no
+ * NEXT_PUBLIC_ prefix — that is only for values the browser bundle must see.
+ */
+const SITE_URL = process.env.SITE_URL ?? "https://lengocha.vercel.app";
 
 /**
  * Metadata, favicon, apple-touch icon and OG image are all the owner's.
