@@ -13,8 +13,10 @@ import { cn } from "@/lib/utils";
  * timeline runs oldest-first because a trajectory reads left to right; these
  * cards run newest-first because that is what a reviewer wants at the top.
  *
- * Content is Lê Ngọc Hà's own, carried across from the career section of his
- * portfolio rather than rewritten, so the two stay in step.
+ * Content is carried VERBATIM (Vietnamese) from the CV at
+ * `public/Le-Ngoc-Ha-Senior-Frontend-Developer.pdf`, on request, so the two
+ * stay in step. The FPT internship is the one entry the two-page CV cut for
+ * space; it is kept here (and on the About timeline) with its own wording.
  *
  * The window keeps the measured 720x596 geometry rather than the standard
  * 864x630. That was sized for a wallpaper carousel, but it happens to leave a
@@ -30,24 +32,24 @@ interface Role {
   url?: string;
   /** Anything the job title alone would misrepresent. */
   note?: string;
-  summary: string;
+  /** The CV lists bullets only, so most roles carry no summary paragraph. */
+  summary?: string;
   highlights: readonly string[];
 }
 
 const ROLES: readonly Role[] = [
   {
-    period: "03/2025 — Present",
+    period: "03/2025 — Hiện tại",
     title: "Frontend Tech Lead",
     org: "SAPP Academy",
     url: "https://sapp.edu.vn",
-    summary:
-      "Own the frontend technical direction across the product ecosystem — the learning platform, the test platform, a finance product and the operations back-office — plus the standards and the people.",
     highlights: [
-      "Consolidated four frontends into one pnpm + Turborepo workspace over a shared component, editor and styles layer",
-      "Migrated the LMS to Next.js 14 App Router, then ran a measured pass over 15 routes: worst route 15.2s → 6.1s, Lighthouse 29 → 65",
-      "Replaced a per-seat editor licence with an in-house Tiptap package across the whole workspace",
-      "Gitleaks, Trivy, Semgrep and OWASP ZAP on every merge request; AI workflows returning ~10 hours a week to the team",
-      "Mentoring two junior engineers; own coding standards and code review",
+      "Dẫn dắt Frontend LMS + Ops, review 100% Merge Request và mentor 2 Junior Frontend.",
+      "Thiết kế Monorepo với pnpm Workspace + Turborepo, hợp nhất 4 frontend và chuẩn hóa hệ thống package dùng chung.",
+      "Nâng cấp LMS từ Next.js 12 → 14 App Router, tạo nền tảng cho các cải tiến rendering và hiệu năng.",
+      "Thay editor thương mại bằng Tiptap, xây dựng thành private package dùng chung, giảm phụ thuộc nhà cung cấp và chi phí license.",
+      "Tối ưu hiệu năng: giảm 60% thời gian tải trang (15.2s → 6.1s), Lighthouse 29 → 65+.",
+      "Tích hợp Gitleaks, Trivy, Semgrep, OWASP ZAP vào CI/CD và xây dựng AI Workflow, tăng 30% năng suất, tiết kiệm ~10 giờ/tuần.",
     ],
   },
   {
@@ -55,12 +57,12 @@ const ROLES: readonly Role[] = [
     title: "Fullstack Developer",
     org: "Tweet World Travel Group",
     url: "https://tweetworldtravel.com",
-    summary:
-      "Both sides of the wire: Spring Boot microservices and the React / Next.js clients in front of them, for a travel group's agent and consumer products.",
     highlights: [
-      "Five B2B products and a multilingual ERP serving roughly 1,000 users a month",
-      "Page load 3.2s → 1.1s with mobile Lighthouse held at 85",
-      "Mentored three junior engineers and ran the code reviews that held production quality steady",
+      "Phát triển 5 nền tảng TravelTech B2B, phục vụ ~1.000 users/tháng, cùng hệ thống quản trị nội bộ đa ngôn ngữ.",
+      "Xây dựng và bảo trì Backend Services với Spring Boot / Microservices trong môi trường Monorepo.",
+      "Tối ưu SSR và tài nguyên Frontend, giảm page load 3.2s → 1.1s (-66%), duy trì Lighthouse 85.",
+      "Mentor 3 Junior Frontend, review Pull Request trước khi merge vào Staging.",
+      "Tái cấu trúc và chuẩn hóa codebase, cải thiện khả năng mở rộng và tái sử dụng.",
     ],
   },
   {
@@ -68,29 +70,29 @@ const ROLES: readonly Role[] = [
     title: "Frontend Developer",
     org: "Minastik JSC",
     url: "https://www.minastik.com",
-    note: "Onsite at 3S Intersoft",
-    summary:
-      "React applications for operational software, to an Agile/Scrum process, with a backend team on the other side of the API.",
+    note: "Onsite tại 3S Intersoft JSC",
     highlights: [
-      "Built the UI/UX for EVN Hanoi's power-management modules on a .NET Core API",
-      "First codebase someone else had to maintain after me — where the habits about naming and structure came from",
+      "Phát triển và bảo trì nhiều ứng dụng web với React.js, xây dựng giao diện đáp ứng (Responsive) và đảm bảo trải nghiệm người dùng trên nhiều nền tảng.",
+      "Phối hợp với đội Backend để tích hợp RESTful API, triển khai các tính năng mới và xử lý lỗi trong quá trình phát triển.",
+      "Làm việc theo quy trình Agile/Scrum, phối hợp chặt chẽ với các thành viên trong nhóm để đảm bảo tiến độ dự án.",
     ],
   },
   {
+    // Not on the two-page CV (cut for space); wording is our own translation of
+    // the entry it used to carry, not CV text.
     period: "2021",
     title: "Software Engineer Intern",
     org: "FPT Software",
     url: "https://www.fpt-software.com",
-    summary:
-      "Built an employee-management application in C++ and learned how software gets built by more than one person.",
+    summary: "Xây dựng ứng dụng quản lý nhân viên bằng C++.",
     highlights: [],
   },
   {
     period: "2018 — 2022",
-    title: "B.Eng, Electronics & Telecommunications",
-    org: "Hanoi University of Science and Technology",
+    title: "Cử nhân Điện tử - Viễn thông",
+    org: "Đại học Bách Khoa Hà Nội",
     url: "https://hust.edu.vn",
-    summary: "Engineering degree at HUST, with published research at REV-ECIT 2021.",
+    summary: "Bài báo khoa học — Kỷ yếu hội nghị REV ECIT 2021.",
     highlights: [],
   },
 ];
@@ -144,12 +146,16 @@ export function ExperienceWindow() {
               ) : (
                 <p className={ORG_CLASS}>{role.org}</p>
               )}
-              {role.note ? <span className={NOTE_CLASS}>{role.note}</span> : null}
+              {role.note ? (
+                <span className={NOTE_CLASS}>{role.note}</span>
+              ) : null}
             </div>
 
             <p className={cn(TITLE_CLASS, "mt-[2px]")}>{role.title}</p>
 
-            <p className={cn(SUMMARY_CLASS, "mt-3")}>{role.summary}</p>
+            {role.summary ? (
+              <p className={cn(SUMMARY_CLASS, "mt-3")}>{role.summary}</p>
+            ) : null}
 
             {role.highlights.length > 0 ? (
               <ul className="mt-3 flex list-disc flex-col gap-[6px] pl-[18px]">

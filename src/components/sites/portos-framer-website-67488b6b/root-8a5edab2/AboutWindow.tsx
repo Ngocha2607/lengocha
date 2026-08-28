@@ -22,18 +22,28 @@ interface RollingCounter extends AboutCounter {
  * Two rows of two. Every figure below is taken from Lê Ngọc Hà's CV rather than
  * invented: ~5 years' experience, the 60% page-load reduction on the SAPP LMS
  * (15.2s → 6.1s), 5 juniors mentored (2 at SAPP, 3 at Tweet World Travel), and
- * the 30% productivity gain from the AI workflow.
+ * the 30% productivity gain from the AI workflow. Labels are Vietnamese to match
+ * the CV, whose body copy this window now carries verbatim.
  */
 const ABOUT_COUNTERS: RollingCounter[] = [
-  { label: "• Experience", value: "5 Years", target: 5, suffix: " Years" },
-  { label: "• Faster Page Load", value: "60%", target: 60, suffix: "%" },
-  { label: "• Juniors Mentored", value: "5", target: 5, suffix: "" },
-  { label: "• Productivity Gain", value: "30%", target: 30, suffix: "%" },
+  { label: "• Kinh nghiệm", value: "5 năm", target: 5, suffix: " năm" },
+  {
+    label: "• Giảm thời gian tải trang",
+    value: "60%",
+    target: 60,
+    suffix: "%",
+  },
+  { label: "• Junior đã mentor", value: "5", target: 5, suffix: "" },
+  { label: "• Tăng năng suất", value: "30%", target: 30, suffix: "%" },
 ];
 
+/**
+ * The CV's PROFESSIONAL SUMMARY, verbatim in Vietnamese (requested), split at
+ * its own sentence boundary so the window keeps its two-paragraph rhythm.
+ */
 const INTRO_PARAGRAPHS = [
-  "I'm a Senior Frontend Engineer, currently Frontend Tech Lead at SAPP Academy, with close to five years architecting and shipping large-scale web systems across EdTech and TravelTech.",
-  "I own frontend architecture end to end — technology choices, coding standards, monorepo structure, security in CI/CD, and performance you can actually measure. Backed by a full-stack foundation in Java Spring Boot and microservices.",
+  "Senior Frontend Engineer — hiện là Frontend Tech Lead tại SAPP Academy — gần 5 năm kinh nghiệm xây dựng và dẫn dắt hệ thống web trong lĩnh vực EdTech và TravelTech.",
+  "Sở trường về kiến trúc Frontend, Monorepo, tối ưu hiệu năng và xây dựng quy trình kỹ thuật cho team. Đã dẫn dắt các sáng kiến từ nâng cấp Next.js, chuẩn hóa hệ thống package, tích hợp Security Pipeline đến xây dựng AI Workflow — tập trung vào tác động đo được và khả năng mở rộng của hệ thống.",
 ];
 
 /** The roll captured on the live site settles in a little over a second. */
@@ -62,7 +72,7 @@ function getReducedMotionServerSnapshot(): boolean {
 }
 
 /**
- * Body of the "About" window ("About Lê Ngọc Hà") — the chrome comes from
+ * Body of the "About" window ("About") — the chrome comes from
  * `WindowFrame`, which renders `children` flush against the 44px title bar, so
  * the 50px gap down to the content (which starts at y = 93) is supplied here.
  *
@@ -172,7 +182,7 @@ export function AboutWindow() {
                 {/* Title & Details */}
                 <div className="flex w-full flex-col gap-4">
                   <h3 className="font-display text-[32px] leading-[38.4px] tracking-[-0.32px] text-black">
-                    Hey, I&#39;m Hà.
+                    Xin chào, tôi là Hà.
                   </h3>
                   {/* Details */}
                   <div className="flex w-full flex-col gap-3">
@@ -195,30 +205,32 @@ export function AboutWindow() {
 
               {/* All Counters — two rows of two, 19px apart. */}
               <div className="flex w-full flex-col gap-8">
-                {[ABOUT_COUNTERS.slice(0, 2), ABOUT_COUNTERS.slice(2)].map((row) => (
-                  <div
-                    key={row[0].label}
-                    className="flex w-full flex-col gap-8 min-[560px]:flex-row min-[560px]:gap-[19px]"
-                  >
-                    {row.map((counter) => (
-                      <div
-                        key={counter.label}
-                        className="flex-1 overflow-clip border-t border-black/10 pt-2"
-                      >
-                        <div className="flex flex-col items-start gap-[2px]">
-                          <p className="font-display text-[14px] leading-[19.6px] tracking-[-0.14px] text-black/70">
-                            {counter.label}
-                          </p>
-                          <h2 className="font-display text-left text-[20px] leading-[28px] font-bold tracking-[-0.4px] text-black">
-                            {settled
-                              ? counter.value
-                              : `${Math.round(counter.target * progress)}${counter.suffix}`}
-                          </h2>
+                {[ABOUT_COUNTERS.slice(0, 2), ABOUT_COUNTERS.slice(2)].map(
+                  (row) => (
+                    <div
+                      key={row[0].label}
+                      className="flex w-full flex-col gap-8 min-[560px]:flex-row min-[560px]:gap-[19px]"
+                    >
+                      {row.map((counter) => (
+                        <div
+                          key={counter.label}
+                          className="flex-1 overflow-clip border-t border-black/10 pt-2"
+                        >
+                          <div className="flex flex-col items-start gap-[2px]">
+                            <p className="font-display text-[14px] leading-[19.6px] tracking-[-0.14px] text-black/70">
+                              {counter.label}
+                            </p>
+                            <h2 className="font-display text-left text-[20px] leading-[28px] font-bold tracking-[-0.4px] text-black">
+                              {settled
+                                ? counter.value
+                                : `${Math.round(counter.target * progress)}${counter.suffix}`}
+                            </h2>
+                          </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                ))}
+                      ))}
+                    </div>
+                  ),
+                )}
               </div>
 
               {/* The source template had a two-up block of team-member photo cards

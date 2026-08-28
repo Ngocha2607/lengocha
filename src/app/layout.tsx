@@ -64,7 +64,7 @@ const ASSETS = "/sites/portos-framer-website-67488b6b/root-8a5edab2";
 
 const SITE_TITLE = "Lê Ngọc Hà — Senior Frontend Engineer";
 const SITE_DESCRIPTION =
-  "Frontend Tech Lead at SAPP Academy. I build fast, scalable web systems with React, Next.js and TypeScript — explore this portfolio like a Mac.";
+  "Frontend Tech Lead tại SAPP Academy. Tôi xây dựng hệ thống web nhanh, có khả năng mở rộng với React, Next.js và TypeScript — khám phá portfolio này như một chiếc Mac.";
 /**
  * Overridable so a preview deployment can advertise its own origin instead of
  * the production one. Read at build time in a server component, so it needs no

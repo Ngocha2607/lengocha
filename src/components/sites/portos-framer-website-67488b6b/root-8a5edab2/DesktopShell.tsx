@@ -2,7 +2,11 @@
 
 import Image from "next/image";
 import { useCallback, useState } from "react";
-import { PORTOS_ASSETS, type PortosAppId, type WindowGeometry } from "@/types/portos";
+import {
+  PORTOS_ASSETS,
+  type PortosAppId,
+  type WindowGeometry,
+} from "@/types/portos";
 import { AboutWindow } from "./AboutWindow";
 import { ContactWindow } from "./ContactWindow";
 import { DesktopIcons } from "./DesktopIcons";
@@ -11,7 +15,11 @@ import { GalleryWindow } from "./GalleryWindow";
 import { WritingWindow } from "./WritingWindow";
 import { MenuBar } from "./MenuBar";
 import { PreLoader } from "./PreLoader";
-import { ProjectsToggle, ProjectsWindow, type ProjectsMode } from "./ProjectsWindow";
+import {
+  ProjectsToggle,
+  ProjectsWindow,
+  type ProjectsMode,
+} from "./ProjectsWindow";
 import { RecycleBinWindow } from "./RecycleBinWindow";
 import { ResumeWindow } from "./ResumeWindow";
 import { DecisionsWindow } from "./DecisionsWindow";
@@ -47,15 +55,24 @@ const MOUNTAIN_BLUR =
 const WINDOWS: Record<PortosAppId, WindowDef> = {
   // Title is the owner's, not the template's ("Our work with Norma"). The Inter
   // title font is kept — that is a real quirk of the source, see WindowFrame.
-  about: { title: "About Lê Ngọc Hà", geometry: STANDARD, top: 68, titleFont: "inter" },
-  projects: { title: "Overview of the Project", geometry: STANDARD, top: 68 },
+  about: {
+    title: "About",
+    geometry: STANDARD,
+    top: 68,
+    titleFont: "inter",
+  },
+  projects: { title: "Projects", geometry: STANDARD, top: 68 },
   writing: { title: "Writing", geometry: STANDARD, top: 68 },
   contact: { title: "Contact", geometry: STANDARD, top: 68 },
   resume: { title: "Resume", geometry: STANDARD, top: 68 },
   gallery: { title: "Gallery", geometry: STANDARD, top: 68 },
   recycleBin: { title: "Recycle Bin", geometry: STANDARD, top: 68 },
-  experience: { title: "Experience", geometry: { width: 720, height: 596 }, top: 89 },
-  decisions: { title: "Highlights & Decisions", geometry: STANDARD, top: 68 },
+  experience: { title: "Experience", geometry: STANDARD, top: 68 },
+  decisions: {
+    title: "Leadership & Technical Decisions",
+    geometry: STANDARD,
+    top: 68,
+  },
 };
 
 const BASE_Z = 4;
@@ -96,9 +113,13 @@ export function DesktopShell() {
    * parked watches this and unparks itself, so a dock icon reaches a minimised
    * window rather than silently doing nothing.
    */
-  const [openCount, setOpenCount] = useState<Partial<Record<PortosAppId, number>>>({});
+  const [openCount, setOpenCount] = useState<
+    Partial<Record<PortosAppId, number>>
+  >({});
   /** Per-window cascade slot, held only while the window is open. */
-  const [cascade, setCascade] = useState<Partial<Record<PortosAppId, number>>>({});
+  const [cascade, setCascade] = useState<Partial<Record<PortosAppId, number>>>(
+    {},
+  );
 
   /** Claims the lowest step nobody is standing on. */
   const claimCascade = useCallback((app: PortosAppId) => {
@@ -115,7 +136,10 @@ export function DesktopShell() {
     (app: PortosAppId) => {
       if (app === "writing") setWritingSlug(null);
       claimCascade(app);
-      setOpenCount((current) => ({ ...current, [app]: (current[app] ?? 0) + 1 }));
+      setOpenCount((current) => ({
+        ...current,
+        [app]: (current[app] ?? 0) + 1,
+      }));
       setOpen((current) => [...current.filter((id) => id !== app), app]);
     },
     [claimCascade],
@@ -126,7 +150,10 @@ export function DesktopShell() {
     (slug: string) => {
       setWritingSlug(slug);
       claimCascade("writing");
-      setOpen((current) => [...current.filter((id) => id !== "writing"), "writing"]);
+      setOpen((current) => [
+        ...current.filter((id) => id !== "writing"),
+        "writing",
+      ]);
     },
     [claimCascade],
   );
@@ -155,12 +182,19 @@ export function DesktopShell() {
       case "about":
         return <AboutWindow />;
       case "projects":
-        return <ProjectsWindow mode={projectsMode} onOpenWriting={openWriting} />;
+        return (
+          <ProjectsWindow mode={projectsMode} onOpenWriting={openWriting} />
+        );
       case "writing":
         // Keyed by slug so arriving from a project card re-opens the body on
         // that article even when the window is already up. Only the body
         // remounts; the frame stays, so this does not replay the genie.
-        return <WritingWindow key={writingSlug ?? "list"} initialSlug={writingSlug} />;
+        return (
+          <WritingWindow
+            key={writingSlug ?? "list"}
+            initialSlug={writingSlug}
+          />
+        );
       case "contact":
         return <ContactWindow />;
       case "resume":
@@ -223,7 +257,10 @@ export function DesktopShell() {
             eight apps, and a maximised window used to bury it. It fades back
             while a window has the focus so it does not compete with what is
             being read, and comes back to full on hover. */}
-        <div className="relative flex w-full justify-center" style={{ zIndex: DOCK_Z }}>
+        <div
+          className="relative flex w-full justify-center"
+          style={{ zIndex: DOCK_Z }}
+        >
           <Dock onOpen={openWindow} dimmed={open.length > 0} />
         </div>
       </div>
@@ -246,7 +283,10 @@ export function DesktopShell() {
             onFocus={() => focusWindow(app)}
             titleBarAccessory={
               app === "projects" ? (
-                <ProjectsToggle mode={projectsMode} onChange={setProjectsMode} />
+                <ProjectsToggle
+                  mode={projectsMode}
+                  onChange={setProjectsMode}
+                />
               ) : undefined
             }
           >

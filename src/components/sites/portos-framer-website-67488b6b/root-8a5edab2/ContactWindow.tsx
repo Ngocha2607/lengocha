@@ -99,7 +99,7 @@ export function ContactWindow() {
               {"Let's talk"}
             </h2>
             <p className="font-display text-[16px] font-normal leading-[22.4px] tracking-[-0.16px] text-black/60">
-              Available for remote · Hanoi, Vietnam
+              Available for remote · Hà Nội, Việt Nam
             </p>
           </div>
 
@@ -204,7 +204,7 @@ export function ContactWindow() {
                 <p className={BLOCK_LABEL}>LOCATION</p>
                 <p className={cn(BLOCK_VALUE, "flex items-center gap-2")}>
                   <MapPin className={ICON_CLASS} aria-hidden="true" />
-                  Hanoi, Vietnam · UTC+7
+                  Hà Nội, Việt Nam · UTC+7
                 </p>
               </div>
 

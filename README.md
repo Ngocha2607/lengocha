@@ -8,17 +8,17 @@ can open, focus, drag, minimise and maximise.
 
 ## The windows
 
-| Window | Opened from | What is in it |
-| --- | --- | --- |
-| About Lê Ngọc Hà | `About` folder, dock | Long-form intro with a sticky portrait and a timeline |
-| Experience | `Experience` folder | Long-form work history |
-| Overview of the Project | `Projects` folder, Finder | Project cards, switchable between grid and list |
-| Writing | Launchpad | Posts read live from Notion, with per-post detail pages |
-| Highlights & Decisions | Notes | Selected decisions and what came of them |
-| Resume | Messages | Embedded PDF |
-| Gallery | Photos | Image grid |
-| Contact | Contacts | Contact details and links |
-| Recycle Bin | Trash | — |
+| Window                 | Opened from               | What is in it                                           |
+| ---------------------- | ------------------------- | ------------------------------------------------------- |
+| About                  | `About` folder, dock      | Long-form intro with a sticky portrait and a timeline   |
+| Experience             | `Experience` folder       | Long-form work history                                  |
+| Projects               | `Projects` folder, Finder | Project cards, switchable between grid and list         |
+| Writing                | Launchpad                 | Posts read live from Notion, with per-post detail pages |
+| Highlights & Decisions | Notes                     | Selected decisions and what came of them                |
+| Resume                 | Messages                  | Embedded PDF                                            |
+| Gallery                | Photos                    | Image grid                                              |
+| Contact                | Contacts                  | Contact details and links                               |
+| Recycle Bin            | Trash                     | —                                                       |
 
 A full-screen intro plays once on first paint, then collapses into the desktop.
 It respects `prefers-reduced-motion`, where it leaves almost immediately
@@ -33,14 +33,14 @@ npm install
 npm run dev          # http://localhost:3000
 ```
 
-| Command | Does |
-| --- | --- |
-| `npm run dev` | Dev server |
-| `npm run build` | Production build |
-| `npm run start` | Serve the production build |
-| `npm run lint` | ESLint |
-| `npm run typecheck` | `tsc --noEmit` |
-| `npm run check` | lint + typecheck + build |
+| Command             | Does                       |
+| ------------------- | -------------------------- |
+| `npm run dev`       | Dev server                 |
+| `npm run build`     | Production build           |
+| `npm run start`     | Serve the production build |
+| `npm run lint`      | ESLint                     |
+| `npm run typecheck` | `tsc --noEmit`             |
+| `npm run check`     | lint + typecheck + build   |
 
 There is also a `Dockerfile` and a `docker-compose.yml` if you would rather not
 install Node locally.
@@ -51,10 +51,10 @@ Copy `.env.example` to `.env.local` and fill it in. Both Notion variables are
 optional — without them the Writing window falls back to a hardcoded entry, and
 everything else works untouched.
 
-| Variable | Purpose |
-| --- | --- |
-| `NEXT_PUBLIC_SITE_URL` | Absolute OG and canonical URLs |
-| `NOTION_TOKEN` | Internal integration secret |
+| Variable               | Purpose                             |
+| ---------------------- | ----------------------------------- |
+| `NEXT_PUBLIC_SITE_URL` | Absolute OG and canonical URLs      |
+| `NOTION_TOKEN`         | Internal integration secret         |
 | `NOTION_WRITING_DB_ID` | Database backing the Writing window |
 
 `.env.example` documents the Notion database properties the integration expects.

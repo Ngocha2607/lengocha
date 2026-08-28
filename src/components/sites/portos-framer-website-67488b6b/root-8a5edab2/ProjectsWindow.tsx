@@ -41,21 +41,26 @@ interface Project {
 }
 
 /**
- * Six projects, newest first — content, wording and screenshots all taken from
- * Lê Ngọc Hà's own portfolio at lengocha.vercel.app rather than invented.
- *
- * Note for whoever updates this: the portfolio's own copy says "Seven products
- * across four employers" but renders six cards, and neither Minastik JSC nor FPT
- * Software has a project card despite both appearing in the career timeline. Six
- * is what actually exists; the seventh is unaccounted for.
+ * Six projects, newest first. Descriptions and tags are carried VERBATIM
+ * (Vietnamese) from the SELECTED PROJECTS section of the CV at
+ * `public/Le-Ngoc-Ha-Senior-Frontend-Developer.pdf`, on request; screenshots
+ * are from the portfolio. The EVN card is the one entry the CV does not carry —
+ * its wording is our own translation of the entry it used to hold.
  */
 const PROJECTS: readonly Project[] = [
   {
-    period: "2025 — Present",
+    period: "2025 — Hiện tại",
     title: "LMS Platform · SAPP Academy",
     description:
-      "The learner-facing side of a large-scale learning platform on Next.js 14 App Router — one of four frontends the lms-fe monorepo builds. I own the frontend technical direction, and took the worst route from 15.2s to 6.1s.",
-    tags: ["Next.js 14", "App Router", "Turborepo", "TanStack Query"],
+      "Hệ thống quản lý học tập trực tuyến; dẫn dắt kỹ thuật Frontend.",
+    tags: [
+      "Next.js 14",
+      "Monorepo",
+      "Antd",
+      "Tailwind CSS",
+      "Redux Toolkit",
+      "React Hook Form",
+    ],
     image: "project-lms-platform.png",
     alt: "SAPP Academy learning-management system dashboard",
     // Same article as the Operations card below, deliberately: these two ARE
@@ -63,10 +68,9 @@ const PROJECTS: readonly Project[] = [
     writingSlug: "ben-trong-sapp-lms-hai-frontend-mot-he-van-hanh-dao-tao",
   },
   {
-    period: "2025 — Present",
-    title: "Operations back-office · SAPP",
-    description:
-      "Sixteen operations modules running the academy behind the LMS: classes, question bank, grading, scheduling and attendance. The attendance system spans repositories, so reconciliation is where the real work sits.",
+    period: "2025 — Hiện tại",
+    title: "Operations · SAPP Academy",
+    description: "16 module vận hành: lớp học, chấm điểm, điểm danh.",
     tags: ["React", "TypeScript", "Vite", "Ant Design"],
     image: "project-ops-portal.png",
     alt: "SAPP Academy operations portal showing the class list screen",
@@ -74,9 +78,8 @@ const PROJECTS: readonly Project[] = [
   },
   {
     period: "2023 — 2025",
-    title: "Subscriber Platform · Tweet World",
-    description:
-      "Travel-business management platform serving roughly 1,000 users a month, on Spring Boot microservices behind a React frontend. I worked both sides of the wire, which is where the multilingual ERP data model got settled.",
+    title: "Subscriber Platform · Tweet World Travel",
+    description: "Nền tảng quản trị doanh nghiệp du lịch",
     tags: ["Spring Boot", "Microservices", "React", "Material UI"],
     image: "project-subscriber-platform.png",
     alt: "Tweet World Travel subscriber management platform interface",
@@ -84,29 +87,28 @@ const PROJECTS: readonly Project[] = [
   },
   {
     period: "2023 — 2024",
-    title: "B2B storefront · Tweet World",
+    title: "Website B2B · Tweet World Travel",
     description:
-      "Multi-language travel commerce for the agent side, with authentication, global state and payments. Cut page load from 3.2s to 1.1s and held mobile Lighthouse at 85 — the dry run for the LMS pass.",
-    tags: ["Next.js 14", "Zustand", "TypeScript", "Tailwind CSS"],
+      "Nền tảng TMĐT du lịch đa ngôn ngữ phục vụ ~1.000 users/tháng; page load 3.2s → 1.1s, Lighthouse 85.",
+    tags: ["Next.js 14", "Zustand", "TypeScript", "Tailwind", "Shadcn"],
     image: "project-b2b-storefront.png",
     alt: "Tweet World Travel B2B e-commerce website homepage",
     href: "https://tweetworldtravel.com",
   },
   {
     period: "2023 — 2024",
-    title: "Newsletter builder · Tweet World",
-    description:
-      "A drag-and-drop email builder and subscriber system that gave marketing a canvas they could use without a developer in the loop. Template output has to survive email clients, which rules out most of what a browser allows.",
+    title: "Newsletter System · Tweet World Travel",
+    description: "Công cụ kéo-thả tạo email và hệ thống quản lý người đăng ký.",
     tags: ["React.js", "GrapeJS", "Laravel API"],
     image: "project-newsletter.png",
     alt: "Drag-and-drop email newsletter builder interface",
     // No public URL and no write-up — the one card that stays inert.
   },
   {
+    // Not on the two-page CV; wording is our own translation, not CV text.
     period: "2022 — 2023",
     title: "EVN Hanoi Power Company",
-    description:
-      "UI/UX for power-management modules, onsite with 3S Intersoft — dense operational data grids on a .NET Core API. The first codebase I worked in that someone else had to maintain after me, which changed how I write.",
+    description: "UI/UX cho các module quản lý điện lực.",
     tags: [".NET Core API", "React.js", "Redux Toolkit", "Ant Design"],
     image: "project-evn.png",
     alt: "EVN Hanoi power-management system module interface",
@@ -193,7 +195,13 @@ export function ProjectsToggle({ mode, onChange }: ProjectsToggleProps) {
   );
 }
 
-function ProjectCardBody({ project, isList }: { project: Project; isList: boolean }) {
+function ProjectCardBody({
+  project,
+  isList,
+}: {
+  project: Project;
+  isList: boolean;
+}) {
   return (
     <>
       {/* `min-h-0` is load-bearing. This box is a flex item, so it carries
@@ -208,7 +216,11 @@ function ProjectCardBody({ project, isList }: { project: Project; isList: boolea
           alt={project.alt}
           width={1913}
           height={912}
-          sizes={isList ? "(min-width: 880px) 1112px, 100vw" : "(min-width: 880px) 548px, 100vw"}
+          sizes={
+            isList
+              ? "(min-width: 880px) 1112px, 100vw"
+              : "(min-width: 880px) 548px, 100vw"
+          }
           className="h-full w-full rounded-none object-cover transition-transform duration-300 ease-out group-hover:scale-[1.02]"
         />
       </div>
@@ -255,7 +267,7 @@ interface ProjectsWindowProps {
 }
 
 /**
- * Body of the "Overview of the Project" window — the chrome comes from
+ * Body of the "Projects" window — the chrome comes from
  * `WindowFrame`, which renders `children` flush against the 44px title bar, so
  * the 50px gap down to the container is supplied here.
  *

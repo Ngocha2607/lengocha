@@ -58,7 +58,7 @@ const DOCK_ITEMS: DockItem[] = [
     icon: `${PORTOS_ASSETS}/images/dock-notes.png`,
     alt: "Notes",
     app: "decisions",
-    tooltip: "Highlights & Decisions",
+    tooltip: "Leadership & Technical Decisions",
   },
   {
     name: "GitHub",

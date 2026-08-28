@@ -3,7 +3,11 @@
 import { Menu } from "@base-ui/react/menu";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import { PORTOS_ASSETS, PORTOS_PROFILES, type PortosAppId } from "@/types/portos";
+import {
+  PORTOS_ASSETS,
+  PORTOS_PROFILES,
+  type PortosAppId,
+} from "@/types/portos";
 
 interface AppleMenuProps {
   onOpen: (app: PortosAppId) => void;
@@ -19,10 +23,10 @@ interface AppleMenuProps {
  * the one thing a visitor may go looking for without knowing which icon hides it.
  */
 const MENU_APPS: { app: PortosAppId; label: string }[] = [
-  { app: "about", label: "About Lê Ngọc Hà" },
+  { app: "about", label: "About" },
   { app: "experience", label: "Experience" },
   { app: "resume", label: "Resume" },
-  { app: "decisions", label: "Highlights & Decisions" },
+  { app: "decisions", label: "Leadership & Technical Decisions" },
   { app: "contact", label: "Contact" },
 ];
 
@@ -82,7 +86,12 @@ export function AppleMenu({ onOpen }: AppleMenuProps) {
         {/* Hangs from the bar's lower edge, its left edge lined up with the
             trigger's — 4px back, because the trigger carries 11px of its own
             padding and the panel should sit under the glyph, not the box. */}
-        <Menu.Positioner side="bottom" align="start" sideOffset={2} alignOffset={-4}>
+        <Menu.Positioner
+          side="bottom"
+          align="start"
+          sideOffset={2}
+          alignOffset={-4}
+        >
           <Menu.Popup className={POPUP_CLASS}>
             {MENU_APPS.map((entry) => (
               <Menu.Item
@@ -124,7 +133,10 @@ export function AppleMenu({ onOpen }: AppleMenuProps) {
             {/* The one system-flavoured row that can honestly do what it says:
                 reloading replays the pre-loader, which is the closest thing this
                 desktop has to booting. */}
-            <Menu.Item className={ITEM_CLASS} onClick={() => window.location.reload()}>
+            <Menu.Item
+              className={ITEM_CLASS}
+              onClick={() => window.location.reload()}
+            >
               Restart
             </Menu.Item>
           </Menu.Popup>

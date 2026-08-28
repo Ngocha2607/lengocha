@@ -39,16 +39,29 @@ const EXPERTISE_BLOCK: BulletBlock = {
   heading: "Expertise",
   left: [
     "•   Frontend Architecture",
-    "•   Performance & SEO",
-    "•   Tech Leadership",
-    "•   Code Review & Mentoring",
+    "•   Performance Engineering",
+    "•   Design System & Monorepo",
   ],
-  right: ["•   Monorepo Design", "•   CI/CD Security", "•   AI Workflow", "•   Design Systems"],
+  right: [
+    "•   Security Engineering",
+    "•   AI-assisted Development",
+    "•   Technical Leadership",
+  ],
 };
 
 /** Split into the same two columns the bullet blocks use, so the rows line up. */
-const STACK_LEFT: readonly StackName[] = ["React", "Next.js", "TypeScript", "Spring Boot"];
-const STACK_RIGHT: readonly StackName[] = ["Turborepo", "Docker", "GitLab CI/CD", "Vercel"];
+const STACK_LEFT: readonly StackName[] = [
+  "React",
+  "Next.js",
+  "TypeScript",
+  "Spring Boot",
+];
+const STACK_RIGHT: readonly StackName[] = [
+  "Turborepo",
+  "Docker",
+  "GitLab CI/CD",
+  "Vercel",
+];
 
 /**
  * Chronological, oldest first — the reading order a left-to-right timeline
@@ -59,14 +72,23 @@ const STACK_RIGHT: readonly StackName[] = ["Turborepo", "Docker", "GitLab CI/CD"
  * wide and the full names wrap onto two lines, breaking the row rhythm.
  */
 const EXPERIENCE_ENTRIES: readonly ExperienceEntry[] = [
-  { dates: "2018 – 2022", company: "HUST", role: "B.Eng, ETT" },
-  { dates: "2021", company: "FPT Software", role: "Intern" },
+  { dates: "2018 – 2022", company: "HUST", role: "Cử nhân CTTT ĐTVT" },
+  { dates: "2021", company: "FPT Software", role: "Thực tập sinh" },
   { dates: "2021 – 2023", company: "Minastik", role: "Frontend Developer" },
-  { dates: "2023 – 2025", company: "Tweet World", role: "Fullstack Developer" },
-  { dates: "2025 – Present", company: "SAPP Academy", role: "Frontend Tech Lead" },
+  {
+    dates: "2023 – 2025",
+    company: "Tweet World Travel",
+    role: "Fullstack Developer",
+  },
+  {
+    dates: "2025 – Hiện tại",
+    company: "SAPP Academy",
+    role: "Frontend Tech Lead",
+  },
 ];
 
-const HEADING_CLASS = "font-display text-[18px] leading-[25.2px] tracking-[-0.54px] text-black";
+const HEADING_CLASS =
+  "font-display text-[18px] leading-[25.2px] tracking-[-0.54px] text-black";
 
 const BULLET_CLASS =
   "font-display text-[14px] leading-[19.6px] tracking-[-0.14px] whitespace-pre text-black/60";
@@ -243,8 +265,16 @@ export function AboutExperience() {
               x2="100%"
               y2="0"
             >
-              <stop offset="0%" stopColor={TIMELINE_ACCENT} stopOpacity="0.18" />
-              <stop offset="100%" stopColor={TIMELINE_ACCENT} stopOpacity="0.95" />
+              <stop
+                offset="0%"
+                stopColor={TIMELINE_ACCENT}
+                stopOpacity="0.18"
+              />
+              <stop
+                offset="100%"
+                stopColor={TIMELINE_ACCENT}
+                stopOpacity="0.95"
+              />
             </linearGradient>
             <marker
               id="portos-xp-arrow"
@@ -299,7 +329,9 @@ export function AboutExperience() {
                 // so the climb can be scoped to a breakpoint — inline styles
                 // cannot carry a media query.
                 style={
-                  { "--rise": `${(LAST_INDEX - index) * RISE_STEP}px` } as React.CSSProperties
+                  {
+                    "--rise": `${(LAST_INDEX - index) * RISE_STEP}px`,
+                  } as React.CSSProperties
                 }
                 className="flex flex-col items-start min-[880px]:mt-[var(--rise)]"
               >
@@ -312,7 +344,9 @@ export function AboutExperience() {
                     background: TIMELINE_ACCENT,
                     // The current role gets a soft halo — a translucent accent, so
                     // it reads on any background without matching the page colour.
-                    boxShadow: isCurrent ? `0 0 0 4px ${TIMELINE_ACCENT}2E` : undefined,
+                    boxShadow: isCurrent
+                      ? `0 0 0 4px ${TIMELINE_ACCENT}2E`
+                      : undefined,
                   }}
                 />
                 <p className="font-sans mt-4 text-[11px] leading-[15px] font-medium tracking-[0.14em] text-black/45">
