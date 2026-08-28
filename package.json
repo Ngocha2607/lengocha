@@ -1,27 +1,26 @@
 {
-  "name": "ai-website-clone-template",
+  "name": "lengocha",
   "version": "0.4.0",
   "private": true,
-  "description": "Clone any website into a clean, modern Next.js codebase using AI coding agents",
-  "author": "JCodesMore",
+  "description": "Personal portfolio of Le Ngoc Ha, presented as a macOS desktop.",
+  "author": "Le Ngoc Ha",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/JCodesMore/ai-website-cloner-template.git"
+    "url": "https://github.com/Ngocha2607/lengocha.git"
   },
-  "homepage": "https://github.com/JCodesMore/ai-website-cloner-template",
+  "homepage": "https://lengocha.vercel.app",
   "bugs": {
-    "url": "https://github.com/JCodesMore/ai-website-cloner-template/issues"
+    "url": "https://github.com/Ngocha2607/lengocha/issues"
   },
   "keywords": [
-    "claude-code",
-    "website-clone",
-    "reverse-engineering",
+    "portfolio",
     "nextjs",
-    "ai",
-    "template",
+    "react",
+    "typescript",
     "tailwindcss",
-    "shadcn-ui"
+    "shadcn-ui",
+    "macos"
   ],
   "scripts": {
     "dev": "next dev",

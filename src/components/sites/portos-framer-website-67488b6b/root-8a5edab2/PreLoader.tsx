@@ -7,29 +7,49 @@ import { PORTOS_ASSETS } from "@/types/portos";
 
 const BG_SRC = `${PORTOS_ASSETS}/images/preloader-bg.png`;
 /**
- * `200vw` is deliberately not the layout width, and that is the point.
+ * Over-declared on purpose — but no longer by the same amount everywhere, which
+ * is the part that broke this on phones.
  *
- * `sizes` is what `next/image` uses to pick a width off its ladder, and it
- * describes LAYOUT size — which here is one viewport. But the intro animates
- * this layer from `scale(3)`, so for the first second the bitmap is painted
- * three viewports wide. Declaring `100vw` fetched w=1920 for a 1440 viewport
- * and then stretched it across 4320px: a 2.25x upscale, which is the blur.
- * Asking for two viewports takes it to 2880, which rounds up to 3840 — the top
- * of the ladder, and so the most real pixels there are to put behind the zoom.
- * Anything wider resolves to the same 3840; `200vw` is simply where it lands.
+ * `sizes` describes LAYOUT size, and `next/image` uses it to pick a width off
+ * its ladder. This layer animates from `scale(3)`, so for the first second the
+ * bitmap is painted three viewports wide; declaring `100vw` fetched w=1920 for a
+ * 1440 viewport and stretched it over 4320px, which is the blur this was written
+ * to fix.
+ *
+ * The fix over-declared for EVERY viewport though, and the ladder tops out at
+ * 3840. A 390px phone at DPR 3 resolves 200vw to 2340 and so takes the 3840
+ * render — the single largest variant on the slowest connection. Measured
+ * against the optimiser: 3840 is 210KB where 1920 is 55KB.
+ *
+ * So 200vw from tablet up, and 150vw below it (390 x 1.5 x DPR 3 = 1755, which
+ * lands on w=1920). Mobile still gets far more pixels than it can show at rest.
+ * It just stops buying the top of the ladder to cover the first 200ms of a zoom.
  *
  * Both copies use it so they resolve to one URL and one download.
  */
-const BG_SIZES = "200vw";
+const BG_SIZES = "(max-width: 809px) 150vw, 200vw";
+
+/**
+ * A 12px-wide WebP of the same wallpaper, inline so it costs no request and is
+ * painted on the very first frame. 86 bytes.
+ *
+ * This is what actually answers "the splash came up with no background". The
+ * desktop renders BEHIND this overlay, so until the real bitmap arrived the
+ * intro was simply transparent and the wallpaper and dock showed through it.
+ * The worst case now is a blurred version of the right image.
+ */
+const BG_BLUR =
+  "data:image/webp;base64,UklGRk4AAABXRUJQVlA4IEIAAADwAQCdASoMAAcAA8BgJbACdAEPDiQa3oAA/uRiehZ8+7WRdsocF+JXoRiufd95tqYmgp/unHqxTu9xck2F/RlMAAA=";
 
 /**
  * 90 rather than the default 75.
  *
  * This wallpaper is dark and smooth — mean brightness 44/255, standard
  * deviation 23 — which is exactly the content WebP bands worst on, and q75
- * squeezed a 1920-wide render to 24KB. At q90 and 3840 wide it is ~186KB.
- * That is a real cost on the first paint, and it buys the one full-screen
- * image every visitor sees before anything else.
+ * squeezed a 1920-wide render to 24KB. Measured at q90: 55KB at 1920, 210KB at
+ * 3840. That is a real cost on the first paint, and it buys the one full-screen
+ * image every visitor sees before anything else — but see `BG_SIZES` for why
+ * phones no longer reach for the 3840 end of that.
  */
 const BG_QUALITY = 90;
 
@@ -145,13 +165,20 @@ export function PreLoader({ onFinish }: PreLoaderProps) {
               transition: reduced ? undefined : `border-radius ${EXIT_DURATION}ms ${EASE}`,
             }}
           >
+            {/* `preload` replaces `priority`, which Next 16 deprecated. This is the
+                one image on the page that is unambiguously the LCP element, so a
+                `<link rel="preload">` in the head is exactly right for it — and
+                the desktop wallpaper behind the splash has been demoted to
+                `fetchPriority="low"` so that it no longer competes. */}
             <Image
               src={BG_SRC}
               alt=""
               fill
-              priority
+              preload
               sizes={BG_SIZES}
               quality={BG_QUALITY}
+              placeholder="blur"
+              blurDataURL={BG_BLUR}
               className="object-cover"
             />
 
@@ -162,12 +189,18 @@ export function PreLoader({ onFinish }: PreLoaderProps) {
                 !reduced && "portos-preloader-content",
               )}
             >
+              {/* Same URL as the copy above, so this is a cache hit rather than a
+                  second download. `loading="eager"` only skips waiting on the
+                  intersection observer; it must NOT preload again. */}
               <Image
                 src={BG_SRC}
                 alt=""
                 fill
+                loading="eager"
                 sizes={BG_SIZES}
                 quality={BG_QUALITY}
+                placeholder="blur"
+                blurDataURL={BG_BLUR}
                 className="object-cover"
               />
 

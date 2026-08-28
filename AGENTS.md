@@ -8,16 +8,24 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 <!-- END:nextjs-agent-rules -->
 
-# Website Reverse-Engineer Template
+# Portfolio — Lê Ngọc Hà
 
 ## What This Is
-A reusable template for reverse-engineering any website into a clean, modern Next.js codebase using AI coding agents. The Next.js + shadcn/ui + Tailwind v4 base is pre-scaffolded — just run `/clone-website <url1> [<url2> ...]`.
+A personal portfolio that presents itself as a macOS desktop: a wallpaper, a
+menu bar, folder icons, a dock, and draggable windows for About, Experience,
+Projects, Writing, Resume, Gallery, Contact and Highlights & Decisions.
+
+It began life as a clone of a Framer template and was matched to it 1:1 first;
+it has since diverged deliberately. The build is now in its **maintenance and
+customisation phase** — changes are made on their own merit, and no longer need
+to match any reference site.
 
 ## Tech Stack
 - **Framework:** Next.js 16 (App Router, React 19, TypeScript strict)
-- **UI:** shadcn/ui (Radix primitives, Tailwind CSS v4, `cn()` utility)
-- **Icons:** Lucide React (default — will be replaced/supplemented by extracted SVGs)
+- **UI:** shadcn/ui (Tailwind CSS v4, `cn()` utility), Base UI primitives
+- **Icons:** Lucide React, plus SVGs served from `public/sites/.../images/`
 - **Styling:** Tailwind CSS v4 with oklch design tokens
+- **Content:** Notion drives the Writing window via `@notionhq/client` — see `.env.example`
 - **Deployment:** Vercel
 
 ## Commands
@@ -34,36 +42,40 @@ A reusable template for reverse-engineering any website into a clean, modern Nex
 - 2-space indentation
 - Responsive: mobile-first
 
-## Design Principles
-- **Pixel-perfect emulation** — match the target's spacing, colors, typography exactly
-- **No personal aesthetic changes during emulation phase** — match 1:1 first, customize later
-- **Real content** — use actual text and assets from the target site, not placeholders
-- **Beauty-first** — every pixel matters
+## Working On This Codebase
+- Many values here are **measured from the original site**, not chosen. Where a
+  comment explains why a number is what it is, keep the comment truthful if you
+  change the number.
+- The breakpoints are `810px` and `1200px`, expressed as arbitrary variants
+  (`min-[810px]:`, `max-[809px]:`) because Tailwind's defaults do not line up.
+- Verify visually before claiming a UI change works. `npm run check` proves it
+  compiles, not that it looks right.
 
 ## Project Structure
 ```
 src/
-  app/              # Next.js routes
-  components/       # React components
+  app/
+    api/writing/    # Notion-backed routes for the Writing window
+    layout.tsx      # Root layout, fonts, metadata
+    page.tsx        # Renders the desktop shell
+    globals.css     # Tailwind v4 theme + design tokens
+  components/
+    sites/portos-framer-website-67488b6b/root-8a5edab2/
+                    # The desktop shell and every window, one file each
     ui/             # shadcn/ui primitives
-    icons.tsx       # Extracted SVG icons as React components
   lib/
     utils.ts        # cn() utility (shadcn)
-  types/            # TypeScript interfaces
-  hooks/            # Custom React hooks
+    notion.ts       # Notion client and query helpers
+    markdown.ts     # Notion blocks -> HTML
+  types/
+    portos.ts       # Shared types and the PORTOS_ASSETS path constant
 public/
-  images/           # Downloaded images from target site
-  videos/           # Downloaded videos from target site
-  seo/              # Favicons, OG images, webmanifest
-docs/
-  research/         # Inspection output (design tokens, components, layout)
-  design-references/ # Screenshots and visual references
-scripts/            # Asset download scripts
+  sites/portos-framer-website-67488b6b/root-8a5edab2/
+    images/         # Wallpapers, dock and folder artwork
+    fonts/          # Self-hosted SF Pro faces
+    seo/            # Favicons, OG images, webmanifest
 ```
 
-## MOST IMPORTANT NOTES
-- When launching Claude Code agent teams, ALWAYS have each teammate work in their own worktree branch and merge everyone's work at the end, resolving any merge conflicts smartly since you are basically serving the orchestrator role and have full context to our goals, work given, work achieved, and desired outcomes.
-- After editing `AGENTS.md`, run `bash scripts/sync-agent-rules.sh` to regenerate platform-specific instruction files.
-- After editing `.claude/skills/clone-website/SKILL.md`, run `node scripts/sync-skills.mjs` to regenerate the skill for all platforms.
-
-@docs/research/INSPECTION_GUIDE.md
+The long `sites/<site-key>/<page-key>/` path is a leftover of how this project
+was generated. `PORTOS_ASSETS` in `src/types/portos.ts` is the single source of
+that prefix — asset URLs are built from it rather than written out by hand.
