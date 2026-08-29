@@ -61,7 +61,7 @@ const PROJECTS: readonly Project[] = [
       "Redux Toolkit",
       "React Hook Form",
     ],
-    image: "project-lms-platform.png",
+    image: "lms-gif.gif",
     alt: "SAPP Academy learning-management system dashboard",
     // Same article as the Operations card below, deliberately: these two ARE
     // the "hai frontend" that write-up is about, so one piece covers both.

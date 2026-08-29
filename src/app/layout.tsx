@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Inspiration } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 // `next/font/local` statically analyses these calls at build time, so every `path`
 // must be a literal string — a template literal or shared constant will not resolve.
@@ -70,7 +72,8 @@ const SITE_DESCRIPTION =
  * the production one. Read at build time in a server component, so it needs no
  * NEXT_PUBLIC_ prefix — that is only for values the browser bundle must see.
  */
-const NEXT_PUBLIC_SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://lengocha.vercel.app";
+const NEXT_PUBLIC_SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://lengocha.vercel.app";
 
 /**
  * Metadata, favicon, apple-touch icon and OG image are all the owner's.
@@ -118,7 +121,11 @@ export default function RootLayout({
       lang="en"
       className={`${sfProDisplay.variable} ${sfProText.variable} ${inspiration.variable} h-full antialiased`}
     >
-      <body className="min-h-full">{children}</body>
+      <body className="min-h-full">
+        {children}
+        <Analytics />
+        <SpeedInsights />
+      </body>
     </html>
   );
 }
