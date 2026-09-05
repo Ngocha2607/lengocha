@@ -63,27 +63,35 @@ const PROJECTS: readonly Project[] = [
     ],
     image: "lms-gif.gif",
     alt: "SAPP Academy learning-management system dashboard",
-    // Same article as the Operations card below, deliberately: these two ARE
-    // the "hai frontend" that write-up is about, so one piece covers both.
-    writingSlug: "ben-trong-sapp-lms-hai-frontend-mot-he-van-hanh-dao-tao",
+    // The learner-side deep dive. The combined "hai frontend" article still
+    // exists in the Writing window; this card now opens the LMS-only piece.
+    writingSlug: "sapp-lms-tu-bai-giang-tuong-tac-den-phong-thi-ao",
   },
   {
     period: "2025 — Hiện tại",
     title: "Operations · SAPP Academy",
     description: "16 module vận hành: lớp học, chấm điểm, điểm danh.",
     tags: ["React", "TypeScript", "Vite", "Ant Design"],
-    image: "project-ops-portal.png",
+    // Pan-through of six Ops screens exported from the team's Figma, at
+    // exactly 2.1 so SHOT_ASPECT crops nothing. Gallery still uses the .png.
+    image: "project-ops-portal.gif",
     alt: "SAPP Academy operations portal showing the class list screen",
-    writingSlug: "ben-trong-sapp-lms-hai-frontend-mot-he-van-hanh-dao-tao",
+    // The back-office deep dive, the OPS counterpart of the LMS card's piece.
+    writingSlug: "sapp-ops-18-module-dung-sau-mot-trung-tam-dao-tao",
   },
   {
     period: "2023 — 2025",
     title: "Subscriber Platform · Tweet World Travel",
     description: "Nền tảng quản trị doanh nghiệp du lịch",
     tags: ["Spring Boot", "Microservices", "React", "Material UI"],
-    image: "project-subscriber-platform.png",
+    // Pan-through of seven TKG screens from the team's docs, browser chrome
+    // cropped and customer/money fields blurred on request; exactly 2.1 so
+    // SHOT_ASPECT crops nothing. Gallery still uses the .png.
+    image: "project-subscriber-platform.gif",
     alt: "Tweet World Travel subscriber management platform interface",
-    href: "https://tweetworldtravel.tkgplatform.com.au/",
+    // Used to link to tweetworldtravel.tkgplatform.com.au — a login screen.
+    // Per the convention above, internal platforms open the write-up instead.
+    writingSlug: "tkg-platform-mot-booking-di-qua-ba-cong",
   },
   {
     period: "2023 — 2024",
@@ -91,7 +99,9 @@ const PROJECTS: readonly Project[] = [
     description:
       "Nền tảng TMĐT du lịch đa ngôn ngữ phục vụ ~1.000 users/tháng; page load 3.2s → 1.1s, Lighthouse 85.",
     tags: ["Next.js 14", "Zustand", "TypeScript", "Tailwind", "Shadcn"],
-    image: "project-b2b-storefront.png",
+    // Animated scroll-through of the live site, captured at exactly 2.1 so
+    // SHOT_ASPECT crops nothing. The Gallery still uses the static .png.
+    image: "project-b2b-storefront.gif",
     alt: "Tweet World Travel B2B e-commerce website homepage",
     href: "https://tweetworldtravel.com",
   },
@@ -100,9 +110,13 @@ const PROJECTS: readonly Project[] = [
     title: "Newsletter System · Tweet World Travel",
     description: "Công cụ kéo-thả tạo email và hệ thống quản lý người đăng ký.",
     tags: ["React.js", "GrapeJS", "Laravel API"],
-    image: "project-newsletter.png",
+    // Pan-through of seven screens lifted from the spec doc's screenshots
+    // (dashboard -> audience -> campaigns -> builder), at exactly 2.1 so
+    // SHOT_ASPECT crops nothing. Gallery still uses the .png.
+    image: "project-newsletter.gif",
     alt: "Drag-and-drop email newsletter builder interface",
-    // No public URL and no write-up — the one card that stays inert.
+    // Internal tool with no public URL, so the card opens the write-up instead.
+    writingSlug: "newsletter-system-tu-keo-tha-template-den-campaign-tu-dong",
   },
   {
     // Not on the two-page CV; wording is our own translation, not CV text.
@@ -117,9 +131,13 @@ const PROJECTS: readonly Project[] = [
 ];
 
 /**
- * Every screenshot is ~1913x912. One uniform ratio keeps the six cards the same
- * height; the widest and narrowest source differ by 2%, which `object-cover`
- * absorbs without visibly cropping any UI.
+ * One uniform ratio keeps the six cards the same height. The static
+ * screenshots are ~1913x912 — within 2% of 2.1, which `object-cover` absorbs
+ * without visibly cropping any UI — and every GIF was produced at exactly
+ * 2.1: the B2B capture and the Ops, Subscriber and Newsletter pan-throughs
+ * are 840x400, the LMS recording an 848x404 center-crop of its 848x658 source
+ * (the crop bakes in what `object-cover` was discarding, which is most of why
+ * that file went from 29.6MB to 3.7MB).
  */
 const SHOT_ASPECT = "aspect-[2.1]";
 
