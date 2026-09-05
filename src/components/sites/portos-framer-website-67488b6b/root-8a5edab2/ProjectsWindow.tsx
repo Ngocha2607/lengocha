@@ -25,6 +25,7 @@ interface Project {
   tags: readonly string[];
   /** Filename under the page's `images/` namespace. */
   image: string;
+  src?: string;
   /** Screenshot alt text, carried over from the portfolio verbatim. */
   alt: string;
   /**
@@ -74,7 +75,8 @@ const PROJECTS: readonly Project[] = [
     tags: ["React", "TypeScript", "Vite", "Ant Design"],
     // Pan-through of six Ops screens exported from the team's Figma, at
     // exactly 2.1 so SHOT_ASPECT crops nothing. Gallery still uses the .png.
-    image: "project-ops-portal.gif",
+    image: "",
+    src: "https://qgat4v5hrepgvc3n.public.blob.vercel-storage.com/writings/project-ops-portal.gif",
     alt: "SAPP Academy operations portal showing the class list screen",
     // The back-office deep dive, the OPS counterpart of the LMS card's piece.
     writingSlug: "sapp-ops-18-module-dung-sau-mot-trung-tam-dao-tao",
@@ -87,7 +89,8 @@ const PROJECTS: readonly Project[] = [
     // Pan-through of seven TKG screens from the team's docs, browser chrome
     // cropped and customer/money fields blurred on request; exactly 2.1 so
     // SHOT_ASPECT crops nothing. Gallery still uses the .png.
-    image: "project-subscriber-platform.gif",
+    image: "",
+    src: "https://qgat4v5hrepgvc3n.public.blob.vercel-storage.com/writings/project-subscriber-platform.gif",
     alt: "Tweet World Travel subscriber management platform interface",
     // Used to link to tweetworldtravel.tkgplatform.com.au — a login screen.
     // Per the convention above, internal platforms open the write-up instead.
@@ -113,7 +116,8 @@ const PROJECTS: readonly Project[] = [
     // Pan-through of seven screens lifted from the spec doc's screenshots
     // (dashboard -> audience -> campaigns -> builder), at exactly 2.1 so
     // SHOT_ASPECT crops nothing. Gallery still uses the .png.
-    image: "project-newsletter.gif",
+    image: "",
+    src: "https://qgat4v5hrepgvc3n.public.blob.vercel-storage.com/writings/project-newsletter.gif",
     alt: "Drag-and-drop email newsletter builder interface",
     // Internal tool with no public URL, so the card opens the write-up instead.
     writingSlug: "newsletter-system-tu-keo-tha-template-den-campaign-tu-dong",
@@ -230,7 +234,7 @@ function ProjectCardBody({
           this showed up: four cards at 192.53px and two at 196.31 / 193.16. */}
       <div className={cn("w-full min-h-0 overflow-clip", SHOT_ASPECT)}>
         <Image
-          src={`${PORTOS_ASSETS}/images/${project.image}`}
+          src={project.src || `${PORTOS_ASSETS}/images/${project.image}`}
           alt={project.alt}
           width={1913}
           height={912}
@@ -317,7 +321,7 @@ export function ProjectsWindow({ mode, onOpenWriting }: ProjectsWindowProps) {
                 : "grid-cols-1 min-[560px]:grid-cols-2 min-[880px]:grid-cols-3 min-[880px]:max-w-[var(--portos-content-max)]",
             )}
           >
-            {PROJECTS.map((project) => {
+            {PROJECTS.map((project, index) => {
               const shared =
                 "group flex w-full flex-col items-start text-left transition-opacity duration-200";
               const interactive = cn(shared, "cursor-pointer hover:opacity-95");
@@ -329,7 +333,7 @@ export function ProjectsWindow({ mode, onOpenWriting }: ProjectsWindowProps) {
                 const slug = project.writingSlug;
                 return (
                   <button
-                    key={project.image}
+                    key={index}
                     type="button"
                     data-no-drag
                     onClick={() => onOpenWriting(slug)}
