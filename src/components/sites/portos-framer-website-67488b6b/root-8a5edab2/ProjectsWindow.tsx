@@ -66,12 +66,12 @@ const PROJECTS: readonly Project[] = [
     alt: "SAPP Academy learning-management system dashboard",
     // The learner-side deep dive. The combined "hai frontend" article still
     // exists in the Writing window; this card now opens the LMS-only piece.
-    writingSlug: "sapp-lms-tu-bai-giang-tuong-tac-den-phong-thi-ao",
+    writingSlug: "sapp-lms-nen-tang-hoc-va-luyen-thi-acca-cfa-cma",
   },
   {
     period: "2025 — Hiện tại",
     title: "Operations · SAPP Academy",
-    description: "16 module vận hành: lớp học, chấm điểm, điểm danh.",
+    description: "18 module vận hành: lớp học, chấm điểm, điểm danh.",
     tags: ["React", "TypeScript", "Vite", "Ant Design"],
     // Pan-through of six Ops screens exported from the team's Figma, at
     // exactly 2.1 so SHOT_ASPECT crops nothing. Gallery still uses the .png.
@@ -79,7 +79,7 @@ const PROJECTS: readonly Project[] = [
     src: "https://qgat4v5hrepgvc3n.public.blob.vercel-storage.com/writings/project-ops-portal.gif",
     alt: "SAPP Academy operations portal showing the class list screen",
     // The back-office deep dive, the OPS counterpart of the LMS card's piece.
-    writingSlug: "sapp-ops-18-module-dung-sau-mot-trung-tam-dao-tao",
+    writingSlug: "sapp-ops-he-van-hanh-dao-tao-voi-18-module-nghiep-vu",
   },
   {
     period: "2023 — 2025",
@@ -94,7 +94,7 @@ const PROJECTS: readonly Project[] = [
     alt: "Tweet World Travel subscriber management platform interface",
     // Used to link to tweetworldtravel.tkgplatform.com.au — a login screen.
     // Per the convention above, internal platforms open the write-up instead.
-    writingSlug: "tkg-platform-mot-booking-di-qua-ba-cong",
+    writingSlug: "tkg-platform-nen-tang-quan-tri-hang-tour-ban-si",
   },
   {
     period: "2023 — 2024",
@@ -109,7 +109,7 @@ const PROJECTS: readonly Project[] = [
     alt: "Tweet World Travel B2B e-commerce website homepage",
     // Used to link straight to tweetworldtravel.com; the card now opens the
     // write-up, which links out to the live site in context.
-    writingSlug: "website-b2b-mat-tien-next-js-cua-hang-tour-ban-si",
+    writingSlug: "website-b2b-website-ban-tour-da-ngon-ngu-tren-next-js",
   },
   {
     period: "2023 — 2024",
@@ -123,7 +123,7 @@ const PROJECTS: readonly Project[] = [
     src: "https://qgat4v5hrepgvc3n.public.blob.vercel-storage.com/writings/project-newsletter.gif",
     alt: "Drag-and-drop email newsletter builder interface",
     // Internal tool with no public URL, so the card opens the write-up instead.
-    writingSlug: "newsletter-system-tu-keo-tha-template-den-campaign-tu-dong",
+    writingSlug: "newsletter-system-cong-cu-email-marketing-keo-tha-va-automation",
   },
   {
     // Not on the two-page CV; wording is our own translation, not CV text.
@@ -136,7 +136,7 @@ const PROJECTS: readonly Project[] = [
     alt: "EVN Hanoi power-management system module interface",
     // Used to link to 3si.vn (the vendor's marketing site, not the product).
     // Per the convention above, the card opens the write-up instead.
-    writingSlug: "evn-ha-noi-dua-dich-vu-dien-cua-thu-do-len-web",
+    writingSlug: "evn-ha-noi-cong-cskh-va-cac-module-quan-ly-dien-luc",
   },
 ];
 
