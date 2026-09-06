@@ -120,16 +120,21 @@ const useHydrated = () =>
 /**
  * Mirrors navigation into the address bar WITHOUT a router navigation: a Next
  * navigation would remount the shell and replay the pre-loader, when all that
- * changed is which article the Writing window shows. `/writing/<slug>` is a real
- * route (see app/writing/[slug]), so what this writes is always a working link.
+ * changed is what the Writing window shows. Both `/writing` and
+ * `/writing/<slug>` are real routes (see app/writing), so what this writes is
+ * always a working link: the list has a shareable URL, not just the articles.
  */
-function syncArticleUrl(slug: string | null): void {
-  window.history.replaceState(null, "", slug ? `/writing/${slug}` : "/");
+function syncWritingUrl(target: "closed" | "list" | { slug: string }): void {
+  const path =
+    target === "closed" ? "/" : target === "list" ? "/writing" : `/writing/${target.slug}`;
+  window.history.replaceState(null, "", path);
 }
 
 interface DesktopShellProps {
   /** Set by the /writing/[slug] route: boot with Writing open on this article. */
   initialWritingSlug?: string | null;
+  /** Set by the /writing route: boot with Writing open on the list. */
+  initialWritingOpen?: boolean;
 }
 
 /**
@@ -137,8 +142,12 @@ interface DesktopShellProps {
  * stack of open windows. Multiple windows can be open at once; the most recently
  * opened or focused one renders on top, matching the live site's DOM-order stacking.
  */
-export function DesktopShell({ initialWritingSlug = null }: DesktopShellProps) {
+export function DesktopShell({
+  initialWritingSlug = null,
+  initialWritingOpen = false,
+}: DesktopShellProps) {
   const hydrated = useHydrated();
+  const bootsWithWriting = initialWritingOpen || initialWritingSlug !== null;
   /**
    * True only for the window a deep link boots with, and only until the visitor
    * closes it. That first mount happens under the pre-loader, where the genie
@@ -146,9 +155,9 @@ export function DesktopShell({ initialWritingSlug = null }: DesktopShellProps) {
    * that one window skips the entrance. Reopening it later plays the genie as
    * normal.
    */
-  const [bootWriting, setBootWriting] = useState(initialWritingSlug !== null);
+  const [bootWriting, setBootWriting] = useState(bootsWithWriting);
   const [open, setOpen] = useState<PortosAppId[]>(() =>
-    initialWritingSlug ? ["writing"] : [],
+    bootsWithWriting ? ["writing"] : [],
   );
   const [projectsMode, setProjectsMode] = useState<ProjectsMode>("grid");
   const [spotlightOpen, setSpotlightOpen] = useState(false);
@@ -168,7 +177,7 @@ export function DesktopShell({ initialWritingSlug = null }: DesktopShellProps) {
   >({});
   /** Per-window cascade slot, held only while the window is open. */
   const [cascade, setCascade] = useState<Partial<Record<PortosAppId, number>>>(
-    () => (initialWritingSlug ? { writing: 0 } : {}),
+    () => (bootsWithWriting ? { writing: 0 } : {}),
   );
 
   /**
@@ -210,7 +219,7 @@ export function DesktopShell({ initialWritingSlug = null }: DesktopShellProps) {
     (app: PortosAppId) => {
       if (app === "writing") {
         setWritingSlug(null);
-        syncArticleUrl(null);
+        syncWritingUrl("list");
       }
       claimCascade(app);
       setOpenCount((current) => ({
@@ -226,7 +235,7 @@ export function DesktopShell({ initialWritingSlug = null }: DesktopShellProps) {
   const openWriting = useCallback(
     (slug: string) => {
       setWritingSlug(slug);
-      syncArticleUrl(slug);
+      syncWritingUrl({ slug });
       claimCascade("writing");
       setOpen((current) => [
         ...current.filter((id) => id !== "writing"),
@@ -238,7 +247,7 @@ export function DesktopShell({ initialWritingSlug = null }: DesktopShellProps) {
 
   const closeWindow = useCallback((app: PortosAppId) => {
     if (app === "writing") {
-      syncArticleUrl(null);
+      syncWritingUrl("closed");
       // The boot window is gone; any later Writing window earns its entrance.
       setBootWriting(false);
     }
@@ -276,7 +285,7 @@ export function DesktopShell({ initialWritingSlug = null }: DesktopShellProps) {
           <WritingWindow
             key={writingSlug ?? "list"}
             initialSlug={writingSlug}
-            onSlugChange={syncArticleUrl}
+            onSlugChange={(slug) => syncWritingUrl(slug ? { slug } : "list")}
           />
         );
       case "contact":

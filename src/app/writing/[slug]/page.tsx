@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { DesktopShell } from "@/components/sites/portos-framer-website-67488b6b/root-8a5edab2/DesktopShell";
 import { getPublishedPosts, isNotionConfigured, type PostMeta } from "@/lib/notion";
+import { SITE_NAME, SITE_URL } from "@/lib/site";
 
 /**
  * Deep link to one article: renders the SAME desktop, with the Writing window
@@ -16,8 +17,6 @@ import { getPublishedPosts, isNotionConfigured, type PostMeta } from "@/lib/noti
  * Notion and must not be frozen at build time.
  */
 export const dynamic = "force-dynamic";
-
-const SITE_NAME = "Lê Ngọc Hà";
 
 async function findPost(slug: string): Promise<PostMeta | null> {
   if (!isNotionConfigured()) return null;
@@ -71,10 +70,31 @@ export default async function WritingPostPage({
   // Only 404 when Notion is reachable and genuinely has no such post. When the
   // integration is unconfigured (local dev without .env), render the desktop
   // anyway — the window explains the empty state better than an error page.
-  if (isNotionConfigured()) {
-    const post = await findPost(slug);
-    if (!post) notFound();
-  }
+  const post = await findPost(slug);
+  if (isNotionConfigured() && !post) notFound();
 
-  return <DesktopShell initialWritingSlug={slug} />;
+  // Article schema for crawlers. `<` is escaped so pasted content can never
+  // close the script tag from inside the JSON.
+  const jsonLd = post
+    ? JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "Article",
+        headline: post.title,
+        description: post.description || undefined,
+        datePublished: post.date,
+        inLanguage: "vi",
+        image: post.coverUrl || undefined,
+        author: { "@type": "Person", name: SITE_NAME, url: SITE_URL },
+        mainEntityOfPage: `${SITE_URL}/writing/${post.slug}`,
+      }).replace(/</g, "\\u003c")
+    : null;
+
+  return (
+    <>
+      {jsonLd ? (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
+      ) : null}
+      <DesktopShell initialWritingSlug={slug} />
+    </>
+  );
 }

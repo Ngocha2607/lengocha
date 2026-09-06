@@ -91,6 +91,10 @@ export const metadata: Metadata = {
   metadataBase: new URL(NEXT_PUBLIC_SITE_URL),
   title: SITE_TITLE,
   description: SITE_DESCRIPTION,
+  alternates: {
+    // Advertises the Writing feed on every page; readers auto-discover it.
+    types: { "application/rss+xml": "/feed.xml" },
+  },
   icons: {
     icon: `${ASSETS}/seo/favicon.svg`,
     apple: `${ASSETS}/seo/apple-touch-icon.png`,
