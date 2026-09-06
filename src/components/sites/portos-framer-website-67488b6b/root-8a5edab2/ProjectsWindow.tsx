@@ -104,9 +104,12 @@ const PROJECTS: readonly Project[] = [
     tags: ["Next.js 14", "Zustand", "TypeScript", "Tailwind", "Shadcn"],
     // Animated scroll-through of the live site, captured at exactly 2.1 so
     // SHOT_ASPECT crops nothing. The Gallery still uses the static .png.
-    image: "project-b2b-storefront.gif",
+    image: "",
+    src: "https://qgat4v5hrepgvc3n.public.blob.vercel-storage.com/writings/project-b2b-storefront.gif",
     alt: "Tweet World Travel B2B e-commerce website homepage",
-    href: "https://tweetworldtravel.com",
+    // Used to link straight to tweetworldtravel.com; the card now opens the
+    // write-up, which links out to the live site in context.
+    writingSlug: "website-b2b-mat-tien-next-js-cua-hang-tour-ban-si",
   },
   {
     period: "2023 — 2024",
@@ -128,9 +131,12 @@ const PROJECTS: readonly Project[] = [
     title: "EVN Hanoi Power Company",
     description: "UI/UX cho các module quản lý điện lực.",
     tags: [".NET Core API", "React.js", "Redux Toolkit", "Ant Design"],
-    image: "project-evn.png",
+    image: "",
+    src: "https://qgat4v5hrepgvc3n.public.blob.vercel-storage.com/writings/project-evn.png",
     alt: "EVN Hanoi power-management system module interface",
-    href: "https://3si.vn/en/",
+    // Used to link to 3si.vn (the vendor's marketing site, not the product).
+    // Per the convention above, the card opens the write-up instead.
+    writingSlug: "evn-ha-noi-dua-dich-vu-dien-cua-thu-do-len-web",
   },
 ];
 
