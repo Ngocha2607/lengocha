@@ -91,6 +91,10 @@ export function AppleMenu({ onOpen }: AppleMenuProps) {
           align="start"
           sideOffset={2}
           alignOffset={-4}
+          // The popup portals to <body> with z auto, which every window (z 4+)
+          // and the dock (z 20) would paint over. A menu is transient chrome:
+          // nothing on the desktop may cover it, so it sits on Spotlight's tier.
+          className="z-50"
         >
           <Menu.Popup className={POPUP_CLASS}>
             {MENU_APPS.map((entry) => (

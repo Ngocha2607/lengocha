@@ -75,9 +75,9 @@ const TRAFFIC = [
 
 /**
  * Height of the menu bar. A maximised window stops just below it, rather than
- * covering the whole viewport — otherwise the menu bar (z-index 5) would paint
- * over the window's own title bar (z-index 4) and bury the traffic lights, leaving
- * no way to un-maximise.
+ * covering the whole viewport — otherwise the menu bar (z-30, above the whole
+ * window stack) would paint over the window's own title bar and bury the
+ * traffic lights, leaving no way to un-maximise.
  */
 const MENU_BAR_HEIGHT = 29;
 

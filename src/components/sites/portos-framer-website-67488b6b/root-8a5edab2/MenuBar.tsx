@@ -110,8 +110,12 @@ function getServerClockSnapshot(): Clock | null {
 export function MenuBar({ name = "Lê Ngọc Hà", onOpen, onSearch }: MenuBarProps) {
   const clock = useSyncExternalStore(subscribeToClock, getClockSnapshot, getServerClockSnapshot);
 
+  // z-30: above every window (BASE_Z 4 + at most 8 of them) AND the dock
+  // (z 20). It was z-5, which only beat the FIRST window — the stack's z grows
+  // per window, so a second window tied it and painted over both the bar and
+  // its dropdown. Spotlight (z-40+) stays above.
   return (
-    <header className="absolute left-0 top-0 z-[5] h-[29px] w-full">
+    <header className="absolute left-0 top-0 z-30 h-[29px] w-full">
       <div className="flex h-[29px] w-full items-center justify-between overflow-clip bg-black/10 pb-[2px] pl-[4px] pr-[11px] pt-[3px] backdrop-blur-[82px]">
         {/* Icon & Name */}
         <div className="flex items-center gap-[3px]">
