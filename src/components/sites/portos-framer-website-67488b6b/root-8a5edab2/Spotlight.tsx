@@ -188,8 +188,7 @@ export function Spotlight({ onClose, onOpenApp, onOpenWriting, windows }: Spotli
         <div className="flex items-center gap-3 px-4 py-3">
           <Search size={20} strokeWidth={2} className="shrink-0 text-black/40" aria-hidden />
           <input
-            // eslint-disable-next-line jsx-a11y/no-autofocus -- a command
-            // palette exists to be typed into; focusing it IS the interaction.
+            // A command palette exists to be typed into; focusing it IS the interaction.
             autoFocus
             value={query}
             onChange={(event) => {

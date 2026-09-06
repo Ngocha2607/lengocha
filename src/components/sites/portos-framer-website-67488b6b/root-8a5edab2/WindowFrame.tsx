@@ -34,6 +34,14 @@ interface WindowFrameProps {
   restoreSignal?: number;
   /** Which app this window is, so the genie knows which dock icon to aim at. */
   app?: PortosAppId;
+  /**
+   * Skips the unfold-from-the-dock entrance. Set for a window that boots open
+   * from a deep link: its mount happens WHILE the pre-loader still covers the
+   * desktop, and the genie's overlay (z 2147483000) is the one layer that would
+   * paint on top of the splash — a window skeleton flying over the lock screen.
+   * The window simply stands ready and is revealed when the splash exits.
+   */
+  skipEntrance?: boolean;
   onClose: () => void;
   onFocus: () => void;
   zIndex: number;
@@ -222,6 +230,7 @@ export function WindowFrame({
   cascadeSlot = 0,
   restoreSignal = 0,
   app,
+  skipEntrance = false,
   onClose,
   onFocus,
   zIndex,
@@ -249,7 +258,7 @@ export function WindowFrame({
   const frameRef = useRef<HTMLDivElement>(null);
   // Hidden while a genie is in flight: the clones are what the eye follows, and
   // showing the real window at the same time would double it.
-  const [warping, setWarping] = useState(!prefersReducedMotion());
+  const [warping, setWarping] = useState(() => !skipEntrance && !prefersReducedMotion());
   /**
    * Suppresses the shell's own width/height/top/transform transition for one
    * commit, so a mode change the genie has already animated does not get

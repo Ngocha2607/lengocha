@@ -139,6 +139,14 @@ interface DesktopShellProps {
  */
 export function DesktopShell({ initialWritingSlug = null }: DesktopShellProps) {
   const hydrated = useHydrated();
+  /**
+   * True only for the window a deep link boots with, and only until the visitor
+   * closes it. That first mount happens under the pre-loader, where the genie
+   * entrance would fly ABOVE the splash (its overlay outranks everything), so
+   * that one window skips the entrance. Reopening it later plays the genie as
+   * normal.
+   */
+  const [bootWriting, setBootWriting] = useState(initialWritingSlug !== null);
   const [open, setOpen] = useState<PortosAppId[]>(() =>
     initialWritingSlug ? ["writing"] : [],
   );
@@ -229,7 +237,11 @@ export function DesktopShell({ initialWritingSlug = null }: DesktopShellProps) {
   );
 
   const closeWindow = useCallback((app: PortosAppId) => {
-    if (app === "writing") syncArticleUrl(null);
+    if (app === "writing") {
+      syncArticleUrl(null);
+      // The boot window is gone; any later Writing window earns its entrance.
+      setBootWriting(false);
+    }
     setOpen((current) => current.filter((id) => id !== app));
     // Releases the step so the next window can stand on it.
     setCascade((current) => {
@@ -350,6 +362,7 @@ export function DesktopShell({ initialWritingSlug = null }: DesktopShellProps) {
             titleFont={def.titleFont}
             cascadeSlot={cascade[app] ?? 0}
             restoreSignal={openCount[app] ?? 0}
+            skipEntrance={app === "writing" && bootWriting}
             zIndex={BASE_Z + index}
             onClose={() => closeWindow(app)}
             onFocus={() => focusWindow(app)}
