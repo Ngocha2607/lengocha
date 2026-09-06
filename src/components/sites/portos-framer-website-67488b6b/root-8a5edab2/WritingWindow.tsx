@@ -47,8 +47,10 @@ const LABEL_CLASS = "font-sans text-[11px] leading-[15px] font-medium tracking-[
 const TAG_CLASS =
   "font-sans rounded-full border border-black/10 px-2 py-[2px] text-[11px] leading-[15px] text-black/55";
 const NOTE_CLASS = "font-sans text-[12px] leading-[16.8px] text-black/50";
+// The extra mobile padding is tap-target ergonomics, not styling: 23px pills
+// are fine under a cursor and hopeless under a thumb.
 const PILL_BUTTON_CLASS =
-  "font-sans cursor-pointer rounded-full border border-black/15 px-3 py-[3px] text-[11px] leading-[16px] text-black/70 transition-colors hover:border-black/40 hover:text-black";
+  "font-sans cursor-pointer rounded-full border border-black/15 px-3 py-[3px] max-[809px]:py-[7px] text-[11px] leading-[16px] text-black/70 transition-colors hover:border-black/40 hover:text-black";
 
 /** One `article_view` per slug per visit, however many times it is reopened. */
 const viewedSlugs = new Set<string>();
@@ -212,6 +214,36 @@ export function WritingWindow({ initialSlug = null, onSlugChange }: WritingWindo
   const prefetch = useCallback((slug: string) => {
     prefetchPost(slug);
   }, []);
+
+  /**
+   * The hover prefetch above never fires on a phone — there is no hover. On
+   * devices without one, a card scrolled into view is the equivalent signal:
+   * warm it as it appears, unobserve once done. The observer's default viewport
+   * root works inside the window's own scroll container because intersection is
+   * clipped by every scrollable ancestor.
+   */
+  const listGridRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (openSlug || !posts?.length) return;
+    if (!window.matchMedia("(hover: none)").matches) return;
+    const grid = listGridRef.current;
+    if (!grid) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          const slug = (entry.target as HTMLElement).dataset.slug;
+          if (slug) prefetchPost(slug);
+          observer.unobserve(entry.target);
+        }
+      },
+      // Start a card's fetch one scroll-beat before it is visible.
+      { rootMargin: "120px" },
+    );
+    grid.querySelectorAll<HTMLElement>("[data-slug]").forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, [openSlug, posts, activeTag]);
 
   // Escape returns to the list. `WindowFrame` owns Escape for closing the
   // window, so this listener stops the event while a detail view is open.
@@ -394,9 +426,17 @@ export function WritingWindow({ initialSlug = null, onSlugChange }: WritingWindo
           <p className={cn(NOTE_CLASS, "mt-6")}>No published posts yet.</p>
         ) : (
           <>
-            {/* Topic filter. Only shown when there is something to narrow. */}
+            {/* Topic filter. Only shown when there is something to narrow.
+                On phones the row does not wrap — fifteen tags cost three rows of
+                a small screen — it becomes one edge-to-edge swipeable strip
+                (the -mx/px pair bleeds it into the window's own padding), with
+                the scrollbar hidden the same way the window body hides its own. */}
             {tags.length > 1 ? (
-              <div className="mt-6 flex flex-wrap gap-[6px]" role="group" aria-label="Filter by topic">
+              <div
+                className="mt-6 flex flex-wrap gap-[6px] max-[809px]:-mx-5 max-[809px]:flex-nowrap max-[809px]:overflow-x-auto max-[809px]:px-5 max-[809px]:[scrollbar-width:none] max-[809px]:[&::-webkit-scrollbar]:hidden"
+                role="group"
+                aria-label="Filter by topic"
+              >
                 {[null, ...tags].map((tag) => {
                   const isActive = activeTag === tag;
                   return (
@@ -407,7 +447,7 @@ export function WritingWindow({ initialSlug = null, onSlugChange }: WritingWindo
                       onClick={() => setActiveTag(tag)}
                       className={cn(
                         TAG_CLASS,
-                        "cursor-pointer transition-colors",
+                        "cursor-pointer whitespace-nowrap transition-colors max-[809px]:shrink-0 max-[809px]:py-[6px]",
                         isActive
                           ? "border-black/60 bg-black text-white"
                           : "hover:border-black/40 hover:text-black",
@@ -423,12 +463,16 @@ export function WritingWindow({ initialSlug = null, onSlugChange }: WritingWindo
             {visiblePosts && visiblePosts.length === 0 ? (
               <p className={cn(NOTE_CLASS, "mt-6")}>Nothing tagged “{activeTag}” yet.</p>
             ) : (
-              <div className="mt-6 grid grid-cols-1 gap-x-4 gap-y-8 min-[560px]:grid-cols-2 min-[880px]:grid-cols-3">
+              <div
+                ref={listGridRef}
+                className="mt-6 grid grid-cols-1 gap-x-4 gap-y-8 min-[560px]:grid-cols-2 min-[880px]:grid-cols-3"
+              >
                 {(visiblePosts ?? []).map((post) => (
                   <button
                     key={post.id}
                     type="button"
                     data-no-drag
+                    data-slug={post.slug}
                     onClick={() => openArticle(post.slug)}
                     onPointerEnter={() => prefetch(post.slug)}
                     onFocus={() => prefetch(post.slug)}

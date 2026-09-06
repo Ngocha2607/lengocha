@@ -238,6 +238,16 @@
   color: rgb(0 0 0 / 0.78);
 }
 
+/* 13px is the measured desktop size, not a mobile choice: a phone is held
+   further from the eye and its window has no 824px reading measure to lean on.
+   Below the site's 810px breakpoint the prose steps up to a phone-native size. */
+@media (max-width: 809px) {
+  .portos-prose {
+    font-size: 15px;
+    line-height: 24px;
+  }
+}
+
 .portos-prose > * + * {
   margin-top: 16px;
 }

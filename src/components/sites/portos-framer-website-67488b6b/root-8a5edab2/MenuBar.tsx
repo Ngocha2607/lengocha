@@ -134,7 +134,9 @@ export function MenuBar({ name = "Lê Ngọc Hà", onOpen, onSearch }: MenuBarPr
                   className={ICON_IMAGE}
                 />
               );
-              // The magnifier is the one live control in the row.
+              // The magnifier is the one live control in the row — and the one
+              // icon that IGNORES hideOnMobile: on touch there is no ⌘K, so
+              // without it Spotlight would be unreachable on a phone.
               if (icon.file === "menubar-search.svg" && onSearch) {
                 return (
                   <button
@@ -143,11 +145,7 @@ export function MenuBar({ name = "Lê Ngọc Hà", onOpen, onSearch }: MenuBarPr
                     onClick={onSearch}
                     aria-label="Search (Cmd+K)"
                     title="Search (⌘K)"
-                    className={cn(
-                      ICON_BOX,
-                      "cursor-pointer rounded transition-colors hover:bg-white/15",
-                      icon.hideOnMobile && "max-[810px]:hidden",
-                    )}
+                    className={cn(ICON_BOX, "cursor-pointer rounded transition-colors hover:bg-white/15")}
                   >
                     {image}
                   </button>

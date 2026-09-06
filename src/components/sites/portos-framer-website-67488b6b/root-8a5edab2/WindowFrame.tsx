@@ -588,7 +588,13 @@ export function WindowFrame({
                         ? () => toggleMode("minimized")
                         : requestClose
                   }
-                  className="portos-light relative size-3 shrink-0 rounded-full"
+                  // The pseudo-element is an invisible hit area: 12px dots are
+                  // authentic macOS but hopeless under a thumb, and on touch the
+                  // red light is the only way to close a window (no Escape).
+                  // ±4px sideways keeps neighbouring lights' zones from
+                  // overlapping across the 8px gap; vertically there is nothing
+                  // to collide with, so the zone spans most of the title bar.
+                  className="portos-light relative size-3 shrink-0 rounded-full before:absolute before:inset-x-[-4px] before:inset-y-[-8px] before:content-['']"
                   style={{ background: light.colour }}
                 >
                   {/* 18x18 icon inside a 12x12 dot, so it overflows by 3px all round.
