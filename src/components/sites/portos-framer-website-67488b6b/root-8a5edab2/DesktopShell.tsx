@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import {
   PORTOS_ASSETS,
   type PortosAppId,
@@ -24,7 +24,9 @@ import { RecycleBinWindow } from "./RecycleBinWindow";
 import { ResumeWindow } from "./ResumeWindow";
 import { DecisionsWindow } from "./DecisionsWindow";
 import { ExperienceWindow } from "./ExperienceWindow";
+import { Spotlight } from "./Spotlight";
 import { WindowFrame } from "./WindowFrame";
+import { fetchPostList } from "./writingClient";
 
 interface WindowDef {
   title: string;
@@ -94,20 +96,60 @@ const CASCADE_WRAP = 8;
 /** Above every window. Windows sit at BASE_Z upward, nine apps at most. */
 const DOCK_Z = 20;
 
+/** Everything Spotlight can open directly, in menu order. */
+const SPOTLIGHT_WINDOWS = (Object.keys(WINDOWS) as PortosAppId[]).map((app) => ({
+  app,
+  title: WINDOWS[app].title,
+}));
+
+/**
+ * "Are we past hydration yet?" as an external-store read — the lint-clean way to
+ * branch on client-ness without a setState-in-effect. The window stack renders
+ * only when this is true, which is what lets WindowFrame keep touching `window`
+ * in its state initialisers even now that a deep link can boot with a window
+ * already open.
+ */
+const subscribeNever = () => () => {};
+const useHydrated = () =>
+  useSyncExternalStore(
+    subscribeNever,
+    () => true,
+    () => false,
+  );
+
+/**
+ * Mirrors navigation into the address bar WITHOUT a router navigation: a Next
+ * navigation would remount the shell and replay the pre-loader, when all that
+ * changed is which article the Writing window shows. `/writing/<slug>` is a real
+ * route (see app/writing/[slug]), so what this writes is always a working link.
+ */
+function syncArticleUrl(slug: string | null): void {
+  window.history.replaceState(null, "", slug ? `/writing/${slug}` : "/");
+}
+
+interface DesktopShellProps {
+  /** Set by the /writing/[slug] route: boot with Writing open on this article. */
+  initialWritingSlug?: string | null;
+}
+
 /**
  * The macOS desktop: wallpaper, always-on scrim, menu bar, icons, dock, and the
  * stack of open windows. Multiple windows can be open at once; the most recently
  * opened or focused one renders on top, matching the live site's DOM-order stacking.
  */
-export function DesktopShell() {
-  const [open, setOpen] = useState<PortosAppId[]>([]);
+export function DesktopShell({ initialWritingSlug = null }: DesktopShellProps) {
+  const hydrated = useHydrated();
+  const [open, setOpen] = useState<PortosAppId[]>(() =>
+    initialWritingSlug ? ["writing"] : [],
+  );
   const [projectsMode, setProjectsMode] = useState<ProjectsMode>("grid");
+  const [spotlightOpen, setSpotlightOpen] = useState(false);
   /**
    * Which article the Writing window should open on. Set when a project card
    * points at an internal write-up; cleared when Writing is opened any other
    * way, so the dock icon always lands on the list.
    */
-  const [writingSlug, setWritingSlug] = useState<string | null>(null);
+  const [writingSlug, setWritingSlug] = useState<string | null>(initialWritingSlug);
   /**
    * Counts how many times each app has been asked to open. A window that is
    * parked watches this and unparks itself, so a dock icon reaches a minimised
@@ -118,8 +160,32 @@ export function DesktopShell() {
   >({});
   /** Per-window cascade slot, held only while the window is open. */
   const [cascade, setCascade] = useState<Partial<Record<PortosAppId, number>>>(
-    {},
+    () => (initialWritingSlug ? { writing: 0 } : {}),
   );
+
+  /**
+   * Warm the article index the moment the desktop exists. One tiny request, and
+   * it makes three other things fast: the Writing list opens filled, Spotlight
+   * searches articles on its first keystroke, and the SERVER starts pre-rendering
+   * every article body (see warmPostCache) before anything is clicked.
+   */
+  useEffect(() => {
+    void fetchPostList().catch(() => {
+      // The Writing window reports properly when it actually opens.
+    });
+  }, []);
+
+  // ⌘K / Ctrl+K from anywhere on the desktop.
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        setSpotlightOpen((current) => !current);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   /** Claims the lowest step nobody is standing on. */
   const claimCascade = useCallback((app: PortosAppId) => {
@@ -134,7 +200,10 @@ export function DesktopShell() {
 
   const openWindow = useCallback(
     (app: PortosAppId) => {
-      if (app === "writing") setWritingSlug(null);
+      if (app === "writing") {
+        setWritingSlug(null);
+        syncArticleUrl(null);
+      }
       claimCascade(app);
       setOpenCount((current) => ({
         ...current,
@@ -149,6 +218,7 @@ export function DesktopShell() {
   const openWriting = useCallback(
     (slug: string) => {
       setWritingSlug(slug);
+      syncArticleUrl(slug);
       claimCascade("writing");
       setOpen((current) => [
         ...current.filter((id) => id !== "writing"),
@@ -159,6 +229,7 @@ export function DesktopShell() {
   );
 
   const closeWindow = useCallback((app: PortosAppId) => {
+    if (app === "writing") syncArticleUrl(null);
     setOpen((current) => current.filter((id) => id !== app));
     // Releases the step so the next window can stand on it.
     setCascade((current) => {
@@ -193,6 +264,7 @@ export function DesktopShell() {
           <WritingWindow
             key={writingSlug ?? "list"}
             initialSlug={writingSlug}
+            onSlugChange={syncArticleUrl}
           />
         );
       case "contact":
@@ -244,7 +316,7 @@ export function DesktopShell() {
       {/* Constant scrim — measured at rgba(0,0,0,0.24) whether or not a window is open. */}
       <div className="absolute inset-0 bg-black/24" aria-hidden="true" />
 
-      <MenuBar onOpen={openWindow} />
+      <MenuBar onOpen={openWindow} onSearch={() => setSpotlightOpen(true)} />
 
       {/* Desktop container: inset 50px (desktop) / 30px (tablet) / 20px (mobile),
           24px from the bottom at every breakpoint. At the desktop breakpoint only, the
@@ -265,7 +337,7 @@ export function DesktopShell() {
         </div>
       </div>
 
-      {open.map((app, index) => {
+      {hydrated && open.map((app, index) => {
         const def = WINDOWS[app];
         return (
           <WindowFrame
@@ -294,6 +366,16 @@ export function DesktopShell() {
           </WindowFrame>
         );
       })}
+
+      {/* Mounted only while open, so its search state resets itself. */}
+      {spotlightOpen ? (
+        <Spotlight
+          onClose={() => setSpotlightOpen(false)}
+          onOpenApp={openWindow}
+          onOpenWriting={openWriting}
+          windows={SPOTLIGHT_WINDOWS}
+        />
+      ) : null}
 
       <PreLoader />
     </div>

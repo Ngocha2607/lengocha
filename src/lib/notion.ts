@@ -45,6 +45,13 @@ export interface PostMeta {
   emoji: string;
   /** Cover image URL, or "" when the post has none. May be an expiring URL. */
   coverUrl: string;
+  /**
+   * Estimated minutes to read, measured from the markdown body. Only known once
+   * the body has been fetched at least once this process — the list query never
+   * fetches bodies — so it is absent until `warmPostCache` (or a reader) has
+   * been past that post. The window renders the badge conditionally.
+   */
+  readingMinutes?: number;
 }
 
 export interface Post extends PostMeta {
@@ -197,9 +204,31 @@ async function fetchPublishedPosts(): Promise<PostMeta[]> {
   }
 }
 
+/**
+ * Reading times live OUTSIDE the list cache and are merged at return time: a
+ * warm-up finishing between two list requests should show up in the second
+ * response without waiting out the list TTL.
+ */
+const readingMinutesBySlug = new Map<string, number>();
+
+/** ~200 wpm reading speed; whitespace-split is close enough for Vietnamese prose. */
+function estimateReadingMinutes(markdown: string): number {
+  const words = markdown.split(/\s+/).filter(Boolean).length;
+  return Math.max(1, Math.round(words / 200));
+}
+
+function withReadingMinutes(posts: PostMeta[]): PostMeta[] {
+  return posts.map((post) => {
+    const readingMinutes = readingMinutesBySlug.get(post.slug);
+    return readingMinutes === undefined ? post : { ...post, readingMinutes };
+  });
+}
+
 /** All published posts, newest first. Empty when unconfigured or on error. */
 export async function getPublishedPosts(): Promise<PostMeta[]> {
-  if (cache && Date.now() - cache.at < LIST_TTL_MS) return cache.posts;
+  if (cache && Date.now() - cache.at < LIST_TTL_MS) {
+    return withReadingMinutes(cache.posts);
+  }
 
   // Share one round trip between concurrent callers rather than stampeding.
   inFlight ??= fetchPublishedPosts().finally(() => {
@@ -208,7 +237,7 @@ export async function getPublishedPosts(): Promise<PostMeta[]> {
 
   const posts = await inFlight;
   cache = { at: Date.now(), posts };
-  return posts;
+  return withReadingMinutes(posts);
 }
 
 /**
@@ -237,7 +266,11 @@ async function fetchPost(slug: string): Promise<Post | null> {
   const blocks = await n2m.pageToMarkdown(meta.id);
   const { parent } = n2m.toMarkdownString(blocks);
 
-  return { ...meta, markdown: parent ?? "" };
+  const markdown = parent ?? "";
+  const readingMinutes = estimateReadingMinutes(markdown);
+  readingMinutesBySlug.set(slug, readingMinutes);
+
+  return { ...meta, readingMinutes, markdown };
 }
 
 /** A single published post with its Markdown body, or null if not found. */
@@ -265,4 +298,35 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
 
   postInFlight.set(slug, pending);
   return pending;
+}
+
+/**
+ * Renders every published body into the post cache, in the background.
+ *
+ * A cold article costs one Notion request per level of block nesting — measured
+ * at 1-11s across these posts — and the hover prefetch only helps the article
+ * being hovered. Kicking this after a list request means that by the time a
+ * visitor has scanned the cards, most bodies answer from cache. Sequential on
+ * purpose: ten parallel block-tree walks is how one visitor becomes a Notion
+ * rate-limit incident.
+ *
+ * Re-arms itself at the post cache's own TTL so entries are re-rendered about
+ * as often as they expire, instead of on every list request.
+ */
+let warmStartedAt = 0;
+
+export function warmPostCache(): void {
+  if (!isNotionConfigured()) return;
+  const now = Date.now();
+  if (now - warmStartedAt < POST_TTL_MS) return;
+  warmStartedAt = now;
+
+  void (async () => {
+    const posts = await getPublishedPosts();
+    for (const post of posts) {
+      await getPostBySlug(post.slug);
+    }
+  })().catch((error) => {
+    console.error("[notion] warmPostCache failed:", error);
+  });
 }

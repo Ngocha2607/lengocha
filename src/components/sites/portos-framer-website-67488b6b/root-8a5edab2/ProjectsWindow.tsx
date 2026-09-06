@@ -16,7 +16,7 @@ import { PORTOS_ASSETS } from "@/types/portos";
  */
 export type ProjectsMode = "grid" | "list";
 
-interface Project {
+export interface Project {
   /** Rendered above the title, in the same style as the About timeline dates. */
   period: string;
   title: string;
@@ -48,7 +48,8 @@ interface Project {
  * are from the portfolio. The EVN card is the one entry the CV does not carry —
  * its wording is our own translation of the entry it used to hold.
  */
-const PROJECTS: readonly Project[] = [
+// Exported for Spotlight, which searches the same six cards this window shows.
+export const PROJECTS: readonly Project[] = [
   {
     period: "2025 — Hiện tại",
     title: "LMS Platform · SAPP Academy",

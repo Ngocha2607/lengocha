@@ -235,7 +235,8 @@ export function WindowFrame({
   // let the genie measure the window at its normal size a frame before it
   // maximised, and the flight would start from the wrong box. Safe to touch
   // `window` in the initialiser because this component never renders on the
-  // server — the desktop opens with no windows.
+  // server: DesktopShell mounts the window stack only after hydration, even
+  // when a deep link (/writing/[slug]) boots with a window already open.
   const [mode, setMode] = useState<WindowMode>(() =>
     typeof window !== "undefined" && window.matchMedia(MOBILE_QUERY).matches
       ? "maximized"

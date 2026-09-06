@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getPublishedPosts, isNotionConfigured } from "@/lib/notion";
+import { getPublishedPosts, isNotionConfigured, warmPostCache } from "@/lib/notion";
 
 /**
  * The Writing list, straight from Notion.
@@ -27,5 +27,11 @@ export async function GET() {
   }
 
   const posts = await getPublishedPosts();
+
+  // Fire-and-forget: start rendering bodies now so the article a visitor picks
+  // in ten seconds answers from cache instead of walking Notion's block tree.
+  // Also what fills in `readingMinutes` for the next list response.
+  warmPostCache();
+
   return NextResponse.json({ posts, configured: true });
 }

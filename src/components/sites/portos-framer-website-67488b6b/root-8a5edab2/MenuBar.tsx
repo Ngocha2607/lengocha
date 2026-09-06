@@ -10,6 +10,11 @@ interface MenuBarProps {
   name?: string;
   /** Lets the logo menu open the same windows the dock and folders do. */
   onOpen: (app: PortosAppId) => void;
+  /**
+   * Opens Spotlight. On the live site the magnifier was a dead image like the
+   * other status icons; it is the one glyph a visitor actually expects to work.
+   */
+  onSearch?: () => void;
 }
 
 interface Clock {
@@ -102,7 +107,7 @@ function getServerClockSnapshot(): Clock | null {
  *
  * Below 810px only the wifi icon and the time survive.
  */
-export function MenuBar({ name = "Lê Ngọc Hà", onOpen }: MenuBarProps) {
+export function MenuBar({ name = "Lê Ngọc Hà", onOpen, onSearch }: MenuBarProps) {
   const clock = useSyncExternalStore(subscribeToClock, getClockSnapshot, getServerClockSnapshot);
 
   return (
@@ -119,11 +124,8 @@ export function MenuBar({ name = "Lê Ngọc Hà", onOpen }: MenuBarProps) {
         {/* Icon & Time */}
         <div className="flex items-center justify-end gap-[6px]">
           <div className="flex items-center justify-end gap-[3px]">
-            {NAV_ICONS.map((icon) => (
-              <div
-                key={icon.file}
-                className={cn(ICON_BOX, icon.hideOnMobile && "max-[810px]:hidden")}
-              >
+            {NAV_ICONS.map((icon) => {
+              const image = (
                 <Image
                   src={`${PORTOS_ASSETS}/images/${icon.file}`}
                   alt=""
@@ -131,8 +133,35 @@ export function MenuBar({ name = "Lê Ngọc Hà", onOpen }: MenuBarProps) {
                   height={icon.height}
                   className={ICON_IMAGE}
                 />
-              </div>
-            ))}
+              );
+              // The magnifier is the one live control in the row.
+              if (icon.file === "menubar-search.svg" && onSearch) {
+                return (
+                  <button
+                    key={icon.file}
+                    type="button"
+                    onClick={onSearch}
+                    aria-label="Search (Cmd+K)"
+                    title="Search (⌘K)"
+                    className={cn(
+                      ICON_BOX,
+                      "cursor-pointer rounded transition-colors hover:bg-white/15",
+                      icon.hideOnMobile && "max-[810px]:hidden",
+                    )}
+                  >
+                    {image}
+                  </button>
+                );
+              }
+              return (
+                <div
+                  key={icon.file}
+                  className={cn(ICON_BOX, icon.hideOnMobile && "max-[810px]:hidden")}
+                >
+                  {image}
+                </div>
+              );
+            })}
           </div>
           <p className="whitespace-nowrap font-display text-[14px] font-medium leading-[16px] tracking-normal text-white max-[810px]:hidden">
             {clock ? (
