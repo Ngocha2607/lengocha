@@ -11,6 +11,12 @@ const nextConfig: NextConfig = {
    */
   env: {
     SITE_BUILT_AT: new Date().toISOString(),
+    /**
+     * Vercel's environment ("production", "preview", or unset locally),
+     * stamped in so CLIENT code can read it — the About window uses it to keep
+     * sample testimonials off the production site (src/data/testimonials.ts).
+     */
+    SITE_VERCEL_ENV: process.env.VERCEL_ENV ?? "",
   },
 
   images: {
