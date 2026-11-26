@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { PORTOS_ASSETS, type AboutCounter } from "@/types/portos";
 import { AboutBulletBlocks, AboutExperience } from "./AboutDetails";
+import { useHydrated } from "./useHydrated";
 
 /**
  * `AboutCounter` carries the settled string only. The live site renders these
@@ -130,7 +131,12 @@ export function AboutWindow() {
     return () => cancelAnimationFrame(frame);
   }, [reduced]);
 
-  const settled = reduced || progress >= 1;
+  // The settled figures until hydration. /about renders this window on the
+  // server, and a crawler reading "0 năm" and "0%" there would be reading the
+  // first frame of an animation as fact. After hydration the roll plays as
+  // before — under the pre-loader, for a window the route booted with.
+  const hydrated = useHydrated();
+  const settled = !hydrated || reduced || progress >= 1;
 
   return (
     <div className="pt-[50px]">

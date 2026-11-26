@@ -110,6 +110,18 @@ export async function fetchPost(slug: string): Promise<PostDetail> {
   return pending;
 }
 
+/**
+ * Seeds the cache with an article the server already rendered into the page
+ * (/writing/[slug]), so reopening it later in the visit costs nothing.
+ *
+ * The LIST is deliberately never seeded this way: the window's own first list
+ * request is also what tells the server to pre-render every article body (see
+ * `warmPostCache`), and it refreshes a server snapshot that may be minutes old.
+ */
+export function primePost(post: PostDetail): void {
+  if (!postCache.has(post.slug)) postCache.set(post.slug, post);
+}
+
 /** Fire-and-forget: warms the server render AND this cache before a click. */
 export function prefetchPost(slug: string): void {
   void fetchPost(slug).catch(() => {

@@ -216,6 +216,10 @@ const STATUS_LABEL: Record<DecisionStatus, string> = {
   Reverted: "Đã gỡ bỏ",
 };
 
+/**
+ * One entry at full length. An h2, not the h1 it used to be: the window's own
+ * title is the page's H1 on /decisions, and a page gets exactly one.
+ */
 function Detail({ entry }: { entry: Entry }) {
   if (entry.kind === "highlight") {
     return (
@@ -223,9 +227,9 @@ function Detail({ entry }: { entry: Entry }) {
         <p className={SECTION_LABEL}>
           {entry.period} · {entry.org}
         </p>
-        <h1 className="font-display mt-2 text-[24px] leading-[30px] font-bold tracking-[-0.48px] text-black">
+        <h2 className="font-display mt-2 text-[24px] leading-[30px] font-bold tracking-[-0.48px] text-black">
           {entry.title}
-        </h1>
+        </h2>
         <p className={cn(BODY_CLASS, "mt-4")}>{entry.detail}</p>
       </article>
     );
@@ -239,9 +243,9 @@ function Detail({ entry }: { entry: Entry }) {
         </span>
         <span className={cn(ROW_META, "text-black/45")}>{entry.year}</span>
       </div>
-      <h1 className="font-display mt-2 text-[22px] leading-[29px] font-bold tracking-[-0.44px] text-black">
+      <h2 className="font-display mt-2 text-[22px] leading-[29px] font-bold tracking-[-0.44px] text-black">
         {entry.title}
-      </h1>
+      </h2>
       <p className={cn(BODY_CLASS, "mt-3")}>{entry.upshot}</p>
 
       <p className={cn(SECTION_LABEL, "mt-6")}>CONTEXT</p>
@@ -339,8 +343,15 @@ export function DecisionsWindow() {
 
       {/* Detail pane — `min-w-0` so a long unbroken string cannot widen the flex
           item past its share and push the list off. */}
+      {/* Every entry is rendered and all but the selected one `hidden`, rather
+          than only the selected one existing. Same screen, but /decisions now
+          carries all six write-ups in its server HTML, not just the first. */}
       <section className="portos-scroll hidden min-w-0 flex-1 px-6 py-6 min-[700px]:block">
-        <Detail entry={selected} />
+        {ALL.map((entry) => (
+          <div key={entry.id} hidden={entry.id !== selected.id}>
+            <Detail entry={entry} />
+          </div>
+        ))}
       </section>
     </div>
   );

@@ -4,6 +4,13 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import {
+  DEFAULT_OG_IMAGE,
+  SITE_DESCRIPTION,
+  SITE_NAME,
+  SITE_TITLE,
+  SITE_URL,
+} from "@/lib/site";
 
 // `next/font/local` statically analyses these calls at build time, so every `path`
 // must be a literal string — a template literal or shared constant will not resolve.
@@ -64,19 +71,13 @@ const inspiration = Inspiration({
 
 const ASSETS = "/sites/portos-framer-website-67488b6b/root-8a5edab2";
 
-const SITE_TITLE = "Lê Ngọc Hà — Senior Frontend Engineer";
-const SITE_DESCRIPTION =
-  "Frontend Tech Lead tại SAPP Academy. Tôi xây dựng hệ thống web nhanh, có khả năng mở rộng với React, Next.js và TypeScript — khám phá portfolio này như một chiếc Mac.";
 /**
- * Overridable so a preview deployment can advertise its own origin instead of
- * the production one. Read at build time in a server component, so it needs no
- * NEXT_PUBLIC_ prefix — that is only for values the browser bundle must see.
- */
-const NEXT_PUBLIC_SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://lengocha.vercel.app";
-
-/**
- * Metadata, favicon, apple-touch icon and OG image are all the owner's.
+ * Site-wide defaults. Every route sets its own title, description, canonical
+ * and social cards through `pageMetadata` (lib/seo.ts); this is what a page
+ * that sets nothing — the 404 — falls back to.
+ *
+ * No `openGraph.url` here on purpose. It used to be the home URL, which every
+ * page that did not override it then advertised as its own address.
  *
  * `favicon.svg` replaces the template's `favicon.png`: an SVG favicon scales to
  * every tab size from one file, and Safari falls back to `apple-touch-icon.png`
@@ -88,11 +89,11 @@ const NEXT_PUBLIC_SITE_URL =
  * entirely. `/favicon.ico` now 404s, which is harmless — browsers follow the tag.
  */
 export const metadata: Metadata = {
-  metadataBase: new URL(NEXT_PUBLIC_SITE_URL),
+  metadataBase: new URL(SITE_URL),
   title: SITE_TITLE,
   description: SITE_DESCRIPTION,
   alternates: {
-    // Advertises the Writing feed on every page; readers auto-discover it.
+    // Advertises the Writing feed; readers auto-discover it.
     types: { "application/rss+xml": "/feed.xml" },
   },
   icons: {
@@ -101,16 +102,17 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: "website",
-    url: NEXT_PUBLIC_SITE_URL,
+    siteName: SITE_NAME,
+    locale: "vi_VN",
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
-    images: [`${ASSETS}/seo/og-image.png`],
+    images: [DEFAULT_OG_IMAGE],
   },
   twitter: {
     card: "summary_large_image",
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
-    images: [`${ASSETS}/seo/og-image.png`],
+    images: [DEFAULT_OG_IMAGE],
   },
   robots: { "max-image-preview": "large" },
 };
@@ -121,8 +123,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
+    // Vietnamese: the content is (the JSON-LD and the RSS feed already said so).
+    // Search engines and screen readers both pick their language from this.
     <html
-      lang="en"
+      lang="vi"
       className={`${sfProDisplay.variable} ${sfProText.variable} ${inspiration.variable} h-full antialiased`}
     >
       <body className="min-h-full">

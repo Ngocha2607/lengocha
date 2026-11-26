@@ -30,7 +30,9 @@ import { NotionToMarkdown } from "notion-to-md";
  * only the first is reliable.
  *
  * Every function degrades to empty/null rather than throwing, so a missing token
- * or a Notion outage leaves the window empty instead of breaking the desktop.
+ * or a Notion outage leaves the window empty instead of breaking the desktop —
+ * except the `...OrThrow` pair, which the statically regenerated pages use so
+ * that an outage keeps the last good page instead of caching an empty one.
  */
 
 export interface PostMeta {
@@ -178,30 +180,26 @@ const LIST_TTL_MS = 60_000;
 let cache: { at: number; posts: PostMeta[] } | null = null;
 let inFlight: Promise<PostMeta[]> | null = null;
 
+/** Throws on any Notion failure; callers decide whether that is fatal. */
 async function fetchPublishedPosts(): Promise<PostMeta[]> {
   if (!isNotionConfigured()) return [];
-  try {
-    const notion = getClient();
-    const pages: PageObjectResponse[] = [];
-    let cursor: string | undefined;
+  const notion = getClient();
+  const pages: PageObjectResponse[] = [];
+  let cursor: string | undefined;
 
-    do {
-      const response = await notion.databases.query({
-        database_id: NOTION_WRITING_DB_ID as string,
-        start_cursor: cursor,
-        page_size: 100,
-      });
-      for (const result of response.results) {
-        if (isFullPage(result) && isPublished(result, "Published")) pages.push(result);
-      }
-      cursor = response.has_more ? (response.next_cursor ?? undefined) : undefined;
-    } while (cursor);
+  do {
+    const response = await notion.databases.query({
+      database_id: NOTION_WRITING_DB_ID as string,
+      start_cursor: cursor,
+      page_size: 100,
+    });
+    for (const result of response.results) {
+      if (isFullPage(result) && isPublished(result, "Published")) pages.push(result);
+    }
+    cursor = response.has_more ? (response.next_cursor ?? undefined) : undefined;
+  } while (cursor);
 
-    return pages.map(toMeta).sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
-  } catch (error) {
-    console.error("[notion] getPublishedPosts failed:", error);
-    return [];
-  }
+  return pages.map(toMeta).sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
 }
 
 /**
@@ -224,20 +222,40 @@ function withReadingMinutes(posts: PostMeta[]): PostMeta[] {
   });
 }
 
-/** All published posts, newest first. Empty when unconfigured or on error. */
-export async function getPublishedPosts(): Promise<PostMeta[]> {
+/**
+ * All published posts, newest first. Throws when Notion fails.
+ *
+ * The strict form is for pages that are statically regenerated (ISR): a throw
+ * there keeps the last good page in the cache, where an empty list would bake
+ * "no posts" — or a 404 for every article — into it until the next revalidate.
+ * Only successful reads are memoised, so an outage is retried on the next call.
+ */
+export async function getPublishedPostsOrThrow(): Promise<PostMeta[]> {
   if (cache && Date.now() - cache.at < LIST_TTL_MS) {
     return withReadingMinutes(cache.posts);
   }
 
   // Share one round trip between concurrent callers rather than stampeding.
-  inFlight ??= fetchPublishedPosts().finally(() => {
-    inFlight = null;
-  });
+  inFlight ??= fetchPublishedPosts()
+    .then((posts) => {
+      cache = { at: Date.now(), posts };
+      return posts;
+    })
+    .finally(() => {
+      inFlight = null;
+    });
 
-  const posts = await inFlight;
-  cache = { at: Date.now(), posts };
-  return withReadingMinutes(posts);
+  return withReadingMinutes(await inFlight);
+}
+
+/** All published posts, newest first. Empty when unconfigured or on error. */
+export async function getPublishedPosts(): Promise<PostMeta[]> {
+  try {
+    return await getPublishedPostsOrThrow();
+  } catch (error) {
+    console.error("[notion] getPublishedPosts failed:", error);
+    return [];
+  }
 }
 
 /**
@@ -259,7 +277,7 @@ const postCache = new Map<string, { at: number; post: Post }>();
 const postInFlight = new Map<string, Promise<Post | null>>();
 
 async function fetchPost(slug: string): Promise<Post | null> {
-  const meta = (await getPublishedPosts()).find((p) => p.slug === slug);
+  const meta = (await getPublishedPostsOrThrow()).find((p) => p.slug === slug);
   if (!meta) return null;
 
   const n2m = new NotionToMarkdown({ notionClient: getClient() });
@@ -273,8 +291,12 @@ async function fetchPost(slug: string): Promise<Post | null> {
   return { ...meta, readingMinutes, markdown };
 }
 
-/** A single published post with its Markdown body, or null if not found. */
-export async function getPostBySlug(slug: string): Promise<Post | null> {
+/**
+ * A single published post with its Markdown body, or null if there is no such
+ * post. Throws when Notion fails — see `getPublishedPostsOrThrow` for why pages
+ * want that — while `getPostBySlug` below keeps the old forgiving contract.
+ */
+export async function getPostBySlugOrThrow(slug: string): Promise<Post | null> {
   if (!isNotionConfigured()) return null;
 
   const hit = postCache.get(slug);
@@ -288,16 +310,22 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
       if (post) postCache.set(slug, { at: Date.now(), post });
       return post;
     })
-    .catch((error) => {
-      console.error(`[notion] getPostBySlug("${slug}") failed:`, error);
-      return null;
-    })
     .finally(() => {
       postInFlight.delete(slug);
     });
 
   postInFlight.set(slug, pending);
   return pending;
+}
+
+/** A single published post with its Markdown body, or null if not found or on error. */
+export async function getPostBySlug(slug: string): Promise<Post | null> {
+  try {
+    return await getPostBySlugOrThrow(slug);
+  } catch (error) {
+    console.error(`[notion] getPostBySlug("${slug}") failed:`, error);
+    return null;
+  }
 }
 
 /**

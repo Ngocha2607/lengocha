@@ -56,8 +56,10 @@ to match any reference site.
 src/
   app/
     api/writing/    # Notion-backed routes for the Writing window
-    layout.tsx      # Root layout, fonts, metadata
-    page.tsx        # Renders the desktop shell
+    [section]/      # /about, /experience, ... — the desktop booted with that window open
+    writing/        # /writing and /writing/[slug], server-rendered from Notion (ISR)
+    layout.tsx      # Root layout, fonts, site-wide metadata defaults
+    page.tsx        # Renders the desktop shell (home: no window open)
     globals.css     # Tailwind v4 theme + design tokens
   components/
     sites/portos-framer-website-67488b6b/root-8a5edab2/
@@ -67,6 +69,10 @@ src/
     utils.ts        # cn() utility (shadcn)
     notion.ts       # Notion client and query helpers
     markdown.ts     # Notion blocks -> HTML
+    posts.ts        # One rendered article, shared by the API route and the page
+    sections.ts     # Which windows are pages, their URLs and search copy
+    seo.ts          # Per-page metadata builder, meta-description overrides
+    site.ts         # Origin, site title/description, Person JSON-LD
   types/
     portos.ts       # Shared types and the PORTOS_ASSETS path constant
 public/

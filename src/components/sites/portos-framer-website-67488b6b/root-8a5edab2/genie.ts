@@ -127,10 +127,10 @@ export interface GenieOptions {
 }
 
 export function prefersReducedMotion(): boolean {
-  // SSR-safe: the deep-link route (/writing/[slug]) renders the shell on the
-  // server, and "no motion" is the only honest answer where nothing can move.
-  // DesktopShell additionally defers window mounting to after hydration, so in
-  // practice this line is only reached in the browser.
+  // SSR-safe: every route that boots with a window renders it on the server,
+  // and "no motion" is the only honest answer where nothing can move. That
+  // window skips its entrance (WindowFrame's `skipEntrance`), so in practice
+  // this line is only reached in the browser.
   if (typeof window === "undefined") return true;
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }

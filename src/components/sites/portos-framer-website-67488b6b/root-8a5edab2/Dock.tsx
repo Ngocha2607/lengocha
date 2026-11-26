@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { pathForApp } from "@/lib/sections";
 import { cn } from "@/lib/utils";
 import {
   PORTOS_ASSETS,
@@ -8,6 +9,7 @@ import {
   type DockItem,
   type PortosAppId,
 } from "@/types/portos";
+import { WindowLink } from "./WindowLink";
 
 interface DockProps {
   /**
@@ -19,40 +21,47 @@ interface DockProps {
   onOpen: (app: PortosAppId) => void;
 }
 
-/** The eight pinned icons, in the live site's order. */
+/**
+ * The eight pinned icons, in the live site's order.
+ *
+ * `alt` names what the icon OPENS ("Writing"), not the macOS app its artwork is
+ * borrowed from ("Launchpad"), which is what it used to say. The image is the
+ * only content of its link, so its alt IS the link's name — for a screen
+ * reader and for a crawler reading anchor text alike.
+ */
 const DOCK_ITEMS: DockItem[] = [
   {
     name: "Finder",
     icon: `${PORTOS_ASSETS}/images/dock-launchpad.png`,
-    alt: "Finder",
+    alt: "Projects",
     app: "projects",
     tooltip: "Projects",
   },
   {
     name: "Launchpad",
     icon: `${PORTOS_ASSETS}/images/dock-finder.png`,
-    alt: "Launchpad",
+    alt: "Writing",
     app: "writing",
     tooltip: "Writing",
   },
   {
     name: "Contacts",
     icon: `${PORTOS_ASSETS}/images/dock-messages.png`,
-    alt: "Contacts",
+    alt: "Contact",
     app: "contact",
     tooltip: "Contact",
   },
   {
     name: "Messages",
     icon: `${PORTOS_ASSETS}/images/dock-contacts.png`,
-    alt: "Messages",
+    alt: "Resume",
     app: "resume",
     tooltip: "Resume",
   },
   {
     name: "Notes",
     icon: `${PORTOS_ASSETS}/images/dock-notes.png`,
-    alt: "Notes",
+    alt: "Leadership & Technical Decisions",
     app: "decisions",
     tooltip: "Leadership & Technical Decisions",
   },
@@ -75,7 +84,7 @@ const DOCK_ITEMS: DockItem[] = [
   {
     name: "Photos",
     icon: `${PORTOS_ASSETS}/images/dock-photos.png`,
-    alt: "Photos",
+    alt: "Gallery",
     app: "gallery",
     tooltip: "Gallery",
   },
@@ -85,7 +94,7 @@ const DOCK_ITEMS: DockItem[] = [
 const TRASH_ITEM: DockItem = {
   name: "Recycle Bin",
   icon: `${PORTOS_ASSETS}/images/dock-trash.png`,
-  alt: "Trash",
+  alt: "Recycle Bin",
   app: "recycleBin",
 };
 
@@ -196,6 +205,7 @@ function DockIcon({
     <Image
       src={item.icon}
       alt={item.alt}
+      draggable={false}
       width={76}
       height={76}
       className={cn(
@@ -208,23 +218,36 @@ function DockIcon({
   const className = cn(ICON_BASE, sizeClass);
   const app = item.app;
 
+  // A window with a URL gets a real link to it (see WindowLink); the Recycle
+  // Bin, which has none, stays a button.
+  const path = app ? pathForApp(app) : null;
+
   const control = item.href ? (
     <a
       href={item.href}
       target="_blank"
       rel="noreferrer noopener"
-      aria-label={item.alt}
       data-framer-name={item.name}
       className={className}
     >
       {image}
     </a>
+  ) : app && path ? (
+    <WindowLink
+      href={path}
+      onOpen={() => onOpen(app)}
+      // Lets the genie effect find the icon a window should collapse into.
+      data-portos-app={app}
+      data-framer-name={item.name}
+      className={cn(className, "[-webkit-touch-callout:none]")}
+    >
+      {image}
+    </WindowLink>
   ) : (
     <button
       type="button"
       // Lets the genie effect find the icon a window should collapse into.
       data-portos-app={app}
-      aria-label={item.alt}
       data-framer-name={item.name}
       className={className}
       onClick={app ? () => onOpen(app) : undefined}
@@ -244,7 +267,7 @@ function DockIcon({
       )}
     >
       {control}
-      {/* Decorative: the control already carries the same text as `aria-label`. */}
+      {/* Decorative: the control already carries the same text as the image's alt. */}
       <span aria-hidden="true" className={TOOLTIP_CLASS}>
         {item.tooltip ?? item.name}
         <span className={TOOLTIP_CARET_CLASS} />

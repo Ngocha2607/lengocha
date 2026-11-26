@@ -1,7 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { pathForApp } from "@/lib/sections";
 import {
   PORTOS_ASSETS,
   type PortosAppId,
@@ -10,6 +11,7 @@ import {
 import { AboutWindow } from "./AboutWindow";
 import { ContactWindow } from "./ContactWindow";
 import { DesktopIcons } from "./DesktopIcons";
+import { DesktopIntro } from "./DesktopIntro";
 import { Dock } from "./Dock";
 import { GalleryWindow } from "./GalleryWindow";
 import { WritingWindow } from "./WritingWindow";
@@ -26,7 +28,7 @@ import { DecisionsWindow } from "./DecisionsWindow";
 import { ExperienceWindow } from "./ExperienceWindow";
 import { Spotlight } from "./Spotlight";
 import { WindowFrame } from "./WindowFrame";
-import { fetchPostList } from "./writingClient";
+import { fetchPostList, type PostDetail, type PostMeta } from "./writingClient";
 
 interface WindowDef {
   title: string;
@@ -103,38 +105,30 @@ const SPOTLIGHT_WINDOWS = (Object.keys(WINDOWS) as PortosAppId[]).map((app) => (
 }));
 
 /**
- * "Are we past hydration yet?" as an external-store read — the lint-clean way to
- * branch on client-ness without a setState-in-effect. The window stack renders
- * only when this is true, which is what lets WindowFrame keep touching `window`
- * in its state initialisers even now that a deep link can boot with a window
- * already open.
+ * The URL the desktop should show: the front window's own page, the article
+ * the Writing window is on, or the home page when nothing is open. Every one
+ * of these is a real route (see app/[section] and app/writing), so whatever a
+ * visitor copies out of the address bar opens the same view.
  */
-const subscribeNever = () => () => {};
-const useHydrated = () =>
-  useSyncExternalStore(
-    subscribeNever,
-    () => true,
-    () => false,
-  );
-
-/**
- * Mirrors navigation into the address bar WITHOUT a router navigation: a Next
- * navigation would remount the shell and replay the pre-loader, when all that
- * changed is what the Writing window shows. Both `/writing` and
- * `/writing/<slug>` are real routes (see app/writing), so what this writes is
- * always a working link: the list has a shareable URL, not just the articles.
- */
-function syncWritingUrl(target: "closed" | "list" | { slug: string }): void {
-  const path =
-    target === "closed" ? "/" : target === "list" ? "/writing" : `/writing/${target.slug}`;
-  window.history.replaceState(null, "", path);
+function pathForView(front: PortosAppId | null, writingView: string | null): string {
+  if (front === null) return "/";
+  if (front === "writing" && writingView) return `/writing/${writingView}`;
+  return pathForApp(front) ?? "/";
 }
 
 interface DesktopShellProps {
-  /** Set by the /writing/[slug] route: boot with Writing open on this article. */
+  /**
+   * Set by every route except the home page: boot with this window open. Its
+   * content is then part of the server HTML, which is the point — crawlers
+   * that run no JavaScript read the window the URL names.
+   */
+  initialApp?: PortosAppId | null;
+  /** Set by the /writing/[slug] route: open Writing on this article. */
   initialWritingSlug?: string | null;
-  /** Set by the /writing route: boot with Writing open on the list. */
-  initialWritingOpen?: boolean;
+  /** The Writing list as the server read it, so /writing renders it without a fetch. */
+  initialPosts?: PostMeta[] | null;
+  /** The booted article, rendered on the server, so /writing/[slug] ships its body. */
+  initialPost?: PostDetail | null;
 }
 
 /**
@@ -143,21 +137,21 @@ interface DesktopShellProps {
  * opened or focused one renders on top, matching the live site's DOM-order stacking.
  */
 export function DesktopShell({
+  initialApp = null,
   initialWritingSlug = null,
-  initialWritingOpen = false,
+  initialPosts = null,
+  initialPost = null,
 }: DesktopShellProps) {
-  const hydrated = useHydrated();
-  const bootsWithWriting = initialWritingOpen || initialWritingSlug !== null;
   /**
-   * True only for the window a deep link boots with, and only until the visitor
-   * closes it. That first mount happens under the pre-loader, where the genie
-   * entrance would fly ABOVE the splash (its overlay outranks everything), so
-   * that one window skips the entrance. Reopening it later plays the genie as
-   * normal.
+   * The window a route boots with, and only until the visitor closes it. It is
+   * mounted while the pre-loader still covers the desktop (on the server, in
+   * fact), where the genie entrance would fly ABOVE the splash — its overlay
+   * outranks everything — so that one window skips the entrance. Reopening it
+   * later plays the genie as normal.
    */
-  const [bootWriting, setBootWriting] = useState(bootsWithWriting);
+  const [bootApp, setBootApp] = useState<PortosAppId | null>(initialApp);
   const [open, setOpen] = useState<PortosAppId[]>(() =>
-    bootsWithWriting ? ["writing"] : [],
+    initialApp ? [initialApp] : [],
   );
   const [projectsMode, setProjectsMode] = useState<ProjectsMode>("grid");
   const [spotlightOpen, setSpotlightOpen] = useState(false);
@@ -168,6 +162,13 @@ export function DesktopShell({
    */
   const [writingSlug, setWritingSlug] = useState<string | null>(initialWritingSlug);
   /**
+   * What the Writing window is SHOWING right now — `writingSlug` above is only
+   * where it started, and the window navigates on its own after that (cards,
+   * Back, links between articles). Tracked separately because changing
+   * `writingSlug` remounts the window body, which this must not do.
+   */
+  const [writingView, setWritingView] = useState<string | null>(initialWritingSlug);
+  /**
    * Counts how many times each app has been asked to open. A window that is
    * parked watches this and unparks itself, so a dock icon reaches a minimised
    * window rather than silently doing nothing.
@@ -177,8 +178,25 @@ export function DesktopShell({
   >({});
   /** Per-window cascade slot, held only while the window is open. */
   const [cascade, setCascade] = useState<Partial<Record<PortosAppId, number>>>(
-    () => (bootsWithWriting ? { writing: 0 } : {}),
+    () => (initialApp ? { [initialApp]: 0 } : {}),
   );
+
+  /** The window on top. It is "the page": it owns the address bar and the H1. */
+  const front = open.length > 0 ? open[open.length - 1] : null;
+  const viewPath = pathForView(front, writingView);
+
+  /**
+   * Mirrors the front window into the address bar WITHOUT a router
+   * navigation: a Next navigation would remount the shell and replay the
+   * pre-loader, when all that changed is which window is on top.
+   *
+   * Only the path is compared and written, so a query string the visitor
+   * arrived with (utm tags, say) survives the first render untouched.
+   */
+  useEffect(() => {
+    if (window.location.pathname === viewPath) return;
+    window.history.replaceState(null, "", viewPath);
+  }, [viewPath]);
 
   /**
    * Warm the article index the moment the desktop exists. One tiny request, and
@@ -219,7 +237,7 @@ export function DesktopShell({
     (app: PortosAppId) => {
       if (app === "writing") {
         setWritingSlug(null);
-        syncWritingUrl("list");
+        setWritingView(null);
       }
       claimCascade(app);
       setOpenCount((current) => ({
@@ -235,7 +253,7 @@ export function DesktopShell({
   const openWriting = useCallback(
     (slug: string) => {
       setWritingSlug(slug);
-      syncWritingUrl({ slug });
+      setWritingView(slug);
       claimCascade("writing");
       setOpen((current) => [
         ...current.filter((id) => id !== "writing"),
@@ -246,11 +264,8 @@ export function DesktopShell({
   );
 
   const closeWindow = useCallback((app: PortosAppId) => {
-    if (app === "writing") {
-      syncWritingUrl("closed");
-      // The boot window is gone; any later Writing window earns its entrance.
-      setBootWriting(false);
-    }
+    // The boot window is gone; any later window of that app earns its entrance.
+    setBootApp((current) => (current === app ? null : current));
     setOpen((current) => current.filter((id) => id !== app));
     // Releases the step so the next window can stand on it.
     setCascade((current) => {
@@ -285,7 +300,11 @@ export function DesktopShell({
           <WritingWindow
             key={writingSlug ?? "list"}
             initialSlug={writingSlug}
-            onSlugChange={(slug) => syncWritingUrl(slug ? { slug } : "list")}
+            initialPosts={initialPosts}
+            // Only for the article it was rendered for: a project card can
+            // re-point this window at another one.
+            initialPost={initialPost && initialPost.slug === writingSlug ? initialPost : null}
+            onSlugChange={setWritingView}
           />
         );
       case "contact":
@@ -346,6 +365,18 @@ export function DesktopShell({
           also what puts the dock's centre at 340.5 rather than the container's 720. */}
       <div className="absolute inset-x-5 bottom-6 top-[120px] flex flex-col justify-between min-[810px]:inset-x-[30px] min-[810px]:top-[130px] min-[1200px]:inset-x-[50px] min-[1200px]:top-40 min-[1200px]:pl-4">
         <DesktopIcons onOpen={openWindow} />
+        {/* The intro widget. On a phone it sits in the column between the
+            folders and the dock, scrolling inside that gap if the screen is
+            too short to show all of it (`my-auto` on the widget centres it
+            without making its top unreachable, which `items-center` would).
+            From 810px it leaves the flow for the empty space right of the
+            folders, top-aligned with About: the column stays exactly the
+            measured folders-and-dock layout, and a laptop-height screen no
+            longer squeezes the widget against the dock. 112px clears the
+            folder artwork and its hover plate at both breakpoints. */}
+        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto py-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden min-[810px]:absolute min-[810px]:top-0 min-[810px]:left-[112px] min-[810px]:block min-[810px]:overflow-visible min-[810px]:p-0">
+          <DesktopIntro isPageHeading={front === null} onOpen={openWindow} />
+        </div>
         {/* Lifted above the window stack: the dock is how you reach the other
             eight apps, and a maximised window used to bury it. It fades back
             while a window has the focus so it does not compete with what is
@@ -358,8 +389,14 @@ export function DesktopShell({
         </div>
       </div>
 
-      {hydrated && open.map((app, index) => {
+      {/* Rendered on the server too: a route that boots with a window open
+          ships that window's content in its HTML. WindowFrame is written to
+          hydrate — see its `mode` and `warping` initialisers. */}
+      {open.map((app, index) => {
         const def = WINDOWS[app];
+        // One H1 per page: the front window's title, except while Writing is
+        // on an article, whose own title is the heading.
+        const isPageHeading = app === front && !(app === "writing" && writingView);
         return (
           <WindowFrame
             key={app}
@@ -369,9 +406,10 @@ export function DesktopShell({
             height={def.geometry.height}
             top={def.top}
             titleFont={def.titleFont}
+            titleAs={isPageHeading ? "h1" : "p"}
             cascadeSlot={cascade[app] ?? 0}
             restoreSignal={openCount[app] ?? 0}
-            skipEntrance={app === "writing" && bootWriting}
+            skipEntrance={app === bootApp}
             zIndex={BASE_Z + index}
             onClose={() => closeWindow(app)}
             onFocus={() => focusWindow(app)}

@@ -18,6 +18,8 @@ import { Marked } from "marked";
  *    intercepts, and still work as real URLs when opened in a new tab.
  *  - h2/h3 headings get stable ids and are collected into a table of contents,
  *    so the window can offer in-article navigation.
+ *  - Images load lazily, and an alt that is just a file name (what Notion
+ *    leaves when an image has no caption) is replaced by `imageAltFallback`.
  */
 
 export interface TocEntry {
@@ -37,6 +39,13 @@ export interface RenderOptions {
    * refers to, or null for "not ours". Only consulted for http(s) links.
    */
   resolveInternalLink?: (href: string) => string | null;
+  /**
+   * Alt text for an image whose source gives it none worth reading. Notion
+   * only has a caption to offer; without one, notion-to-md writes the FILE
+   * NAME as the alt ("screenshot-2.png"), which tells a screen reader or a
+   * search engine nothing. The caller passes something about the article.
+   */
+  imageAltFallback?: string;
 }
 
 const escapeHtml = (value: string) =>
@@ -48,6 +57,10 @@ const escapeHtml = (value: string) =>
     .replace(/'/g, "&#39;");
 
 const isExternal = (href: string) => /^https?:\/\//i.test(href);
+
+/** notion-to-md's alt for an uncaptioned image: the file name, or the word "image". */
+const isPlaceholderAlt = (alt: string) =>
+  !alt.trim() || alt.trim().toLowerCase() === "image" || /^[^\s]+\.[a-z0-9]{3,4}$/i.test(alt.trim());
 
 /** Same normalisation the slugs use, so heading anchors look like the URLs do. */
 function slugifyHeading(input: string): string {
@@ -91,7 +104,7 @@ export function renderMarkdown(
 ): RenderedMarkdown {
   const toc: TocEntry[] = [];
   const seenIds = new Map<string, number>();
-  const { resolveInternalLink } = options;
+  const { resolveInternalLink, imageAltFallback = "" } = options;
 
   const renderer = new Marked({
     gfm: true,
@@ -118,6 +131,18 @@ export function renderMarkdown(
 
         toc.push({ id, text, depth });
         return `<h${depth} id="${escapeHtml(id)}">${label}</h${depth}>`;
+      },
+
+      image({ href, title, text }) {
+        const alt = isPlaceholderAlt(text) ? imageAltFallback : text;
+        const attrs = [
+          `src="${escapeHtml(href)}"`,
+          `alt="${escapeHtml(alt)}"`,
+          'loading="lazy"',
+          'decoding="async"',
+        ];
+        if (title) attrs.push(`title="${escapeHtml(title)}"`);
+        return `<img ${attrs.join(" ")}>`;
       },
 
       link({ href, title, tokens }) {

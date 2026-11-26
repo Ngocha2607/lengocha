@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { cn } from "@/lib/utils";
 import { prefersReducedMotion, runGenie } from "./genie";
 import { PORTOS_ASSETS, type PortosAppId } from "@/types/portos";
@@ -17,6 +17,12 @@ interface WindowFrameProps {
   titleBarAccessory?: React.ReactNode;
   /** The About window is the one window whose title uses Inter, not SF Pro Display. */
   titleFont?: "sf" | "inter";
+  /**
+   * `h1` for the window that is the page — the front window, whose URL is in
+   * the address bar. Every other window's title is a plain paragraph, so a
+   * page never carries more than one H1.
+   */
+  titleAs?: "h1" | "p";
   /**
    * Which step of the cascade this window stands on. An index, not a distance:
    * the same slot has to produce two different offsets, one for the open window
@@ -143,6 +149,31 @@ const PARKED_STEP = 10;
 type WindowMode = "normal" | "maximized" | "minimized";
 
 /**
+ * Before hydration the window cannot know the viewport, yet a route that boots
+ * with a window open renders it on the server. `auto` is that state: the
+ * geometry comes from a media query in CSS instead of from script — maximised
+ * below 810px, normal above — so a phone gets a window that is ALREADY
+ * maximised in the first paint. Once hydrated, the same choice is made in
+ * script, and it lands on identical values, so nothing moves.
+ *
+ * Deciding in script only (as this used to) would paint the normal 864px
+ * window on a phone and then snap it to full screen after hydration: a layout
+ * shift as big as the screen.
+ */
+type FrameMode = WindowMode | "auto";
+
+/**
+ * `auto`'s geometry, as classes. Literal values because Tailwind has to see
+ * them: 29px is MENU_BAR_HEIGHT and 824px is CONTENT_MAX. The per-window size
+ * arrives through the custom properties set inline in `auto` mode.
+ */
+const AUTO_GEOMETRY_CLASS =
+  "w-screen max-w-none h-[calc(100dvh-29px)] top-[29px] cursor-default [--portos-content-max:none] " +
+  "min-[810px]:w-[var(--portos-window-w)] min-[810px]:max-w-[calc(100vw-16px)] " +
+  "min-[810px]:h-[var(--portos-window-h)] min-[810px]:top-[var(--portos-window-top)] " +
+  "min-[810px]:cursor-grab min-[810px]:[--portos-content-max:824px]";
+
+/**
  * Below this a window opens maximised.
  *
  * The desktop metaphor stops paying for itself on a phone: an 864px frame on a
@@ -151,6 +182,17 @@ type WindowMode = "normal" | "maximized" | "minimized";
  * breakpoint, so it lines up with everything else here.
  */
 const MOBILE_QUERY = "(max-width: 809px)";
+
+function subscribeToMobile(onChange: () => void): () => void {
+  const query = window.matchMedia(MOBILE_QUERY);
+  query.addEventListener("change", onChange);
+  return () => query.removeEventListener("change", onChange);
+}
+
+const getMobile = () => window.matchMedia(MOBILE_QUERY).matches;
+
+/** Unknown on the server and during hydration — see `auto` above. */
+const getMobileServerSnapshot = () => null;
 
 /**
  * Open and close are the macOS genie — see `genie.ts` for why the warp cannot
@@ -227,6 +269,7 @@ export function WindowFrame({
   top,
   titleBarAccessory,
   titleFont = "sf",
+  titleAs: Title = "p",
   cascadeSlot = 0,
   restoreSignal = 0,
   app,
@@ -240,17 +283,17 @@ export function WindowFrame({
   const parkedOffset = cascadeSlot * PARKED_STEP;
   const [offset, setOffset] = useState({ x: cascadeOffset, y: cascadeOffset });
   const [dragging, setDragging] = useState(false);
-  // Read once, on the first render, rather than in an effect. An effect would
-  // let the genie measure the window at its normal size a frame before it
-  // maximised, and the flight would start from the wrong box. Safe to touch
-  // `window` in the initialiser because this component never renders on the
-  // server: DesktopShell mounts the window stack only after hydration, even
-  // when a deep link (/writing/[slug]) boots with a window already open.
-  const [mode, setMode] = useState<WindowMode>(() =>
-    typeof window !== "undefined" && window.matchMedia(MOBILE_QUERY).matches
-      ? "maximized"
-      : "normal",
-  );
+  // Until the visitor uses the green or yellow light, the mode follows the
+  // viewport: maximised on a phone, normal otherwise. Read through an external
+  // store rather than an effect: a window opened after hydration gets the right
+  // answer on its very first render — an effect would let the genie measure the
+  // normal-size box a frame before it maximised — while a window rendered on
+  // the server gets null, i.e. `auto`, until hydration is done.
+  const mobile = useSyncExternalStore(subscribeToMobile, getMobile, getMobileServerSnapshot);
+  const [chosenMode, setChosenMode] = useState<WindowMode | null>(null);
+  const mode: FrameMode =
+    chosenMode ?? (mobile === null ? "auto" : mobile ? "maximized" : "normal");
+  const auto = mode === "auto";
   const maximized = mode === "maximized";
   const minimized = mode === "minimized";
   // The genie clones this element, so it has to be the plain block that wraps
@@ -374,7 +417,7 @@ export function WindowFrame({
       // Only minimise and restore warp. Maximise already has its own geometry
       // transition, and a genie on top of it would fight that.
       if (target !== "minimized" || prefersReducedMotion() || !frameRef.current) {
-        setMode((current) => (current === target ? "normal" : target));
+        setChosenMode(mode === target ? "normal" : target);
         return;
       }
       const source = frameRef.current;
@@ -391,7 +434,7 @@ export function WindowFrame({
           collapse: "rect",
           onArrive: () => {
             geometryJump.current = true;
-            setMode("minimized");
+            setChosenMode("minimized");
             setWarping(false);
           },
         });
@@ -403,7 +446,7 @@ export function WindowFrame({
       // nothing here waits on layout.
       const from = parkedRect();
       geometryJump.current = true;
-      setMode("normal");
+      setChosenMode("normal");
       void runGenie({
         source,
         target: from,
@@ -474,65 +517,84 @@ export function WindowFrame({
     <div
       className={cn(
         "fixed left-1/2",
-        maximized ? "max-w-none" : "max-w-[calc(100vw-16px)]",
-        minimized
-          ? "cursor-pointer"
-          : maximized
-            ? "cursor-default"
-            : dragging
-              ? "cursor-grabbing"
-              : "cursor-grab",
+        auto
+          ? AUTO_GEOMETRY_CLASS
+          : [
+              maximized ? "max-w-none" : "max-w-[calc(100vw-16px)]",
+              minimized
+                ? "cursor-pointer"
+                : maximized
+                  ? "cursor-default"
+                  : dragging
+                    ? "cursor-grabbing"
+                    : "cursor-grab",
+            ],
       )}
       // At MINIMIZED_SCALE the 12px traffic lights render under 4px across, which
       // is not realistically clickable — without this the window could be
       // minimised and then never restored. Clicking anywhere on it restores.
       onClick={minimized ? () => toggleMode("minimized") : undefined}
-      style={{
-        // Maximised fills the desktop below the menu bar. Minimised keeps its own
-        // width/height but is scaled down and parked bottom-left. In every mode the
-        // element stays `left: 50%`, so only lengths change and the geometry can
-        // transition smoothly instead of jumping.
-        width: maximized ? "100vw" : width,
-        // Published to the subtree so a window's content can widen when the frame
-        // does. Without it maximise grows the chrome and leaves the content
-        // stranded at its 824px measured cap. See CONTENT_MAX.
-        "--portos-content-max": maximized ? CONTENT_MAX_MAXIMIZED : CONTENT_MAX,
-        height: maximized ? `calc(100dvh - ${MENU_BAR_HEIGHT}px)` : height,
-        top: maximized
-          ? MENU_BAR_HEIGHT
-          : minimized
-            ? // Bottom edge sits MINIMIZED_MARGIN above the viewport floor. The
-              // scale is anchored bottom-left, so the visible box grows upward
-              // from here rather than from the element's unscaled top.
-              `calc(100dvh - ${MINIMIZED_MARGIN + parkedOffset}px - ${height}px)`
-            : top,
-        zIndex,
-        // Anchoring the scale bottom-left keeps the minimised window pinned to the
-        // corner. At scale(1) the origin has no visible effect, so it is safe to
-        // leave set in every mode.
-        transformOrigin: "0% 100%",
-        // On THIS element `transform` is reserved for placement — centring, drag,
-        // and the minimise scale. The open/close zoom lives on the inner wrapper
-        // below, so the two can never fight: a keyframe setting `transform` here
-        // would replace this whole value for the animation's duration, dropping
-        // the -50% centring and making the window fly in from the right.
-        transform: maximized
-          ? "translate(-50%, 0)"
-          : minimized
-            ? // Put the element's left edge at MINIMIZED_MARGIN. It sits at 50vw
-              // because of `left: 50%`, so shift it back by that much.
-              `translate(calc(${MINIMIZED_MARGIN + parkedOffset}px - 50vw), 0px) scale(${MINIMIZED_SCALE})`
-            : `translate(calc(-50% + ${offset.x}px), ${offset.y}px)`,
-        // Do not transition while dragging, or the window lags behind the pointer.
-        // Nor on a commit the genie has already animated: minimising otherwise
-        // played the effect and then the old corner-shrink straight after it.
-        transition:
-          dragging || geometryJump.current
-            ? undefined
-            : `width ${RESIZE_MS}ms ease, height ${RESIZE_MS}ms ease, top ${RESIZE_MS}ms ease, transform ${RESIZE_MS}ms ease`,
-        // The cast is for `--portos-content-max`: React's CSSProperties has no
-        // index signature for custom properties, though it renders them fine.
-      } as React.CSSProperties}
+      style={
+        auto
+          ? ({
+              // Geometry is the class list's job in `auto`; these feed it the
+              // window's own size. The transform matches what both settled
+              // modes resolve to at zero offset, so hydrating changes no value
+              // and the transition below has nothing to animate.
+              "--portos-window-w": `${width}px`,
+              "--portos-window-h": `${height}px`,
+              "--portos-window-top": `${top}px`,
+              zIndex,
+              transformOrigin: "0% 100%",
+              transform: "translate(-50%, 0px)",
+            } as React.CSSProperties)
+          : ({
+              // Maximised fills the desktop below the menu bar. Minimised keeps its own
+              // width/height but is scaled down and parked bottom-left. In every mode the
+              // element stays `left: 50%`, so only lengths change and the geometry can
+              // transition smoothly instead of jumping.
+              width: maximized ? "100vw" : width,
+              // Published to the subtree so a window's content can widen when the frame
+              // does. Without it maximise grows the chrome and leaves the content
+              // stranded at its 824px measured cap. See CONTENT_MAX.
+              "--portos-content-max": maximized ? CONTENT_MAX_MAXIMIZED : CONTENT_MAX,
+              height: maximized ? `calc(100dvh - ${MENU_BAR_HEIGHT}px)` : height,
+              top: maximized
+                ? MENU_BAR_HEIGHT
+                : minimized
+                  ? // Bottom edge sits MINIMIZED_MARGIN above the viewport floor. The
+                    // scale is anchored bottom-left, so the visible box grows upward
+                    // from here rather than from the element's unscaled top.
+                    `calc(100dvh - ${MINIMIZED_MARGIN + parkedOffset}px - ${height}px)`
+                  : top,
+              zIndex,
+              // Anchoring the scale bottom-left keeps the minimised window pinned to the
+              // corner. At scale(1) the origin has no visible effect, so it is safe to
+              // leave set in every mode.
+              transformOrigin: "0% 100%",
+              // On THIS element `transform` is reserved for placement — centring, drag,
+              // and the minimise scale. The open/close zoom lives on the inner wrapper
+              // below, so the two can never fight: a keyframe setting `transform` here
+              // would replace this whole value for the animation's duration, dropping
+              // the -50% centring and making the window fly in from the right.
+              transform: maximized
+                ? "translate(-50%, 0)"
+                : minimized
+                  ? // Put the element's left edge at MINIMIZED_MARGIN. It sits at 50vw
+                    // because of `left: 50%`, so shift it back by that much.
+                    `translate(calc(${MINIMIZED_MARGIN + parkedOffset}px - 50vw), 0px) scale(${MINIMIZED_SCALE})`
+                  : `translate(calc(-50% + ${offset.x}px), ${offset.y}px)`,
+              // Do not transition while dragging, or the window lags behind the pointer.
+              // Nor on a commit the genie has already animated: minimising otherwise
+              // played the effect and then the old corner-shrink straight after it.
+              transition:
+                dragging || geometryJump.current
+                  ? undefined
+                  : `width ${RESIZE_MS}ms ease, height ${RESIZE_MS}ms ease, top ${RESIZE_MS}ms ease, transform ${RESIZE_MS}ms ease`,
+              // The cast is for `--portos-content-max`: React's CSSProperties has no
+              // index signature for custom properties, though it renders them fine.
+            } as React.CSSProperties)
+      }
       onPointerDown={onPointerDown}
     >
       {/* Zoom + fade wrapper. Separate from the positioning element above so the
@@ -609,7 +671,7 @@ export function WindowFrame({
                 </button>
               ))}
             </div>
-            <p
+            <Title
               className={cn(
                 "truncate",
                 titleFont === "inter"
@@ -618,7 +680,7 @@ export function WindowFrame({
               )}
             >
               {title}
-            </p>
+            </Title>
             {titleBarAccessory ? (
               <div className="ml-auto flex items-center" data-no-drag>
                 {titleBarAccessory}
