@@ -21,13 +21,10 @@
  * Fully static: no hover states, no links.
  */
 
+import type { TimelineEntryCopy } from "@/i18n/types";
 import { STACK_ICONS, type StackName } from "./StackIcons";
 
-interface ExperienceEntry {
-  dates: string;
-  company: string;
-  role: string;
-}
+type ExperienceEntry = TimelineEntryCopy;
 
 /**
  * Read down the left column, then down the right. Frontend first, then the
@@ -76,8 +73,12 @@ const [STACK_LEFT, STACK_RIGHT] = splitColumns(STACK);
  * Company names are the SHORT forms ("Minastik", not "Minastik JSC"; "Tweet
  * World", not "Tweet World Travel") because each timeline column is only ~165px
  * wide and the full names wrap onto two lines, breaking the row rhythm.
+ *
+ * Vietnamese; the English is `EN_ABOUT.timeline` in src/i18n/en.ts, which must
+ * keep the same five entries — the rail geometry below is computed from this
+ * list's length. The About window picks one and passes it in.
  */
-const EXPERIENCE_ENTRIES: readonly ExperienceEntry[] = [
+export const VI_TIMELINE: readonly ExperienceEntry[] = [
   { dates: "2018 – 2022", company: "HUST", role: "Cử nhân CTTT ĐTVT" },
   { dates: "2021", company: "FPT Software", role: "Thực tập sinh" },
   { dates: "2021 – 2023", company: "Minastik", role: "Frontend Developer" },
@@ -206,7 +207,7 @@ const RAIL_OVERSHOOT_PCT = 14;
  * marker 4 by `RAIL_OVERSHOOT_PCT` at that same slope, so the extension reads as
  * the same line continuing rather than a separate flourish.
  */
-const LAST_INDEX = EXPERIENCE_ENTRIES.length - 1;
+const LAST_INDEX = VI_TIMELINE.length - 1;
 const RAIL_Y_START = RAIL_HEADROOM + LAST_INDEX * RISE_STEP + DOT / 2;
 const RAIL_Y_AT_LAST = RAIL_HEADROOM + DOT / 2;
 /** Pixels of climb per 1% of block width. Negative: the rail goes up. */
@@ -282,7 +283,7 @@ export function AboutBulletBlocks() {
  * three and then two, and both the climb and the rail switch off — they only
  * describe a single row.
  */
-export function AboutExperience() {
+export function AboutExperience({ entries }: { entries: readonly ExperienceEntry[] }) {
   return (
     <div className="flex w-full flex-col items-start gap-6">
       <p className={HEADING_CLASS}>Experience</p>
@@ -357,7 +358,7 @@ export function AboutExperience() {
             the widest label is ~118px inside a 164.8px column, so nothing
             collides without it. */}
         <ol className="grid grid-cols-2 gap-x-4 gap-y-8 min-[560px]:grid-cols-3 min-[880px]:grid-cols-5 min-[880px]:gap-x-0 min-[880px]:gap-y-0">
-          {EXPERIENCE_ENTRIES.map((entry, index) => {
+          {entries.map((entry, index) => {
             const isCurrent = index === LAST_INDEX;
             return (
               <li

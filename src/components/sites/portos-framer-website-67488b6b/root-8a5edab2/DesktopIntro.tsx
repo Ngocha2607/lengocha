@@ -2,8 +2,11 @@
 
 import Image from "next/image";
 import { useSyncExternalStore } from "react";
+import { EN_DESKTOP_INTRO } from "@/i18n/en";
+import { useLocale } from "@/i18n/LocaleProvider";
+import type { DesktopIntroCopy } from "@/i18n/types";
 import { cn } from "@/lib/utils";
-import { SECTION_PATHS, type SectionApp } from "@/lib/sections";
+import { pathForApp, type SectionApp } from "@/lib/sections";
 import { SITE_TITLE } from "@/lib/site";
 import { PORTOS_ASSETS, type PortosAppId } from "@/types/portos";
 import { WindowLink } from "./WindowLink";
@@ -16,6 +19,13 @@ interface DesktopIntroProps {
   isPageHeading: boolean;
   onOpen: (app: PortosAppId) => void;
 }
+
+/** The Vietnamese copy. The English is `EN_DESKTOP_INTRO` in src/i18n/en.ts. */
+const VI_COPY: DesktopIntroCopy = {
+  closeLabel: "Đóng phần giới thiệu",
+  tagline: "Frontend Tech Lead tại SAPP Academy. React, Next.js, TypeScript, backend NestJS và cloud.",
+  navLabel: "Các mục",
+};
 
 /** The sections the widget links to, in the order a first-time visitor wants them. */
 const LINKS: { app: SectionApp; label: string }[] = [
@@ -111,7 +121,9 @@ function closeIntro(): void {
  */
 export function DesktopIntro({ isPageHeading, onOpen }: DesktopIntroProps) {
   const closed = useSyncExternalStore(subscribeToClosed, getClosed, getClosedServerSnapshot);
+  const locale = useLocale();
   if (closed) return null;
+  const copy = locale === "en" ? EN_DESKTOP_INTRO : VI_COPY;
 
   const Heading = isPageHeading ? "h1" : "p";
 
@@ -131,7 +143,7 @@ export function DesktopIntro({ isPageHeading, onOpen }: DesktopIntroProps) {
             to 32px, because a 12px dot is hopeless under a thumb. */}
         <button
           type="button"
-          aria-label="Đóng phần giới thiệu"
+          aria-label={copy.closeLabel}
           onClick={closeIntro}
           className={cn(
             "group/close relative size-3 shrink-0 rounded-full bg-[#fd5d5c]",
@@ -158,15 +170,14 @@ export function DesktopIntro({ isPageHeading, onOpen }: DesktopIntroProps) {
         </Heading>
       </div>
       <p className="font-sans mt-[6px] text-[12px] leading-[17px] text-white/80">
-        Frontend Tech Lead tại SAPP Academy. React, Next.js, TypeScript, backend NestJS và
-        cloud.
+        {copy.tagline}
       </p>
-      <nav aria-label="Các mục" className="mt-[10px]">
+      <nav aria-label={copy.navLabel} className="mt-[10px]">
         <ul className="flex flex-wrap gap-[5px]">
           {LINKS.map((link) => (
             <li key={link.app}>
               <WindowLink
-                href={SECTION_PATHS[link.app]}
+                href={pathForApp(link.app, locale) ?? "/"}
                 onOpen={() => onOpen(link.app)}
                 className={cn(
                   "font-sans block rounded-full border border-white/25 px-[10px] py-[2px] text-[11px] leading-[16px] text-white/90",

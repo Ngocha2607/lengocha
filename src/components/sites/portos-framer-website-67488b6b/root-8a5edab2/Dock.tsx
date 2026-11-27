@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useLocale } from "@/i18n/LocaleProvider";
 import { outboundLinkProps } from "@/lib/analytics";
 import { pathForApp } from "@/lib/sections";
 import { cn } from "@/lib/utils";
@@ -223,7 +224,8 @@ function DockIcon({
 
   // A window with a URL gets a real link to it (see WindowLink); the Recycle
   // Bin, which has none, stays a button.
-  const path = app ? pathForApp(app) : null;
+  const locale = useLocale();
+  const path = app ? pathForApp(app, locale) : null;
 
   const control = item.href ? (
     <a

@@ -1,3 +1,8 @@
+"use client";
+
+import { EN_EXPERIENCE } from "@/i18n/en";
+import { useLocale } from "@/i18n/LocaleProvider";
+import type { RoleCopy } from "@/i18n/types";
 import { cn } from "@/lib/utils";
 
 /**
@@ -22,24 +27,14 @@ import { cn } from "@/lib/utils";
  * internship is the one entry the two-page CV cut for space; it is kept here
  * (and on the About timeline) with its own wording.
  *
+ * The English is `EN_EXPERIENCE` in src/i18n/en.ts, picked by locale.
+ *
  * The window keeps the measured 720x596 geometry rather than the standard
  * 864x630. That was sized for a wallpaper carousel, but it happens to leave a
  * 680px text column, which is a better reading width than 824 would be.
  */
 
-interface Role {
-  /** The exact range from the CV. Do not widen these to whole years. */
-  period: string;
-  title: string;
-  org: string;
-  /** The employer's site, where there is one. */
-  url?: string;
-  /** Anything the job title alone would misrepresent. */
-  note?: string;
-  /** The CV lists bullets only, so most roles carry no summary paragraph. */
-  summary?: string;
-  highlights: readonly string[];
-}
+type Role = RoleCopy;
 
 const ROLES: readonly Role[] = [
   {
@@ -114,10 +109,11 @@ const NOTE_CLASS =
   "font-sans rounded-full border border-black/10 px-2 py-[2px] text-[11px] leading-[15px] text-black/55";
 
 export function ExperienceWindow() {
+  const roles = useLocale() === "en" ? EN_EXPERIENCE : ROLES;
   return (
     <div className="px-5 pt-[50px] pb-[60px]">
       <div className="mx-auto flex w-full flex-col gap-8">
-        {ROLES.map((role, index) => (
+        {roles.map((role, index) => (
           <article
             key={`${role.org}-${role.period}`}
             className={cn(

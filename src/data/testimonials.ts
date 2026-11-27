@@ -20,6 +20,12 @@
 export type TestimonialStatus = "sample" | "published";
 
 export interface Testimonial {
+  /**
+   * Stable key. The English page looks up its translation by this id in
+   * src/i18n/en.ts (`EN_TESTIMONIALS.translations`); replace that entry too
+   * when a sample becomes a real quote.
+   */
+  id: string;
   /** The words, verbatim. */
   quote: string;
   /** Empty while the entry is a sample. */
@@ -36,6 +42,7 @@ export interface Testimonial {
 
 export const TESTIMONIALS: readonly Testimonial[] = [
   {
+    id: "sapp-manager",
     quote:
       "Hà đo trước khi sửa. Trang LMS từ 15.2s xuống 6.1s, và quyết định nào cũng có lý do được ghi lại.",
     name: "",
@@ -45,6 +52,7 @@ export const TESTIMONIALS: readonly Testimonial[] = [
     status: "sample",
   },
   {
+    id: "sapp-colleague",
     quote:
       "Hà nhận phần tích hợp Payoo từ đầu đến lúc nghiệm thu, kể cả đối soát với kế toán.",
     name: "",
@@ -54,6 +62,7 @@ export const TESTIMONIALS: readonly Testimonial[] = [
     status: "sample",
   },
   {
+    id: "sapp-junior",
     quote: "Hà review kỹ nhưng không làm thay. Mình học được cách tự tìm lời giải.",
     name: "",
     role: "",
@@ -62,6 +71,7 @@ export const TESTIMONIALS: readonly Testimonial[] = [
     status: "sample",
   },
   {
+    id: "twt-pm",
     quote: "Site của chúng tôi từ 3.2s xuống 1.1s sau khi Hà tối ưu SSR.",
     name: "",
     role: "",

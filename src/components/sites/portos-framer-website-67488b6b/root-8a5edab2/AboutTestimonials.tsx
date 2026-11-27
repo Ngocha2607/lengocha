@@ -1,4 +1,9 @@
+"use client";
+
 import { visibleTestimonials, type Testimonial } from "@/data/testimonials";
+import { EN_TESTIMONIALS } from "@/i18n/en";
+import { useLocale } from "@/i18n/LocaleProvider";
+import type { TestimonialsCopy } from "@/i18n/types";
 import { cn } from "@/lib/utils";
 
 /**
@@ -26,39 +31,67 @@ const LABEL_CLASS =
 const SAMPLE_BADGE_CLASS =
   "font-sans shrink-0 rounded-full border border-[#b8860b]/30 px-2 py-[2px] text-[11px] leading-[15px] font-medium text-[#8a6508]";
 
-function attribution(t: Testimonial): string {
+/** The Vietnamese labels. The English, with the quotes' translations, is `EN_TESTIMONIALS`. */
+const VI_COPY: TestimonialsCopy = {
+  heading: "Nhận xét",
+  sampleBadge: "MẪU",
+  sampleTitle: "Nhận xét mẫu — chưa phải lời thật",
+  sourceLink: "Nguồn ↗",
+  translations: {},
+};
+
+function attribution(t: Testimonial, relation: string): string {
   const who = [t.name, t.role].filter(Boolean).join(", ");
-  return [who, t.relation, t.company].filter(Boolean).join(" · ");
+  return [who, relation, t.company].filter(Boolean).join(" · ");
 }
 
 export function AboutTestimonials() {
+  const locale = useLocale();
+  const copy = locale === "en" ? EN_TESTIMONIALS : VI_COPY;
   const entries = visibleTestimonials();
   if (entries.length === 0) return null;
+
+  /**
+   * On the English page, the translation when there is one; otherwise the
+   * original words, marked as Vietnamese (every entry so far was written in
+   * Vietnamese).
+   */
+  const textOf = (t: Testimonial) => {
+    const translation = copy.translations[t.id];
+    return {
+      quote: translation?.quote ?? t.quote,
+      relation: translation?.relation ?? t.relation,
+      lang: locale === "en" && !translation ? "vi" : undefined,
+    };
+  };
 
   return (
     <section aria-labelledby="about-testimonials" className="flex w-full flex-col items-start gap-6">
       <h2 id="about-testimonials" className={HEADING_CLASS}>
-        Nhận xét
+        {copy.heading}
       </h2>
       <div className="grid w-full grid-cols-1 gap-4 min-[560px]:grid-cols-2">
         {entries.map((t) => (
           <figure
-            key={t.quote}
+            key={t.id}
             className={cn(
               "flex flex-col justify-between gap-4 rounded-[10px] border bg-white p-4",
               t.status === "sample" ? "border-dashed border-[#b8860b]/35" : "border-black/10",
             )}
           >
-            <blockquote className="font-display text-[14px] leading-[20px] tracking-[-0.14px] text-black">
-              “{t.quote}”
+            <blockquote
+              lang={textOf(t).lang}
+              className="font-display text-[14px] leading-[20px] tracking-[-0.14px] text-black"
+            >
+              “{textOf(t).quote}”
             </blockquote>
             <figcaption className="flex flex-wrap items-center gap-2">
               {t.status === "sample" ? (
-                <span className={SAMPLE_BADGE_CLASS} title="Nhận xét mẫu — chưa phải lời thật">
-                  MẪU
+                <span className={SAMPLE_BADGE_CLASS} title={copy.sampleTitle}>
+                  {copy.sampleBadge}
                 </span>
               ) : null}
-              <span className={LABEL_CLASS}>{attribution(t)}</span>
+              <span className={LABEL_CLASS}>{attribution(t, textOf(t).relation)}</span>
               {t.sourceUrl ? (
                 <a
                   // `data-no-drag` so the click is not taken for a window drag.
@@ -68,7 +101,7 @@ export function AboutTestimonials() {
                   rel="noreferrer noopener"
                   className="font-sans text-[11px] leading-[15px] text-black/55 underline-offset-2 hover:text-black hover:underline"
                 >
-                  Nguồn ↗
+                  {copy.sourceLink}
                 </a>
               ) : null}
             </figcaption>

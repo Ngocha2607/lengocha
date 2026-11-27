@@ -2,8 +2,11 @@
 
 import Image from "next/image";
 import { useEffect, useState, useSyncExternalStore } from "react";
+import { EN_ABOUT } from "@/i18n/en";
+import { useLocale } from "@/i18n/LocaleProvider";
+import type { AboutCopy } from "@/i18n/types";
 import { PORTOS_ASSETS, type AboutCounter } from "@/types/portos";
-import { AboutBulletBlocks, AboutExperience } from "./AboutDetails";
+import { AboutBulletBlocks, AboutExperience, VI_TIMELINE } from "./AboutDetails";
 import { AboutTestimonials } from "./AboutTestimonials";
 import { useHydrated } from "./useHydrated";
 
@@ -52,6 +55,17 @@ const INTRO_PARAGRAPHS = [
   "Fullstack Developer, hiện là Frontend Tech Lead tại SAPP Academy. Gần 5 năm xây dựng hệ thống web cho EdTech và TravelTech, từ giao diện React/Next.js tới backend NestJS, Spring Boot và hạ tầng cloud.",
   "Mạnh nhất ở frontend, với kiến trúc monorepo, tối ưu hiệu năng và quy trình kỹ thuật cho team. Ở SAPP tôi làm thêm phần backend và hạ tầng: tích hợp cổng thanh toán Payoo POS trên NestJS, và dẫn dắt đợt chuyển server dev, GitLab, database production từ AWS sang CMC Cloud mà không thuê thêm máy. Mỗi việc đều có số đo trước và sau, ghi lại trong mục Writing.",
 ];
+
+/**
+ * The Vietnamese copy, gathered for the window to pick by locale. The English
+ * is `EN_ABOUT` in src/i18n/en.ts, same shape and the same four counters.
+ */
+const VI_COPY: AboutCopy = {
+  greeting: "Xin chào, tôi là Hà.",
+  paragraphs: INTRO_PARAGRAPHS,
+  counters: ABOUT_COUNTERS,
+  timeline: VI_TIMELINE,
+};
 
 /** The roll captured on the live site settles in a little over a second. */
 const COUNT_DURATION = 1200;
@@ -113,6 +127,7 @@ function getReducedMotionServerSnapshot(): boolean {
  *   - the template's fourth block, "Tools I Use", is dropped entirely.
  */
 export function AboutWindow() {
+  const copy = useLocale() === "en" ? EN_ABOUT : VI_COPY;
   const reduced = useSyncExternalStore(
     subscribeToReducedMotion,
     getReducedMotion,
@@ -194,11 +209,11 @@ export function AboutWindow() {
                 {/* Title & Details */}
                 <div className="flex w-full flex-col gap-4">
                   <h3 className="font-display text-[32px] leading-[38.4px] tracking-[-0.32px] text-black">
-                    Xin chào, tôi là Hà.
+                    {copy.greeting}
                   </h3>
                   {/* Details */}
                   <div className="flex w-full flex-col gap-3">
-                    {INTRO_PARAGRAPHS.map((paragraph) => (
+                    {copy.paragraphs.map((paragraph) => (
                       <p
                         key={paragraph}
                         className="font-display text-[14px] leading-[19.6px] tracking-[-0.14px] text-black"
@@ -217,7 +232,7 @@ export function AboutWindow() {
 
               {/* All Counters — two rows of two, 19px apart. */}
               <div className="flex w-full flex-col gap-8">
-                {[ABOUT_COUNTERS.slice(0, 2), ABOUT_COUNTERS.slice(2)].map(
+                {[copy.counters.slice(0, 2), copy.counters.slice(2)].map(
                   (row) => (
                     <div
                       key={row[0].label}
@@ -259,7 +274,7 @@ export function AboutWindow() {
         </div>
 
         {/* Region 2 — full width, portrait released. */}
-        <AboutExperience />
+        <AboutExperience entries={copy.timeline} />
 
         {/* Region 3 — what colleagues say. Renders nothing when this
             deployment has no entry it may show (see data/testimonials.ts). */}

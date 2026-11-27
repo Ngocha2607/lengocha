@@ -1,17 +1,24 @@
 import type { Metadata } from "next";
 import { Inspiration } from "next/font/google";
 import localFont from "next/font/local";
-import "./globals.css";
+import "../globals.css";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { AnalyticsScripts } from "@/components/AnalyticsScripts";
-import {
-  DEFAULT_OG_CARD,
-  SITE_DESCRIPTION,
-  SITE_NAME,
-  SITE_TITLE,
-  SITE_URL,
-} from "@/lib/site";
+import { EN_META } from "@/i18n/en";
+import { HTML_LANG, OG_LOCALE, type Locale } from "@/i18n/locale";
+import { DEFAULT_OG_CARD, SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL } from "@/lib/site";
+
+/**
+ * The `<html>` document both root layouts share — app/(vi)/layout.tsx and
+ * app/en/layout.tsx. There are two root layouts because `<html lang>` has to
+ * be right in the SERVER HTML (search engines and screen readers read it
+ * there), and a root layout is the only thing that renders `<html>`. Moving
+ * between the two is a full page load, which is what the VI | EN switch does
+ * anyway.
+ *
+ * In a private `_shared` folder, so nothing here becomes a route.
+ */
 
 // `next/font/local` statically analyses these calls at build time, so every `path`
 // must be a literal string — a template literal or shared constant will not resolve.
@@ -22,17 +29,17 @@ const sfProDisplay = localFont({
   display: "swap",
   src: [
     {
-      path: "../../public/sites/portos-framer-website-67488b6b/root-8a5edab2/fonts/SFProDisplay-Regular.woff2",
+      path: "../../../public/sites/portos-framer-website-67488b6b/root-8a5edab2/fonts/SFProDisplay-Regular.woff2",
       weight: "400",
       style: "normal",
     },
     {
-      path: "../../public/sites/portos-framer-website-67488b6b/root-8a5edab2/fonts/SFProDisplay-Medium.woff2",
+      path: "../../../public/sites/portos-framer-website-67488b6b/root-8a5edab2/fonts/SFProDisplay-Medium.woff2",
       weight: "500",
       style: "normal",
     },
     {
-      path: "../../public/sites/portos-framer-website-67488b6b/root-8a5edab2/fonts/SFProDisplay-Bold.woff2",
+      path: "../../../public/sites/portos-framer-website-67488b6b/root-8a5edab2/fonts/SFProDisplay-Bold.woff2",
       weight: "700",
       style: "normal",
     },
@@ -45,17 +52,17 @@ const sfProText = localFont({
   display: "swap",
   src: [
     {
-      path: "../../public/sites/portos-framer-website-67488b6b/root-8a5edab2/fonts/SFProText-Thin.woff2",
+      path: "../../../public/sites/portos-framer-website-67488b6b/root-8a5edab2/fonts/SFProText-Thin.woff2",
       weight: "200",
       style: "normal",
     },
     {
-      path: "../../public/sites/portos-framer-website-67488b6b/root-8a5edab2/fonts/SFProText-Regular.woff2",
+      path: "../../../public/sites/portos-framer-website-67488b6b/root-8a5edab2/fonts/SFProText-Regular.woff2",
       weight: "400",
       style: "normal",
     },
     {
-      path: "../../public/sites/portos-framer-website-67488b6b/root-8a5edab2/fonts/SFProText-Semibold.woff2",
+      path: "../../../public/sites/portos-framer-website-67488b6b/root-8a5edab2/fonts/SFProText-Semibold.woff2",
       weight: "600",
       style: "normal",
     },
@@ -71,6 +78,11 @@ const inspiration = Inspiration({
 });
 
 const ASSETS = "/sites/portos-framer-website-67488b6b/root-8a5edab2";
+
+/** The home page's meta description in each language. */
+export function siteDescription(locale: Locale): string {
+  return locale === "en" ? EN_META.siteDescription : SITE_DESCRIPTION;
+}
 
 /**
  * Site-wide defaults. Every route sets its own title, description, canonical
@@ -89,45 +101,45 @@ const ASSETS = "/sites/portos-framer-website-67488b6b/root-8a5edab2";
  * emitted `<link rel="icon" href="/favicon.ico">` and ignored the value below
  * entirely. `/favicon.ico` now 404s, which is harmless — browsers follow the tag.
  */
-export const metadata: Metadata = {
-  metadataBase: new URL(SITE_URL),
-  title: SITE_TITLE,
-  description: SITE_DESCRIPTION,
-  alternates: {
-    // Advertises the Writing feed; readers auto-discover it.
-    types: { "application/rss+xml": "/feed.xml" },
-  },
-  icons: {
-    icon: `${ASSETS}/seo/favicon.svg`,
-    apple: `${ASSETS}/seo/apple-touch-icon.png`,
-  },
-  openGraph: {
-    type: "website",
-    siteName: SITE_NAME,
-    locale: "vi_VN",
+export function siteMetadata(locale: Locale): Metadata {
+  const description = siteDescription(locale);
+  return {
+    metadataBase: new URL(SITE_URL),
     title: SITE_TITLE,
-    description: SITE_DESCRIPTION,
-    images: [DEFAULT_OG_CARD],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: SITE_TITLE,
-    description: SITE_DESCRIPTION,
-    images: [DEFAULT_OG_CARD],
-  },
-  robots: { "max-image-preview": "large" },
-};
+    description,
+    alternates: {
+      // Advertises the Writing feed; readers auto-discover it.
+      types: { "application/rss+xml": "/feed.xml" },
+    },
+    icons: {
+      icon: `${ASSETS}/seo/favicon.svg`,
+      apple: `${ASSETS}/seo/apple-touch-icon.png`,
+    },
+    openGraph: {
+      type: "website",
+      siteName: SITE_NAME,
+      locale: OG_LOCALE[locale],
+      title: SITE_TITLE,
+      description,
+      images: [DEFAULT_OG_CARD],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: SITE_TITLE,
+      description,
+      images: [DEFAULT_OG_CARD],
+    },
+    robots: { "max-image-preview": "large" },
+  };
+}
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export function SiteDocument({ locale, children }: { locale: Locale; children: React.ReactNode }) {
   return (
-    // Vietnamese: the content is (the JSON-LD and the RSS feed already said so).
+    // The page's language, in the server HTML: Vietnamese for every page
+    // outside /en (the JSON-LD and the RSS feed say so too), English under it.
     // Search engines and screen readers both pick their language from this.
     <html
-      lang="vi"
+      lang={HTML_LANG[locale]}
       className={`${sfProDisplay.variable} ${sfProText.variable} ${inspiration.variable} h-full antialiased`}
     >
       <body className="min-h-full">

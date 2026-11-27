@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { OG_LOCALE, localizedPath, type Locale } from "@/i18n/locale";
 import { DEFAULT_OG_CARD, SITE_NAME } from "@/lib/site";
 
 /**
@@ -89,6 +90,20 @@ interface PageMetadataInput {
   /** For articles. */
   publishedTime?: string;
   tags?: string[];
+  /** The page's language. Defaults to Vietnamese. */
+  locale?: Locale;
+  /**
+   * For a page that exists in both languages: its VIETNAMESE path ("/about",
+   * "/" for home). Adds the hreflang set — `vi`, `en` and `x-default`, the
+   * last pointing at the Vietnamese page — identical on both pages of the
+   * pair, self link included. Articles, which have no English twin, omit it.
+   */
+  translationOf?: string;
+}
+
+/** The hreflang set for a page that exists in both languages. */
+export function languageAlternates(viPath: string): Record<"vi" | "en" | "x-default", string> {
+  return { vi: viPath, en: localizedPath(viPath, "en"), "x-default": viPath };
 }
 
 export function pageMetadata({
@@ -99,6 +114,8 @@ export function pageMetadata({
   image,
   publishedTime,
   tags,
+  locale = "vi",
+  translationOf,
 }: PageMetadataInput): Metadata {
   // A cover's size is unknown (it is an external URL), so only the site card
   // carries width, height and alt.
@@ -108,6 +125,7 @@ export function pageMetadata({
     description,
     alternates: {
       canonical: path,
+      ...(translationOf ? { languages: languageAlternates(translationOf) } : {}),
       // Re-stated on every page: a page-level `alternates` replaces the
       // layout's, and the feed should stay discoverable from all of them.
       types: { "application/rss+xml": "/feed.xml" },
@@ -116,7 +134,8 @@ export function pageMetadata({
       type,
       url: path,
       siteName: SITE_NAME,
-      locale: "vi_VN",
+      locale: OG_LOCALE[locale],
+      ...(translationOf ? { alternateLocale: OG_LOCALE[locale === "vi" ? "en" : "vi"] } : {}),
       title,
       description,
       images,

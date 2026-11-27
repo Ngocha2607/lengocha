@@ -1,3 +1,6 @@
+import { EN_META } from "@/i18n/en";
+import { localizedPath, type Locale } from "@/i18n/locale";
+import type { SectionPageId } from "@/i18n/types";
 import type { PortosAppId } from "@/types/portos";
 
 /**
@@ -34,18 +37,22 @@ export function isSectionApp(app: PortosAppId): app is SectionApp {
   return app in SECTION_PATHS;
 }
 
-/** The URL a window lives at, or null for a window that has none. */
-export function pathForApp(app: PortosAppId): string | null {
-  return isSectionApp(app) ? SECTION_PATHS[app] : null;
+/**
+ * The URL a window lives at in the given language (`/about`, `/en/about`), or
+ * null for a window that has none.
+ */
+export function pathForApp(app: PortosAppId, locale: Locale = "vi"): string | null {
+  return isSectionApp(app) ? localizedPath(SECTION_PATHS[app], locale) : null;
 }
 
 /**
  * Search copy for the window routes served by `app/[section]`. Writing has
  * its own route (it reads Notion), so it is not in this list.
  *
- * Every description is Vietnamese, like the content, and at most 160
+ * Every description here is Vietnamese, like the content, and at most 160
  * characters. Each one only restates what that window already says — no claim
- * here that the window itself does not make.
+ * here that the window itself does not make. The English descriptions are in
+ * src/i18n/en.ts (`EN_META.sections`); `sectionDescription` picks one.
  */
 export const SECTION_PAGES = {
   // About and Experience restate the Fullstack copy of those two windows
@@ -88,6 +95,16 @@ export const SECTION_PAGES = {
 } as const satisfies Record<Exclude<SectionApp, "writing">, { title: string; description: string }>;
 
 export type SectionPageApp = keyof typeof SECTION_PAGES;
+
+// The English copy is keyed by the same windows; this fails to compile if the
+// two lists ever drift apart.
+const SAME_PAGES: [SectionPageApp, SectionPageId] extends [SectionPageId, SectionPageApp] ? true : never = true;
+void SAME_PAGES;
+
+/** A window page's meta description in the given language. */
+export function sectionDescription(app: SectionPageApp, locale: Locale): string {
+  return locale === "en" ? EN_META.sections[app] : SECTION_PAGES[app].description;
+}
 
 /** Route param -> app, for `app/[section]`. Null for anything that is not a section page. */
 export function sectionPageFromParam(param: string): SectionPageApp | null {

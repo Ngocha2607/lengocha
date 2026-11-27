@@ -4,6 +4,16 @@ const nextConfig: NextConfig = {
   /* config options here */
   // output: "standalone",
 
+  experimental: {
+    /**
+     * The site has two root layouts — app/(vi) and app/en, so that `<html
+     * lang>` is right for each language — and therefore no single layout to
+     * build the 404 for an unmatched URL from. This makes Next use
+     * app/global-not-found.tsx for those instead of a bare default page.
+     */
+    globalNotFound: true,
+  },
+
   /**
    * When this build was made, for the sitemap's `lastmod` on pages whose
    * content only changes with a deploy (home and the window pages). Inlined at

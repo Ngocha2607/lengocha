@@ -2,10 +2,12 @@
 
 import { Search } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { englishPostCard } from "@/data/writing-en";
+import { useLocale } from "@/i18n/LocaleProvider";
 import { trackEvent } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 import type { PortosAppId } from "@/types/portos";
-import { PROJECTS } from "./ProjectsWindow";
+import { projectsFor } from "./ProjectsWindow";
 import { fetchPostList, prefetchPost, type PostMeta } from "./writingClient";
 
 /**
@@ -19,6 +21,9 @@ import { fetchPostList, prefetchPost, type PostMeta } from "./writingClient";
  *
  * Search is diacritic-insensitive because the content is Vietnamese and a
  * recruiter's keyboard may not be: "phong thi" finds "phòng thi".
+ *
+ * On the English desktop, projects and articles show (and match) their
+ * English text, and each article also still matches its Vietnamese title.
  */
 
 interface SpotlightWindowItem {
@@ -74,6 +79,7 @@ export function Spotlight({ onClose, onOpenApp, onOpenWriting, windows }: Spotli
   const [active, setActive] = useState(0);
   const [posts, setPosts] = useState<PostMeta[]>([]);
   const listRef = useRef<HTMLDivElement>(null);
+  const locale = useLocale();
 
   // Load the article index. `fetchPostList` memoises (and the desktop warms it
   // on boot), so this is almost always an instant cache hit.
@@ -103,7 +109,7 @@ export function Spotlight({ onClose, onOpenApp, onOpenWriting, windows }: Spotli
         run: () => onOpenApp(w.app),
       }));
 
-    const projectItems: Item[] = PROJECTS.filter(
+    const projectItems: Item[] = projectsFor(locale).filter(
       (p) => !trimmed || matches(`${p.title} ${p.description} ${p.tags.join(" ")}`, trimmed),
     ).map((p) => ({
       key: `project:${p.title}`,
@@ -121,23 +127,30 @@ export function Spotlight({ onClose, onOpenApp, onOpenWriting, windows }: Spotli
       },
     }));
 
-    const matchedPosts = posts.filter(
-      (post) =>
-        !trimmed || matches(`${post.title} ${post.description} ${post.tags.join(" ")}`, trimmed),
-    );
+    // What each article shows here: its English card on the English desktop.
+    const shown = posts.map((post) => {
+      const english = locale === "en" ? englishPostCard(post) : null;
+      return {
+        post,
+        title: english?.title ?? post.title,
+        subtitle: english?.summary ?? post.description,
+        haystack: `${post.title} ${post.description} ${english ? `${english.title} ${english.summary}` : ""} ${post.tags.join(" ")}`,
+      };
+    });
+    const matchedPosts = shown.filter((entry) => !trimmed || matches(entry.haystack, trimmed));
     const writingItems: Item[] = (trimmed ? matchedPosts : matchedPosts.slice(0, IDLE_WRITING_LIMIT)).map(
-      (post) => ({
+      ({ post, title, subtitle }) => ({
         key: `post:${post.slug}`,
         group: "Writing" as const,
-        title: `${post.emoji ? `${post.emoji} ` : ""}${post.title}`,
-        subtitle: post.description,
+        title: `${post.emoji ? `${post.emoji} ` : ""}${title}`,
+        subtitle,
         prefetchSlug: post.slug,
         run: () => onOpenWriting(post.slug),
       }),
     );
 
     return [...windowItems, ...projectItems, ...writingItems];
-  }, [query, windows, posts, onOpenApp, onOpenWriting]);
+  }, [query, windows, posts, locale, onOpenApp, onOpenWriting]);
 
   // Clamp the highlight when the result set shrinks under it.
   const activeIndex = Math.min(active, Math.max(items.length - 1, 0));
