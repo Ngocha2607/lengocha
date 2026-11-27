@@ -1,0 +1,308 @@
+{
+  "lang": "vi",
+  "documentTitle": "Lê Ngọc Hà · Fullstack Developer · CV",
+  "name": "Lê Ngọc Hà",
+  "headline": "Fullstack Developer · Frontend Tech Lead tại SAPP Academy",
+  "photoAlt": "Ảnh chân dung Lê Ngọc Hà",
+  "footer": {
+    "name": "Lê Ngọc Hà",
+    "site": "lengocha.vercel.app",
+    "href": "https://lengocha.vercel.app"
+  },
+  "pages": [
+    {
+      "sidebar": [
+        {
+          "type": "contact",
+          "heading": "Contact",
+          "items": [
+            {
+              "icon": "phone",
+              "text": "0964 972 693",
+              "href": "tel:+84964972693"
+            },
+            {
+              "icon": "mail",
+              "text": "ngocha2k0.ln@gmail.com",
+              "href": "mailto:ngocha2k0.ln@gmail.com"
+            },
+            {
+              "icon": "pin",
+              "text": "Hà Nội, Việt Nam"
+            },
+            {
+              "icon": "globe",
+              "text": "lengocha.vercel.app",
+              "href": "https://lengocha.vercel.app"
+            },
+            {
+              "icon": "github",
+              "text": "github.com/Ngocha2607",
+              "href": "https://github.com/Ngocha2607"
+            },
+            {
+              "icon": "linkedin",
+              "text": "LinkedIn · Ngọc Hà Lê",
+              "href": "https://www.linkedin.com/in/ng%E1%BB%8Dc-h%C3%A0-l%C3%AA-886aa3228/"
+            }
+          ]
+        },
+        {
+          "type": "list",
+          "heading": "Expertise",
+          "items": [
+            "Frontend Architecture",
+            "Backend & Payment Integration",
+            "Cloud Migration & DevOps",
+            "Performance Engineering",
+            "Design System & Monorepo",
+            "Security Engineering",
+            "AI-assisted Development",
+            "Technical Leadership"
+          ]
+        },
+        {
+          "type": "rows",
+          "heading": "Frontend Stack",
+          "rows": [
+            "React • Next.js • TypeScript",
+            "Redux Toolkit • Zustand • TanStack Query",
+            "Antd • Tailwind • MUI • Shadcn",
+            "Tiptap • GrapeJS • React Hook Form",
+            "Vite"
+          ]
+        },
+        {
+          "type": "rows",
+          "heading": "Languages",
+          "rows": [
+            "Tiếng Việt",
+            "Tiếng Anh: TOEIC 665/990"
+          ]
+        }
+      ],
+      "main": [
+        {
+          "type": "text",
+          "heading": "Professional Summary",
+          "paragraphs": [
+            "Fullstack Developer, hiện là Frontend Tech Lead tại SAPP Academy, gần 5 năm xây dựng hệ thống web cho EdTech và TravelTech. Mạnh nhất ở frontend (React, Next.js, TypeScript): kiến trúc monorepo, tối ưu hiệu năng, quy trình kỹ thuật và bảo mật cho team. Ở backend và hạ tầng: tích hợp cổng thanh toán Payoo POS trên NestJS, Spring Boot microservices, và dẫn dắt chuyển server dev, GitLab, database production từ AWS sang CMC Cloud. **Kết quả nào cũng có số đo trước và sau.**"
+          ]
+        },
+        {
+          "type": "entries",
+          "variant": "education",
+          "heading": "Education",
+          "entries": [
+            {
+              "title": "Đại học Bách Khoa Hà Nội",
+              "period": "2018 - 2022",
+              "notes": [
+                "Cử nhân Điện tử - Viễn thông",
+                "Bài báo khoa học — Kỷ yếu hội nghị REV ECIT 2021"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "entries",
+          "variant": "experience",
+          "heading": "Professional Experience",
+          "entries": [
+            {
+              "title": "Frontend Tech Lead",
+              "period": "03/2025 - Hiện tại",
+              "org": "SAPP Academy",
+              "bullets": [
+                "Dẫn dắt Frontend LMS + Ops, review **100% Merge Request** và mentor **2 Junior Frontend**.",
+                "Thiết kế Monorepo với **pnpm Workspace + Turborepo**, hợp nhất 4 frontend và chuẩn hóa hệ thống package dùng chung.",
+                "Phụ trách backend tích hợp cổng thanh toán **Payoo POS trên NestJS** (ops, payment-service, background-job-service): tạo, hủy, tra cứu đơn, xử lý IPN, cron đối soát, đồng bộ HubSpot và SAP, **174 test case**.",
+                "Dẫn dắt chuyển server dev (16 app NestJS), GitLab và database production hợp đồng điện tử từ **AWS sang CMC Cloud** trong 7 tuần, không thuê thêm máy; database production chỉ gián đoạn khoảng **2,5 phút**.",
+                "Nâng cấp LMS từ **Next.js 12 → 14 App Router** và tối ưu hiệu năng: giảm **60% thời gian tải trang (15.2s → 6.1s)**, Lighthouse **29 → 65+**.",
+                "Thay editor thương mại bằng **Tiptap**, xây dựng thành private package dùng chung, giảm phụ thuộc nhà cung cấp và chi phí license.",
+                "Tích hợp **Gitleaks, Trivy, Semgrep, OWASP ZAP** vào CI/CD và xây dựng AI Workflow, tăng **30% năng suất**, tiết kiệm **~10 giờ/tuần**."
+              ]
+            },
+            {
+              "title": "Fullstack Developer",
+              "period": "03/2023 - 02/2025",
+              "org": "Tweet World Travel Group",
+              "bullets": [
+                "Phát triển **5 nền tảng TravelTech B2B**, phục vụ **~1.000 users/tháng**, cùng hệ thống quản trị nội bộ đa ngôn ngữ.",
+                "Xây dựng và bảo trì Backend Services với **Spring Boot / Microservices** trong môi trường Monorepo.",
+                "Tối ưu SSR và tài nguyên Frontend, giảm page load 3.2s → 1.1s (-66%), duy trì Lighthouse 85.",
+                "Mentor **3 Junior Frontend**, review Pull Request trước khi merge vào Staging.",
+                "Tái cấu trúc và chuẩn hóa codebase, cải thiện khả năng mở rộng và tái sử dụng."
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sidebar": [
+        {
+          "type": "rows",
+          "heading": "Backend Stack",
+          "rows": [
+            "NestJS • Node.js",
+            "Java • Spring Boot",
+            "PostgreSQL • TypeORM • Kafka",
+            "RESTful API • Microservices"
+          ]
+        },
+        {
+          "type": "rows",
+          "heading": "Cloud & DevOps",
+          "rows": [
+            "AWS • CMC Cloud",
+            "Docker • GitLab CI/CD • Vercel",
+            "Turborepo • pnpm Workspace",
+            "Gitleaks • Semgrep • Trivy • ZAP"
+          ]
+        },
+        {
+          "type": "entries",
+          "variant": "leadership",
+          "heading": "Leadership",
+          "entries": [
+            {
+              "title": "Dẫn dắt bằng số liệu",
+              "period": "2025",
+              "org": "LMS · SAPP Academy",
+              "text": [
+                "Ưu tiên các hạng mục tối ưu dựa trên dữ liệu đo đạc thực tế trên 15 trang: giảm **60% thời gian tải trang (15.2s → 6.1s)**, Lighthouse nhóm học viên **49 → 67**, giảng viên **72 → 89**."
+              ]
+            },
+            {
+              "title": "Đặt chuẩn kỹ thuật cho team",
+              "period": "2026",
+              "org": "Pipeline CI/CD · SAPP Academy",
+              "text": [
+                "Thiết lập chuẩn code và bảo mật, tự động hóa kiểm tra trong CI/CD và trực tiếp review **100% Merge Request** — để máy bắt lỗi lặp lại, con người tập trung vào kiến trúc và chất lượng."
+              ]
+            },
+            {
+              "title": "Mentoring & phát triển kỹ sư trẻ",
+              "period": "2023 - 2025",
+              "org": "SAPP Academy · Tweet World Travel",
+              "text": [
+                "Trực tiếp mentor **5 Junior Frontend**, tập trung hướng dẫn cách phân tích và tự tìm lời giải thay vì đưa đáp án sẵn."
+              ]
+            }
+          ]
+        },
+        {
+          "type": "qr",
+          "heading": "Portfolio",
+          "text": "lengocha.vercel.app",
+          "href": "https://lengocha.vercel.app"
+        }
+      ],
+      "main": [
+        {
+          "type": "entries",
+          "variant": "experience",
+          "heading": "Professional Experience (cont.)",
+          "entries": [
+            {
+              "title": "Frontend Developer",
+              "period": "10/2021 - 02/2023",
+              "org": "Minastik JSC · Onsite tại 3S Intersoft JSC",
+              "bullets": [
+                "Phát triển và bảo trì nhiều ứng dụng web với React.js, xây dựng giao diện đáp ứng (Responsive) và đảm bảo trải nghiệm người dùng trên nhiều nền tảng.",
+                "Phối hợp với đội Backend để tích hợp RESTful API, triển khai các tính năng mới và xử lý lỗi trong quá trình phát triển.",
+                "Làm việc theo quy trình Agile/Scrum, phối hợp chặt chẽ với các thành viên trong nhóm để đảm bảo tiến độ dự án."
+              ]
+            }
+          ]
+        },
+        {
+          "type": "entries",
+          "variant": "projects",
+          "heading": "Selected Projects",
+          "entries": [
+            {
+              "title": "LMS Platform · SAPP Academy",
+              "period": "2025 - Hiện tại",
+              "text": [
+                "Hệ thống quản lý học tập trực tuyến; dẫn dắt kỹ thuật Frontend."
+              ],
+              "tags": "Next.js 14 • Monorepo • Antd • Tailwind CSS • Redux Toolkit • React Hook Form"
+            },
+            {
+              "title": "Operations · SAPP Academy",
+              "period": "2025 - Hiện tại",
+              "text": [
+                "18 module vận hành: lớp học, chấm điểm, điểm danh."
+              ],
+              "tags": "React • TypeScript • Vite • Ant Design"
+            },
+            {
+              "title": "Thanh toán Payoo POS · SAPP Academy",
+              "period": "2026",
+              "text": [
+                "Backend cho thanh toán POS tại quầy: tạo, hủy, tra cứu đơn, IPN, cron đối soát, đồng bộ HubSpot và SAP."
+              ],
+              "tags": "NestJS • TypeORM • PostgreSQL • Kafka • Jest"
+            },
+            {
+              "title": "Chuyển hạ tầng AWS → CMC Cloud · SAPP Academy",
+              "period": "2026",
+              "text": [
+                "Server dev (16 app NestJS), GitLab, database production; 7 tuần, không thuê thêm máy, database production gián đoạn khoảng 2,5 phút."
+              ],
+              "tags": "Docker rootless • GitLab • MySQL 8.4 • Bash"
+            },
+            {
+              "title": "Subscriber Platform · Tweet World Travel",
+              "period": "2023 - 2025",
+              "text": [
+                "Nền tảng quản trị doanh nghiệp du lịch."
+              ],
+              "tags": "Spring Boot • Microservices • React • Material UI"
+            },
+            {
+              "title": "Website B2B · Tweet World Travel",
+              "period": "2023 - 2024",
+              "text": [
+                "Nền tảng TMĐT du lịch đa ngôn ngữ; page load 3.2s → 1.1s, Lighthouse 85."
+              ],
+              "tags": "Next.js 14 • Zustand • TypeScript • Tailwind • Shadcn"
+            }
+          ]
+        },
+        {
+          "type": "entries",
+          "variant": "decisions",
+          "heading": "Technical Decisions",
+          "entries": [
+            {
+              "title": "Ưu tiên hiệu năng người dùng thay vì chỉ số server",
+              "period": "Đã đo, chưa triển khai · 2026",
+              "text": [
+                "Một cải tiến giúp thời gian phản hồi server giảm 60ms → 3ms trên 20 trang. Tuy nhiên, đo lường thực tế cho thấy người dùng gần như không nhận thấy cải thiện. Tôi quyết định không triển khai, chuyển nguồn lực sang xử lý đúng điểm nghẽn ảnh hưởng đến trải nghiệm thực tế."
+              ]
+            },
+            {
+              "title": "Gộp 4 sản phẩm vào một nền tảng chung",
+              "period": "Đã triển khai · 2025",
+              "text": [
+                "Bốn sản phẩm trước đây nằm ở bốn repository riêng, khiến các tính năng dùng chung phải triển khai lặp lại. Tôi quyết định đưa về **Monorepo với pnpm Workspace + Turborepo**, tập trung hóa UI, editor và styles dùng chung.",
+                "**Kết quả**: giảm công việc lặp lại, thống nhất chất lượng và giúp sản phẩm mới kế thừa ngay các chuẩn kỹ thuật và bảo mật."
+              ]
+            },
+            {
+              "title": "Thay editor trả phí bằng giải pháp tự xây dựa trên Tiptap",
+              "period": "Đã triển khai · 2025",
+              "text": [
+                "Editor cũ tính phí theo số lượng người dùng, khiến chi phí tăng theo quy mô học viên. Tôi quyết định chuyển sang **Tiptap**, xây dựng và đóng gói thành package dùng chung trong Monorepo.",
+                "**Đánh đổi:** team chủ động toàn bộ việc phát triển và bảo trì editor, đổi lại giảm phụ thuộc nhà cung cấp và kiểm soát tốt hơn chi phí dài hạn."
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

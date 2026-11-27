@@ -15,7 +15,7 @@ can open, focus, drag, minimise and maximise.
 | Projects               | `Projects` folder, Finder | Project cards, switchable between grid and list         |
 | Writing                | Launchpad                 | Posts read live from Notion, with per-post detail pages |
 | Highlights & Decisions | Notes                     | Selected decisions and what came of them                |
-| Resume                 | Messages                  | Embedded PDF                                            |
+| Resume                 | Messages                  | The CV as an embedded PDF (Vietnamese or English)       |
 | Gallery                | Photos                    | Image grid                                              |
 | Contact                | Contacts                  | Contact details and links                               |
 | Recycle Bin            | Trash                     | —                                                       |
@@ -41,6 +41,10 @@ npm run dev          # http://localhost:3000
 | `npm run lint`      | ESLint                     |
 | `npm run typecheck` | `tsc --noEmit`             |
 | `npm run check`     | lint + typecheck + build   |
+| `npm run cv:build`  | Rebuild the CV PDFs        |
+
+The CV PDFs in `public/` are generated from `cv/`; see `cv/README.md` for how
+to edit and rebuild them.
 
 There is also a `Dockerfile` and a `docker-compose.yml` if you would rather not
 install Node locally.
@@ -62,6 +66,7 @@ everything else works untouched.
 ## Layout
 
 ```
+cv/                 # CV source: content per language, template, build script
 src/
   app/
     api/writing/    # Notion-backed routes for the Writing window
@@ -74,7 +79,7 @@ src/
                     # The desktop shell and every window, one file each
     ui/             # shadcn/ui primitives
   i18n/en.ts        # Every English string; Vietnamese stays in its component
-  lib/              # cn(), Notion client, Notion-blocks-to-HTML, analytics
+  lib/              # cn(), Notion client, Notion-blocks-to-HTML, analytics, CV paths
   types/portos.ts   # Shared types and the PORTOS_ASSETS path constant
 public/
   sites/portos-framer-website-67488b6b/root-8a5edab2/

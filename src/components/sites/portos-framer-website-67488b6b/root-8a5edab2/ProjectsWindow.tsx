@@ -50,11 +50,14 @@ export interface Project {
 }
 
 /**
- * Six projects, newest first. Descriptions and tags are carried VERBATIM
- * (Vietnamese) from the SELECTED PROJECTS section of the CV at
- * `public/Le-Ngoc-Ha-Senior-Frontend-Developer.pdf`, on request; screenshots
- * are from the portfolio. The EVN card is the one entry the CV does not carry —
- * its wording is our own translation of the entry it used to hold.
+ * Six projects, newest first; screenshots are from the portfolio. Descriptions
+ * and tags started as a VERBATIM copy (Vietnamese) of the CV's SELECTED
+ * PROJECTS, on request, and the two have since moved apart. The CV, now built
+ * from `cv/content.vi.json`, adds the Payoo POS and AWS -> CMC Cloud projects
+ * and drops Newsletter System for space; the B2B card here carries the
+ * ~1.000 users/tháng figure, which the CV states in the Tweet World Travel
+ * role instead. EVN has never been on the CV: its wording is our own
+ * translation of the entry it used to hold.
  *
  * Period and description are the only prose; their English is `EN_PROJECTS`
  * in src/i18n/en.ts, keyed by `id`. Use `projectsFor(locale)`.

@@ -1,13 +1,8 @@
 "use client";
 
-import { EN_RESUME } from "@/i18n/en";
 import { useLocale } from "@/i18n/LocaleProvider";
-import type { ResumeCopy } from "@/i18n/types";
 import { trackEvent } from "@/lib/analytics";
-
-/** Served straight from `public/`, so the window works offline with the app. */
-const RESUME_PDF = "/Le-Ngoc-Ha-Senior-Frontend-Developer.pdf";
-const RESUME_FILENAME = "Le-Ngoc-Ha-Senior-Frontend-Developer.pdf";
+import { CV_PDF } from "@/lib/cv";
 
 /**
  * `#view=FitH` asks the browser's built-in viewer to fit the page to the window
@@ -15,7 +10,10 @@ const RESUME_FILENAME = "Le-Ngoc-Ha-Senior-Frontend-Developer.pdf";
  * Chrome and Edge honour it, Firefox mostly does, and anything that ignores it
  * simply opens at its own default zoom.
  */
-const VIEWER_SRC = `${RESUME_PDF}#view=FitH`;
+const VIEWER_HINT = "#view=FitH";
+
+/** The window's own text (title, buttons) is English in both languages. */
+const VIEWER_TITLE = "Lê Ngọc Hà · Fullstack Developer · CV";
 
 /**
  * `cv_download` for a click on either link to the PDF: "Download" saves it,
@@ -32,14 +30,14 @@ function pdfLinkTracking(method: "download" | "new_tab") {
   };
 }
 
-/** The window's text is English in both languages; only the English page needs the note. */
-const VI_COPY: ResumeCopy = { languageNote: null };
-
 const ACTION_CLASS =
   "font-sans rounded-full border border-black/15 px-3 py-[3px] text-[11px] leading-[16px] text-black/70 transition-colors hover:border-black/40 hover:text-black";
 
 /**
- * Body of the "Resume" window — the CV itself, nothing else.
+ * Body of the "Resume" window — the CV itself, nothing else: the Vietnamese
+ * PDF on the Vietnamese pages, the English one under /en (src/lib/cv.ts).
+ * Both are served straight from `public/`, so the window works offline with
+ * the app.
  *
  * COMPLETELY REPLACED, on request. The live site fills this window with eight
  * cards for the template author's design tools (Framer, Figma, Spline, Rive,
@@ -59,9 +57,7 @@ const ACTION_CLASS =
  * the feature.
  */
 export function ResumeWindow() {
-  // The CV PDF is Vietnamese. The English page says so beside the file name,
-  // and in the mobile panel, before anyone opens it expecting English.
-  const { languageNote } = useLocale() === "en" ? EN_RESUME : VI_COPY;
+  const { href, filename } = CV_PDF[useLocale()];
   return (
     // `data-no-drag` on the whole body: this window is a document, so selecting
     // and scrolling inside it has to win over dragging the window around.
@@ -71,8 +67,8 @@ export function ResumeWindow() {
           `flex-1` from ever shrinking it to fit. */}
       <div className="min-h-0 flex-1">
         <iframe
-          src={VIEWER_SRC}
-          title="Lê Ngọc Hà — Senior Frontend Engineer, resume"
+          src={`${href}${VIEWER_HINT}`}
+          title={VIEWER_TITLE}
           className="hidden h-full w-full border-0 min-[700px]:block"
         />
 
@@ -83,11 +79,10 @@ export function ResumeWindow() {
           </p>
           <p className="font-sans max-w-[280px] text-[12px] leading-[16.8px] text-black/60">
             Mobile browsers cannot display a PDF inline. Open it in a new tab or save it.
-            {languageNote ? ` ${languageNote}.` : null}
           </p>
           <div className="flex items-center gap-2">
             <a
-              href={RESUME_PDF}
+              href={href}
               target="_blank"
               rel="noreferrer noopener"
               className={ACTION_CLASS}
@@ -96,8 +91,8 @@ export function ResumeWindow() {
               Open ↗
             </a>
             <a
-              href={RESUME_PDF}
-              download={RESUME_FILENAME}
+              href={href}
+              download={filename}
               className={ACTION_CLASS}
               {...pdfLinkTracking("download")}
             >
@@ -110,12 +105,11 @@ export function ResumeWindow() {
       {/* Status bar — the filename, and the two things anyone wants from a CV. */}
       <div className="flex shrink-0 items-center justify-between gap-4 border-t border-black/10 px-4 py-[7px]">
         <p className="font-sans truncate text-[11px] leading-[16px] text-black/45">
-          {RESUME_FILENAME}
-          {languageNote ? ` · ${languageNote}` : null}
+          {filename}
         </p>
         <div className="flex shrink-0 items-center gap-2">
           <a
-            href={RESUME_PDF}
+            href={href}
             target="_blank"
             rel="noreferrer noopener"
             className={ACTION_CLASS}
@@ -124,8 +118,8 @@ export function ResumeWindow() {
             Open ↗
           </a>
           <a
-            href={RESUME_PDF}
-            download={RESUME_FILENAME}
+            href={href}
+            download={filename}
             className={ACTION_CLASS}
             {...pdfLinkTracking("download")}
           >

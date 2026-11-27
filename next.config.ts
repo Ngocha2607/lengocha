@@ -29,6 +29,22 @@ const nextConfig: NextConfig = {
     SITE_VERCEL_ENV: process.env.VERCEL_ENV ?? "",
   },
 
+  /**
+   * The CV used to live at /Le-Ngoc-Ha-Senior-Frontend-Developer.pdf, and that
+   * URL went out in job applications. It now points at the Vietnamese CV that
+   * replaced it (built from cv/, paths in src/lib/cv.ts). Permanent, so a
+   * reader who follows an old link lands on the current CV, not a 404.
+   */
+  async redirects() {
+    return [
+      {
+        source: "/Le-Ngoc-Ha-Senior-Frontend-Developer.pdf",
+        destination: "/Le-Ngoc-Ha-Fullstack-Developer.pdf",
+        permanent: true,
+      },
+    ];
+  },
+
   images: {
     /**
      * Next 16 narrowed `images.qualities` from "anything" to `[75]`, and a

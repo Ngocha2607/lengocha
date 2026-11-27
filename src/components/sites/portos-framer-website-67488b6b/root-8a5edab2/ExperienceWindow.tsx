@@ -18,14 +18,13 @@ import { cn } from "@/lib/utils";
  * timeline runs oldest-first because a trajectory reads left to right; these
  * cards run newest-first because that is what a reviewer wants at the top.
  *
- * Content is carried VERBATIM (Vietnamese) from the CV at
- * `public/Le-Ngoc-Ha-Senior-Frontend-Developer.pdf`, on request, so the two
- * stay in step. Two exceptions. The SAPP highlights were rewritten by the owner
- * on 2026-11-27 for the Fullstack headline: they add the Payoo POS backend and
- * the AWS -> CMC Cloud migration, and fold the Next.js upgrade and the
- * performance numbers into one line, so they run ahead of that PDF. And the FPT
- * internship is the one entry the two-page CV cut for space; it is kept here
- * (and on the About timeline) with its own wording.
+ * The highlights are carried VERBATIM (Vietnamese) from the CV's source,
+ * `cv/content.vi.json`, on request, so the two stay in step: change one,
+ * change the other, and rebuild the PDF (`npm run cv:build`, see cv/README.md).
+ * The SAPP highlights are the owner's Fullstack rewrite of 2026-11-27 (Payoo
+ * POS backend, AWS -> CMC Cloud migration), which the CV now carries too. The
+ * one exception is the FPT internship, which the two-page CV cuts for space;
+ * it is kept here (and on the About timeline) with its own wording.
  *
  * The English is `EN_EXPERIENCE` in src/i18n/en.ts, picked by locale.
  *
