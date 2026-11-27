@@ -365,16 +365,21 @@ export function DesktopShell({
           also what puts the dock's centre at 340.5 rather than the container's 720. */}
       <div className="absolute inset-x-5 bottom-6 top-[120px] flex flex-col justify-between min-[810px]:inset-x-[30px] min-[810px]:top-[130px] min-[1200px]:inset-x-[50px] min-[1200px]:top-40 min-[1200px]:pl-4">
         <DesktopIcons onOpen={openWindow} />
-        {/* The intro widget. On a phone it sits in the column between the
-            folders and the dock, scrolling inside that gap if the screen is
-            too short to show all of it (`my-auto` on the widget centres it
-            without making its top unreachable, which `items-center` would).
-            From 810px it leaves the flow for the empty space right of the
-            folders, top-aligned with About: the column stays exactly the
-            measured folders-and-dock layout, and a laptop-height screen no
-            longer squeezes the widget against the dock. 112px clears the
-            folder artwork and its hover plate at both breakpoints. */}
-        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto py-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden min-[810px]:absolute min-[810px]:top-0 min-[810px]:left-[112px] min-[810px]:block min-[810px]:overflow-visible min-[810px]:p-0">
+        {/* The intro widget, placed so that neither its size nor its closing
+            can move anything else (CLS stays at zero either way).
+
+            On a phone it sits at the TOP of the column between the folders
+            and the dock, full width inside the gutters. That column is
+            `flex-1`, so its height comes from the space left over, not from
+            the widget: closing the widget leaves the dock where it was. It
+            scrolls inside that gap if a short screen cannot show all of it.
+
+            From 810px it leaves the flow for the desktop's right edge, under
+            the Experience folder: 104px down clears the folder (78.59px) and
+            its hover plate (6px more), and `right-0` lines it up with the
+            container's edge, 100px right of the folder. The column stays
+            exactly the measured folders-and-dock layout. */}
+        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto py-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden min-[810px]:absolute min-[810px]:top-[104px] min-[810px]:right-0 min-[810px]:block min-[810px]:overflow-visible min-[810px]:p-0">
           <DesktopIntro isPageHeading={front === null} onOpen={openWindow} />
         </div>
         {/* Lifted above the window stack: the dock is how you reach the other

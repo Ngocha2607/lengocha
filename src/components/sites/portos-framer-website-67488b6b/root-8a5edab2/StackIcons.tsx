@@ -4,7 +4,7 @@
  * Drawn here rather than pulled from a package: the clone is deliberately free
  * of external asset hosts (verified — every runtime request is same-origin), and
  * `lucide-react`, the project's icon library, dropped brand logos years ago.
- * Adding `react-icons` or `simple-icons` for eight glyphs would be a heavy
+ * Adding `react-icons` or `simple-icons` for eleven glyphs would be a heavy
  * dependency for something that renders at 16px.
  *
  * Fidelity varies by mark, and that is a deliberate trade:
@@ -16,8 +16,12 @@
  *   - Docker, Spring and Turborepo are SIMPLIFIED silhouettes. At 16px the whale,
  *     the leaf and the gradient ring read correctly; do not enlarge them past
  *     ~24px and expect brand-accurate detail.
+ *   - NestJS and PostgreSQL are simplified the same way: a red cat head and a
+ *     blue elephant head, in the brands' colours. AWS is the lowercase "aws"
+ *     in stroked letterforms over the orange smile-arrow, which is the part
+ *     that still reads at 16px.
  *
- * All eight share a 24x24 viewBox so one size class governs them all.
+ * All eleven share a 24x24 viewBox so one size class governs them all.
  */
 
 interface StackIconProps {
@@ -158,6 +162,76 @@ function GitLabIcon({ className }: StackIconProps) {
   );
 }
 
+function NestjsIcon({ className }: StackIconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={`${BASE} ${className ?? ""}`} aria-hidden="true">
+      {/* Simplified cat head: two pointed ears, a rounded jaw, two eyes. */}
+      <path
+        d="M3.6 2.8 9 7.6c1-.3 2-.4 3-.4s2 .1 3 .4l5.4-4.8v10.1c0 5-3.8 8.5-8.4 8.5s-8.4-3.5-8.4-8.5z"
+        fill="#E0234E"
+      />
+      <circle cx="8.8" cy="13.2" r="1.35" fill="#ffffff" />
+      <circle cx="15.2" cy="13.2" r="1.35" fill="#ffffff" />
+    </svg>
+  );
+}
+
+function PostgresqlIcon({ className }: StackIconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={`${BASE} ${className ?? ""}`} aria-hidden="true">
+      {/* Simplified elephant head facing right: the dome with the ear's tip
+          hanging below it on the left, and the trunk curling forward on the
+          right. The ear is drawn as a white outline, as in the real mark. */}
+      <path
+        d="M11 2.2c5.6 0 9.7 3.4 9.7 8.2 0 2.5-1.1 4.5-2.9 5.8v2.3c0 .5.3.8.8.8.6 0 1.1.4 1.1 1s-.5 1.1-1.1 1.1c-1.8 0-3-1.2-3-3v-1.1c-1.2.4-2.6.6-4 .6-.2 0-.4 1-.8 2.1-.4 1-1.4 1.1-1.8.1l-.6-2.8C4.4 16.4 1.6 13.8 1.6 10c0-4.6 4-7.8 9.4-7.8z"
+        fill="#336791"
+      />
+      <path
+        d="M10.5 5.2C7.7 5 5.3 6.8 5.3 9.6c0 2.4 1.7 4 3.9 4.4.8.2 1.3-.3 1.3-1.1V5.2z"
+        fill="none"
+        stroke="#ffffff"
+        strokeWidth="1.3"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <circle cx="14.9" cy="8.4" r="1.15" fill="#ffffff" />
+    </svg>
+  );
+}
+
+function AwsIcon({ className }: StackIconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={`${BASE} ${className ?? ""}`} aria-hidden="true">
+      <g
+        fill="none"
+        stroke="#232F3E"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        {/* a — a bowl and its stem. */}
+        <circle cx="4.5" cy="9.7" r="1.9" />
+        <path d="M6.4 7.6v4.2" />
+        {/* w */}
+        <path d="M8.6 7.6 10 11.8l1.6-3.4 1.6 3.4 1.4-4.2" />
+        {/* s */}
+        <path d="M20.1 8.1c-.5-.5-1.2-.7-1.9-.7-1 0-1.8.5-1.8 1.2 0 .8.7 1 1.8 1.2 1.1.2 1.9.5 1.9 1.3 0 .7-.8 1.1-1.9 1.1-.8 0-1.5-.2-2-.7" />
+      </g>
+      {/* The smile, ending in its arrowhead. */}
+      <g
+        fill="none"
+        stroke="#FF9900"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M3.2 15.4c5.4 3.6 12.2 3.6 17.4 0" />
+        <path d="M17.9 14.6l2.9.7-.6 2.9" />
+      </g>
+    </svg>
+  );
+}
+
 function VercelIcon({ className }: StackIconProps) {
   return (
     <svg viewBox="0 0 24 24" className={`${BASE} ${className ?? ""}`} aria-hidden="true">
@@ -171,10 +245,13 @@ export const STACK_ICONS = {
   React: ReactIcon,
   "Next.js": NextjsIcon,
   TypeScript: TypeScriptIcon,
+  NestJS: NestjsIcon,
   "Spring Boot": SpringIcon,
+  PostgreSQL: PostgresqlIcon,
   Turborepo: TurborepoIcon,
   Docker: DockerIcon,
   "GitLab CI/CD": GitLabIcon,
+  AWS: AwsIcon,
   Vercel: VercelIcon,
 } as const;
 

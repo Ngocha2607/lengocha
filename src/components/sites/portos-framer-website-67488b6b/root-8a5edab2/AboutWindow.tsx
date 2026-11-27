@@ -25,7 +25,7 @@ interface RollingCounter extends AboutCounter {
  * invented: ~5 years' experience, the 60% page-load reduction on the SAPP LMS
  * (15.2s → 6.1s), 5 juniors mentored (2 at SAPP, 3 at Tweet World Travel), and
  * the 30% productivity gain from the AI workflow. Labels are Vietnamese to match
- * the CV, whose body copy this window now carries verbatim.
+ * the body copy around them.
  */
 const ABOUT_COUNTERS: RollingCounter[] = [
   { label: "• Kinh nghiệm", value: "5 năm", target: 5, suffix: " năm" },
@@ -40,12 +40,17 @@ const ABOUT_COUNTERS: RollingCounter[] = [
 ];
 
 /**
- * The CV's PROFESSIONAL SUMMARY, verbatim in Vietnamese (requested), split at
- * its own sentence boundary so the window keeps its two-paragraph rhythm.
+ * The owner's own Fullstack framing (2026-11-27), in Vietnamese: the headline
+ * title is "Fullstack Developer", the current job title stays "Frontend Tech
+ * Lead". Paragraph one says who and where, paragraph two what the strongest
+ * area is and which backend/infrastructure work at SAPP backs the title. This
+ * replaced the CV's PROFESSIONAL SUMMARY, which led with "Senior Frontend
+ * Engineer". The meta descriptions for /about and /experience (lib/sections.ts)
+ * restate this copy; change them together.
  */
 const INTRO_PARAGRAPHS = [
-  "Senior Frontend Engineer — hiện là Frontend Tech Lead tại SAPP Academy — gần 5 năm kinh nghiệm xây dựng và dẫn dắt hệ thống web trong lĩnh vực EdTech và TravelTech.",
-  "Sở trường về kiến trúc Frontend, Monorepo, tối ưu hiệu năng và xây dựng quy trình kỹ thuật cho team. Đã dẫn dắt các sáng kiến từ nâng cấp Next.js, chuẩn hóa hệ thống package, tích hợp Security Pipeline đến xây dựng AI Workflow — tập trung vào tác động đo được và khả năng mở rộng của hệ thống.",
+  "Fullstack Developer, hiện là Frontend Tech Lead tại SAPP Academy. Gần 5 năm xây dựng hệ thống web cho EdTech và TravelTech, từ giao diện React/Next.js tới backend NestJS, Spring Boot và hạ tầng cloud.",
+  "Mạnh nhất ở frontend, với kiến trúc monorepo, tối ưu hiệu năng và quy trình kỹ thuật cho team. Ở SAPP tôi làm thêm phần backend và hạ tầng: tích hợp cổng thanh toán Payoo POS trên NestJS, và dẫn dắt đợt chuyển server dev, GitLab, database production từ AWS sang CMC Cloud mà không thuê thêm máy. Mỗi việc đều có số đo trước và sau, ghi lại trong mục Writing.",
 ];
 
 /** The roll captured on the live site settles in a little over a second. */

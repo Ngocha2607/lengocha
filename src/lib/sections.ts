@@ -48,15 +48,17 @@ export function pathForApp(app: PortosAppId): string | null {
  * here that the window itself does not make.
  */
 export const SECTION_PAGES = {
+  // About and Experience restate the Fullstack copy of those two windows
+  // (AboutWindow's intro, ExperienceWindow's SAPP highlights); change together.
   about: {
     title: "About",
     description:
-      "Giới thiệu Lê Ngọc Hà, Frontend Tech Lead tại SAPP Academy: gần 5 năm xây dựng và dẫn dắt hệ thống web EdTech và TravelTech.",
+      "Lê Ngọc Hà, Fullstack Developer, Frontend Tech Lead tại SAPP Academy: gần 5 năm làm web EdTech, TravelTech với React, Next.js, NestJS, Spring Boot và cloud.",
   },
   experience: {
     title: "Experience",
     description:
-      "Kinh nghiệm của Lê Ngọc Hà: Frontend Tech Lead tại SAPP Academy, Fullstack Developer tại Tweet World Travel, Frontend Developer tại Minastik.",
+      "Kinh nghiệm Fullstack của Lê Ngọc Hà: Frontend Tech Lead tại SAPP Academy (Payoo POS trên NestJS, chuyển AWS sang CMC Cloud), Tweet World Travel, Minastik.",
   },
   projects: {
     title: "Projects",
