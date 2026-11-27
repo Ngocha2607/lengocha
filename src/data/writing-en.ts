@@ -71,6 +71,11 @@ export const WRITING_EN: Readonly<Record<string, WritingEnglish>> = {
     summary:
       "Frontend security needs three layers of automated checks: Gitleaks to catch secrets (pre-commit, and it blocks the merge), Trivy to scan library vulnerabilities (CI only, warns) and Semgrep to catch dangerous code patterns (pre-commit and CI, warns).",
   },
+  "chuyen-ha-tang-tu-aws-sang-cmc-cloud-ma-khong-thue-them-may": {
+    title: "Moving infrastructure from AWS to CMC Cloud without renting extra machines",
+    summary:
+      "How I moved SAPP's dev server (16 NestJS apps), GitLab and the e-contract production database from AWS to CMC Cloud in 7 weeks: rehearsals with real data, cutovers with about 2.5 minutes of production downtime, and the AWS clean-up.",
+  },
 };
 
 /** What a card on /en/writing shows, and whether it is the English or the fallback. */
