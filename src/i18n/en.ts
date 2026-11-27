@@ -83,7 +83,7 @@ export const EN_ABOUT: AboutCopy = {
   greeting: "Hi, I'm Hà.",
   paragraphs: [
     "Fullstack Developer, currently Frontend Tech Lead at SAPP Academy. Almost 5 years building web systems for EdTech and TravelTech, from React/Next.js interfaces to NestJS and Spring Boot backends and cloud infrastructure.",
-    "Strongest on the frontend: monorepo architecture, performance and engineering process for the team. At SAPP I also work on the backend and infrastructure: I integrated the Payoo POS payment gateway on NestJS, and I led the move of the dev servers, GitLab and the production database from AWS to CMC Cloud without renting extra machines. Each piece of work has before-and-after numbers; many have a detailed write-up in Writing.",
+    "Strongest on the frontend: monorepo architecture, performance and engineering process for the team. At SAPP I also work on the backend and infrastructure: I integrated the Payoo POS payment gateway on NestJS, and I led the move of the dev servers, GitLab and the production database from AWS to CMC Cloud without renting extra machines.",
   ],
   counters: [
     { label: "• Experience", value: "5 years", target: 5, suffix: " years" },
