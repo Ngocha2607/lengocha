@@ -2,6 +2,11 @@
 
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { englishPostCard } from "@/data/writing-en";
+import { EN_WRITING } from "@/i18n/en";
+import { useLocale } from "@/i18n/LocaleProvider";
+import { localizedPath } from "@/i18n/locale";
+import type { WritingCopy } from "@/i18n/types";
 import { trackEvent } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 import { isPlainLeftClick, WindowLink } from "./WindowLink";
@@ -38,6 +43,12 @@ import {
  * real content — the only content a crawler without JavaScript ever sees.
  * Every card, the Back pill and each table-of-contents entry is a real link
  * for the same reason; a plain click is intercepted and stays in the window.
+ *
+ * On the English desktop (/en/writing) the cards show the English title and
+ * summary from src/data/writing-en.ts — or, for a post that has none yet, the
+ * Vietnamese ones marked `lang="vi"` — and every card and article carries the
+ * "In Vietnamese" label. The cards still open the Vietnamese article, whose
+ * own URL (/writing/<slug>) is the same from either desktop.
  */
 
 /**
@@ -69,6 +80,13 @@ const NOTE_CLASS = "font-sans text-[12px] leading-[16.8px] text-black/50";
 // are fine under a cursor and hopeless under a thumb.
 const PILL_BUTTON_CLASS =
   "font-sans cursor-pointer rounded-full border border-black/15 px-3 py-[3px] max-[809px]:py-[7px] text-[11px] leading-[16px] text-black/70 transition-colors hover:border-black/40 hover:text-black";
+
+/** Nothing extra on the Vietnamese desktop; the English is `EN_WRITING` in src/i18n/en.ts. */
+const VI_COPY: WritingCopy = { languageLabel: null };
+
+/** The "In Vietnamese" label: same quiet pill as a tag, so it reads as metadata. */
+const LANGUAGE_LABEL_CLASS =
+  "font-sans rounded-full border border-black/15 bg-black/[0.04] px-2 py-[2px] text-[11px] leading-[15px] font-medium text-black/60";
 
 /** One `article_view` per slug per visit, however many times it is reopened. */
 const viewedSlugs = new Set<string>();
@@ -136,6 +154,18 @@ export function WritingWindow({
   initialPost = null,
   onSlugChange,
 }: WritingWindowProps) {
+  const locale = useLocale();
+  const { languageLabel } = locale === "en" ? EN_WRITING : VI_COPY;
+
+  /**
+   * What a card says: on the English desktop the English title and summary,
+   * or — for a post with no entry yet — the Vietnamese ones, marked `vi`.
+   */
+  const cardText = (post: PostMeta) => {
+    if (locale !== "en") return { title: post.title, summary: post.description, lang: undefined };
+    const english = englishPostCard(post);
+    return { title: english.title, summary: english.summary, lang: english.translated ? undefined : "vi" };
+  };
   const [posts, setPosts] = useState<PostMeta[] | null>(initialPosts);
   const [listError, setListError] = useState<string | null>(null);
   const [activeTag, setActiveTag] = useState<string | null>(null);
@@ -343,7 +373,11 @@ export function WritingWindow({
             measure whatever the frame does. */}
         <div ref={articleTopRef} className="mx-auto w-full min-[880px]:max-w-[824px]">
           <div className="flex items-center justify-between gap-2">
-            <WindowLink href="/writing" onOpen={close} className={PILL_BUTTON_CLASS}>
+            <WindowLink
+              href={localizedPath("/writing", locale)}
+              onOpen={close}
+              className={PILL_BUTTON_CLASS}
+            >
               ← Back
             </WindowLink>
             {/* Only offered once the article exists — a copied link to a 404 helps nobody. */}
@@ -372,7 +406,8 @@ export function WritingWindow({
           ) : !post ? (
             <ArticleSkeleton />
           ) : (
-            <article className="mt-8">
+            // The article is Vietnamese whichever desktop it is read on.
+            <article lang="vi" className="mt-8">
               <header className="border-b border-black/10 pb-6">
                 {/* The page's H1 on /writing/<slug>, so its text is the title
                     and nothing else. The Notion emoji is still drawn in front
@@ -384,12 +419,17 @@ export function WritingWindow({
                 >
                   {post.title}
                 </h1>
-                <p className={cn(LABEL_CLASS, "mt-4")}>
+                <p className={cn(LABEL_CLASS, "mt-4")} lang="en">
                   {formatDate(post.date) ? (
                     <time dateTime={post.date}>{formatDate(post.date)}</time>
                   ) : null}
                   {post.readingMinutes ? <> · {post.readingMinutes} min read</> : null}
                 </p>
+                {languageLabel ? (
+                  <p className="mt-3" lang="en">
+                    <span className={LANGUAGE_LABEL_CLASS}>{languageLabel}</span>
+                  </p>
+                ) : null}
                 {post.tags.length > 0 ? (
                   <ul className="mt-4 flex flex-wrap gap-[6px]" aria-label="Topics">
                     {post.tags.map((tag) => (
@@ -555,14 +595,26 @@ export function WritingWindow({
 
                     {/* h2 under the window's "Writing" H1, so the list reads as
                         a list of articles. Same type as before. */}
-                    <h2 className="font-display mt-[6px] text-[15px] leading-[21px] font-medium tracking-[-0.3px] text-black">
+                    <h2
+                      lang={cardText(post).lang}
+                      className="font-display mt-[6px] text-[15px] leading-[21px] font-medium tracking-[-0.3px] text-black"
+                    >
                       {post.emoji ? `${post.emoji} ` : ""}
-                      {post.title}
+                      {cardText(post).title}
                     </h2>
 
-                    {post.description ? (
-                      <p className="font-sans mt-2 text-[12px] leading-[16.8px] text-black/70">
-                        {post.description}
+                    {cardText(post).summary ? (
+                      <p
+                        lang={cardText(post).lang}
+                        className="font-sans mt-2 text-[12px] leading-[16.8px] text-black/70"
+                      >
+                        {cardText(post).summary}
+                      </p>
+                    ) : null}
+
+                    {languageLabel ? (
+                      <p className="mt-3">
+                        <span className={LANGUAGE_LABEL_CLASS}>{languageLabel}</span>
                       </p>
                     ) : null}
 

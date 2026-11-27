@@ -1,7 +1,11 @@
 "use client";
 
 import Image from "next/image";
-import { useSyncExternalStore } from "react";
+import { Fragment, useSyncExternalStore } from "react";
+import { EN_MENU_BAR } from "@/i18n/en";
+import { useLocale } from "@/i18n/LocaleProvider";
+import { LOCALES, type Locale } from "@/i18n/locale";
+import type { MenuBarCopy } from "@/i18n/types";
 import { cn } from "@/lib/utils";
 import { type PortosAppId, PORTOS_ASSETS } from "@/types/portos";
 import { AppleMenu } from "./AppleMenu";
@@ -15,6 +19,63 @@ interface MenuBarProps {
    * other status icons; it is the one glyph a visitor actually expects to work.
    */
   onSearch?: () => void;
+  /** Where each language's link goes: the current view in that language. */
+  languageTargets: Record<Locale, string>;
+}
+
+const VI_COPY: MenuBarCopy = {
+  languageLabel: "Ngôn ngữ",
+};
+
+/** Each language's own name, announced in that language (`lang` on the link). */
+const LANGUAGE_NAMES: Record<Locale, string> = { vi: "Tiếng Việt", en: "English" };
+
+/**
+ * VI | EN. Plain links rather than buttons: each one is a real URL for the
+ * current view in that language (a crawler and "open in new tab" both work),
+ * and changing language is a full page load anyway — the two languages have
+ * separate root layouts so that `<html lang>` is right in the server HTML.
+ * Nothing switches language automatically; this is the only way.
+ *
+ * Shown at every width, unlike the status icons: it is the one way to reach
+ * the other language.
+ */
+function LanguageSwitch({ targets }: { targets: Record<Locale, string> }) {
+  const locale = useLocale();
+  const copy = locale === "en" ? EN_MENU_BAR : VI_COPY;
+  return (
+    <nav aria-label={copy.languageLabel} className="flex items-center">
+      {LOCALES.map((target, index) => {
+        const current = target === locale;
+        return (
+          <Fragment key={target}>
+            {index > 0 ? (
+              <span aria-hidden="true" className="font-display px-[1px] text-[12px] leading-[18px] text-white/40">
+                |
+              </span>
+            ) : null}
+            <a
+              href={targets[target]}
+              hrefLang={target}
+              lang={target}
+              aria-label={LANGUAGE_NAMES[target]}
+              aria-current={current ? "true" : undefined}
+              title={LANGUAGE_NAMES[target]}
+              className={cn(
+                "font-display rounded-[4px] px-[5px] text-[12px] leading-[18px] font-bold tracking-normal transition-colors",
+                "outline-none focus-visible:bg-white/15",
+                // A thumb needs more than a 12px word to aim at.
+                "max-[809px]:px-[7px] max-[809px]:py-[3px]",
+                current ? "text-white" : "text-white/55 hover:bg-white/15 hover:text-white",
+              )}
+            >
+              {target.toUpperCase()}
+            </a>
+          </Fragment>
+        );
+      })}
+    </nav>
+  );
 }
 
 interface Clock {
@@ -105,9 +166,10 @@ function getServerClockSnapshot(): Clock | null {
  * and the four status icons on the right still are not. The clock shows the
  * visitor's local date and time, and the logo is now a real menu; see AppleMenu.
  *
- * Below 810px only the wifi icon and the time survive.
+ * Below 810px only the language switch, the wifi icon, the magnifier and the
+ * time survive.
  */
-export function MenuBar({ name = "Lê Ngọc Hà", onOpen, onSearch }: MenuBarProps) {
+export function MenuBar({ name = "Lê Ngọc Hà", onOpen, onSearch, languageTargets }: MenuBarProps) {
   const clock = useSyncExternalStore(subscribeToClock, getClockSnapshot, getServerClockSnapshot);
 
   // z-30: above every window (BASE_Z 4 + at most 8 of them) AND the dock
@@ -127,6 +189,7 @@ export function MenuBar({ name = "Lê Ngọc Hà", onOpen, onSearch }: MenuBarPr
 
         {/* Icon & Time */}
         <div className="flex items-center justify-end gap-[6px]">
+          <LanguageSwitch targets={languageTargets} />
           <div className="flex items-center justify-end gap-[3px]">
             {NAV_ICONS.map((icon) => {
               const image = (

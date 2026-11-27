@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useLocale } from "@/i18n/LocaleProvider";
 import { pathForApp } from "@/lib/sections";
 import { PORTOS_ASSETS, type DesktopIcon, type PortosAppId } from "@/types/portos";
 import { WindowLink } from "./WindowLink";
@@ -59,9 +60,10 @@ const HOVER_PLATE_CLASS =
  * link preview sheet, which a button never did.
  */
 function DesktopIconButton({ icon, onOpen }: DesktopIconButtonProps) {
+  const locale = useLocale();
   return (
     <WindowLink
-      href={pathForApp(icon.app) ?? "/"}
+      href={pathForApp(icon.app, locale) ?? "/"}
       onOpen={() => onOpen(icon.app)}
       className="group relative flex h-[78.59px] w-[58px] cursor-pointer flex-col items-center justify-center [-webkit-touch-callout:none]"
     >

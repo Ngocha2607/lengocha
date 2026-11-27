@@ -1,5 +1,8 @@
 "use client";
 
+import { EN_RESUME } from "@/i18n/en";
+import { useLocale } from "@/i18n/LocaleProvider";
+import type { ResumeCopy } from "@/i18n/types";
 import { trackEvent } from "@/lib/analytics";
 
 /** Served straight from `public/`, so the window works offline with the app. */
@@ -29,6 +32,9 @@ function pdfLinkTracking(method: "download" | "new_tab") {
   };
 }
 
+/** The window's text is English in both languages; only the English page needs the note. */
+const VI_COPY: ResumeCopy = { languageNote: null };
+
 const ACTION_CLASS =
   "font-sans rounded-full border border-black/15 px-3 py-[3px] text-[11px] leading-[16px] text-black/70 transition-colors hover:border-black/40 hover:text-black";
 
@@ -53,6 +59,9 @@ const ACTION_CLASS =
  * the feature.
  */
 export function ResumeWindow() {
+  // The CV PDF is Vietnamese. The English page says so beside the file name,
+  // and in the mobile panel, before anyone opens it expecting English.
+  const { languageNote } = useLocale() === "en" ? EN_RESUME : VI_COPY;
   return (
     // `data-no-drag` on the whole body: this window is a document, so selecting
     // and scrolling inside it has to win over dragging the window around.
@@ -74,6 +83,7 @@ export function ResumeWindow() {
           </p>
           <p className="font-sans max-w-[280px] text-[12px] leading-[16.8px] text-black/60">
             Mobile browsers cannot display a PDF inline. Open it in a new tab or save it.
+            {languageNote ? ` ${languageNote}.` : null}
           </p>
           <div className="flex items-center gap-2">
             <a
@@ -101,6 +111,7 @@ export function ResumeWindow() {
       <div className="flex shrink-0 items-center justify-between gap-4 border-t border-black/10 px-4 py-[7px]">
         <p className="font-sans truncate text-[11px] leading-[16px] text-black/45">
           {RESUME_FILENAME}
+          {languageNote ? ` · ${languageNote}` : null}
         </p>
         <div className="flex shrink-0 items-center gap-2">
           <a

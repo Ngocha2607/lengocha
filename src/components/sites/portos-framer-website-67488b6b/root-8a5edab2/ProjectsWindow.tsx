@@ -2,6 +2,10 @@
 
 import { LayoutGrid, Rows3 } from "lucide-react";
 import Image from "next/image";
+import { EN_PROJECTS } from "@/i18n/en";
+import { useLocale } from "@/i18n/LocaleProvider";
+import type { Locale } from "@/i18n/locale";
+import type { ProjectId } from "@/i18n/types";
 import { outboundLinkProps } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 import { PORTOS_ASSETS } from "@/types/portos";
@@ -19,6 +23,8 @@ import { WindowLink } from "./WindowLink";
 export type ProjectsMode = "grid" | "list";
 
 export interface Project {
+  /** Keys the English period and description in src/i18n/en.ts. */
+  id: ProjectId;
   /** Rendered above the title, in the same style as the About timeline dates. */
   period: string;
   title: string;
@@ -49,10 +55,14 @@ export interface Project {
  * `public/Le-Ngoc-Ha-Senior-Frontend-Developer.pdf`, on request; screenshots
  * are from the portfolio. The EVN card is the one entry the CV does not carry —
  * its wording is our own translation of the entry it used to hold.
+ *
+ * Period and description are the only prose; their English is `EN_PROJECTS`
+ * in src/i18n/en.ts, keyed by `id`. Use `projectsFor(locale)`.
  */
-// Exported for Spotlight, which searches the same six cards this window shows.
+// Exported for `projectsFor`, which Spotlight uses to search the same six cards.
 export const PROJECTS: readonly Project[] = [
   {
+    id: "lms",
     period: "2025 — Hiện tại",
     title: "LMS Platform · SAPP Academy",
     description:
@@ -72,6 +82,7 @@ export const PROJECTS: readonly Project[] = [
     writingSlug: "sapp-lms-nen-tang-hoc-va-luyen-thi-acca-cfa-cma",
   },
   {
+    id: "ops",
     period: "2025 — Hiện tại",
     title: "Operations · SAPP Academy",
     description: "18 module vận hành: lớp học, chấm điểm, điểm danh.",
@@ -85,6 +96,7 @@ export const PROJECTS: readonly Project[] = [
     writingSlug: "sapp-ops-he-van-hanh-dao-tao-voi-18-module-nghiep-vu",
   },
   {
+    id: "subscriber",
     period: "2023 — 2025",
     title: "Subscriber Platform · Tweet World Travel",
     description: "Nền tảng quản trị doanh nghiệp du lịch",
@@ -100,6 +112,7 @@ export const PROJECTS: readonly Project[] = [
     writingSlug: "tkg-platform-nen-tang-quan-tri-hang-tour-ban-si",
   },
   {
+    id: "b2b",
     period: "2023 — 2024",
     title: "Website B2B · Tweet World Travel",
     description:
@@ -115,6 +128,7 @@ export const PROJECTS: readonly Project[] = [
     writingSlug: "website-b2b-website-ban-tour-da-ngon-ngu-tren-next-js",
   },
   {
+    id: "newsletter",
     period: "2023 — 2024",
     title: "Newsletter System · Tweet World Travel",
     description: "Công cụ kéo-thả tạo email và hệ thống quản lý người đăng ký.",
@@ -130,6 +144,7 @@ export const PROJECTS: readonly Project[] = [
   },
   {
     // Not on the two-page CV; wording is our own translation, not CV text.
+    id: "evn",
     period: "2022 — 2023",
     title: "EVN Hanoi Power Company",
     description: "UI/UX cho các module quản lý điện lực.",
@@ -142,6 +157,12 @@ export const PROJECTS: readonly Project[] = [
     writingSlug: "evn-ha-noi-cong-cskh-va-cac-module-quan-ly-dien-luc",
   },
 ];
+
+/** The six cards in a language: the Vietnamese prose swapped for the English. */
+export function projectsFor(locale: Locale): readonly Project[] {
+  if (locale === "vi") return PROJECTS;
+  return PROJECTS.map((project) => ({ ...project, ...EN_PROJECTS[project.id] }));
+}
 
 /**
  * One uniform ratio keeps the six cards the same height. The static
@@ -315,6 +336,7 @@ interface ProjectsWindowProps {
  */
 export function ProjectsWindow({ mode, onOpenWriting }: ProjectsWindowProps) {
   const isList = mode === "list";
+  const projects = projectsFor(useLocale());
 
   return (
     <div className="pt-[50px]">
@@ -330,7 +352,7 @@ export function ProjectsWindow({ mode, onOpenWriting }: ProjectsWindowProps) {
                 : "grid-cols-1 min-[560px]:grid-cols-2 min-[880px]:grid-cols-3 min-[880px]:max-w-[var(--portos-content-max)]",
             )}
           >
-            {PROJECTS.map((project, index) => {
+            {projects.map((project, index) => {
               const shared =
                 "group flex w-full flex-col items-start text-left transition-opacity duration-200";
               const interactive = cn(shared, "cursor-pointer hover:opacity-95");

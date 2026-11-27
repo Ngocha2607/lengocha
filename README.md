@@ -65,14 +65,16 @@ everything else works untouched.
 src/
   app/
     api/writing/    # Notion-backed routes for the Writing window
-    layout.tsx      # Root layout, fonts, metadata
-    page.tsx        # Renders the desktop shell
+    (vi)/           # Vietnamese pages at the root URLs (<html lang="vi">)
+    en/             # English pages under /en (<html lang="en">)
+    _shared/        # The document, fonts and pages both languages render
     globals.css     # Tailwind v4 theme + design tokens
   components/
     sites/portos-framer-website-67488b6b/root-8a5edab2/
                     # The desktop shell and every window, one file each
     ui/             # shadcn/ui primitives
-  lib/              # cn(), Notion client, Notion-blocks-to-HTML
+  i18n/en.ts        # Every English string; Vietnamese stays in its component
+  lib/              # cn(), Notion client, Notion-blocks-to-HTML, analytics
   types/portos.ts   # Shared types and the PORTOS_ASSETS path constant
 public/
   sites/portos-framer-website-67488b6b/root-8a5edab2/

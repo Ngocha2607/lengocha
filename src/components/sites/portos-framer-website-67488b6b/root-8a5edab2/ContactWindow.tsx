@@ -2,6 +2,9 @@
 
 import { CircleCheck, FileText, Globe, Mail, MapPin } from "lucide-react";
 import { useState } from "react";
+import { EN_CONTACT } from "@/i18n/en";
+import { useLocale } from "@/i18n/LocaleProvider";
+import type { ContactCopy } from "@/i18n/types";
 import { outboundLinkProps, trackEvent } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 import { GitHubGlyph, LinkedInGlyph } from "./SocialIcons";
@@ -95,6 +98,19 @@ const FORMSUBMIT_ENDPOINT = `https://formsubmit.co/ajax/${CONTACT_EMAIL}`;
 
 type SendStatus = "idle" | "sending" | "sent" | "error";
 
+/**
+ * The window's Vietnamese prose. Labels, placeholders and the button are
+ * English in both languages (as on the live site); the English of these lines
+ * is `EN_CONTACT` in src/i18n/en.ts.
+ */
+const VI_COPY: ContactCopy = {
+  availability: "Available for remote · Hà Nội, Việt Nam",
+  location: "Hà Nội, Việt Nam · UTC+7",
+  sent: "Đã gửi thành công — tôi sẽ phản hồi sớm nhất có thể.",
+  failedBefore: "Gửi không thành công. Vui lòng gửi trực tiếp tới",
+  failedAfter: ".",
+};
+
 /** What the submit button reads in each state — both stacked copies of it. */
 const BUTTON_LABEL: Record<SendStatus, string> = {
   idle: "Send Message",
@@ -135,6 +151,8 @@ const SLIDE_TRANSITION = "transition-transform duration-300 ease-[ease]";
  * and stepping the 72px heading down is our own graceful fallback.
  */
 export function ContactWindow() {
+  const locale = useLocale();
+  const copy = locale === "en" ? EN_CONTACT : VI_COPY;
   const [status, setStatus] = useState<SendStatus>("idle");
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -162,7 +180,11 @@ export function ContactWindow() {
           name: data.get("Name"),
           email: data.get("EMAIL"),
           message: data.get("MESSAGE"),
-          _subject: "Portfolio contact — lengocha.vercel.app",
+          // Says which language the visitor wrote from, so the reply can match.
+          _subject:
+            locale === "en"
+              ? "Portfolio contact (English page) — lengocha.vercel.app"
+              : "Portfolio contact — lengocha.vercel.app",
           // A table-layout email instead of raw key/value lines.
           _template: "table",
           // The AJAX endpoint cannot show FormSubmit's captcha page, so it
@@ -206,7 +228,7 @@ export function ContactWindow() {
               {"Let's talk"}
             </h2>
             <p className="font-display text-[16px] font-normal leading-[22.4px] tracking-[-0.16px] text-black/60">
-              Available for remote · Hà Nội, Việt Nam
+              {copy.availability}
             </p>
           </div>
 
@@ -309,13 +331,11 @@ export function ContactWindow() {
                 )}
               >
                 {status === "sent" ? (
-                  <span className="text-os-green">
-                    Đã gửi thành công — tôi sẽ phản hồi sớm nhất có thể.
-                  </span>
+                  <span className="text-os-green">{copy.sent}</span>
                 ) : null}
                 {status === "error" ? (
                   <span className="text-[#a03225]">
-                    Gửi không thành công. Vui lòng gửi trực tiếp tới{" "}
+                    {copy.failedBefore}{" "}
                     <a
                       href={`mailto:${CONTACT_EMAIL}`}
                       className="underline"
@@ -323,7 +343,7 @@ export function ContactWindow() {
                     >
                       {CONTACT_EMAIL}
                     </a>
-                    .
+                    {copy.failedAfter}
                   </span>
                 ) : null}
               </p>
@@ -356,7 +376,7 @@ export function ContactWindow() {
                 <p className={BLOCK_LABEL}>LOCATION</p>
                 <p className={cn(BLOCK_VALUE, "flex items-center gap-2")}>
                   <MapPin className={ICON_CLASS} aria-hidden="true" />
-                  Hà Nội, Việt Nam · UTC+7
+                  {copy.location}
                 </p>
               </div>
 

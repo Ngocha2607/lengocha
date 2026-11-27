@@ -1,6 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import { EN_DECISIONS } from "@/i18n/en";
+import { useLocale } from "@/i18n/LocaleProvider";
+import type {
+  DecisionCopy,
+  DecisionStatus,
+  DecisionsCopy,
+  HighlightCopy,
+} from "@/i18n/types";
 import { cn } from "@/lib/utils";
 
 /**
@@ -25,38 +33,16 @@ import { cn } from "@/lib/utils";
  * portfolio content this window used to carry in English. A third group of six
  * working practices was removed with the rename — it is in git history.
  *
+ * The English is `EN_DECISIONS` in src/i18n/en.ts, with the same ids, picked
+ * by locale.
+ *
  * The decision log keeps the entry that did NOT ship. That is the point of
  * keeping one at all: a log with no rejections is a brag sheet, and "what did
  * you decide not to do" is the question this window exists to answer.
  */
 
-type DecisionStatus = "Shipped" | "Held" | "Reverted";
-
-interface Highlight {
-  kind: "highlight";
-  id: string;
-  title: string;
-  period: string;
-  org: string;
-  detail: string;
-}
-
-interface Decision {
-  kind: "decision";
-  id: string;
-  status: DecisionStatus;
-  year: string;
-  title: string;
-  /** One line a non-engineer takes away without opening the entry. */
-  upshot: string;
-  context: string;
-  options: readonly string[];
-  /** Index into `options` of the one taken, so the choice is unambiguous. */
-  chosen: number;
-  decision: string;
-  consequences: readonly string[];
-}
-
+type Highlight = HighlightCopy;
+type Decision = DecisionCopy;
 type Entry = Highlight | Decision;
 
 const HIGHLIGHTS: readonly Highlight[] = [
@@ -164,13 +150,31 @@ const DECISIONS: readonly Decision[] = [
   },
 ];
 
-/** Group labels follow the CV's own English section headers. */
-const GROUPS: readonly { label: string; items: readonly Entry[] }[] = [
-  { label: "Leadership", items: HIGHLIGHTS },
-  { label: "Technical Decisions", items: DECISIONS },
-];
+/** The chip text, exactly as the CV prints each state. */
+const STATUS_LABEL: Record<DecisionStatus, string> = {
+  Shipped: "Đã triển khai",
+  Held: "Đã đo, chưa triển khai",
+  Reverted: "Đã gỡ bỏ",
+};
 
-const ALL: readonly Entry[] = GROUPS.flatMap((g) => g.items);
+const VI_COPY: DecisionsCopy = {
+  statusLabels: STATUS_LABEL,
+  highlights: HIGHLIGHTS,
+  decisions: DECISIONS,
+};
+
+interface Group {
+  label: string;
+  items: readonly Entry[];
+}
+
+/** Group labels follow the CV's own English section headers, in both languages. */
+function groupsOf(copy: DecisionsCopy): readonly Group[] {
+  return [
+    { label: "Leadership", items: copy.highlights },
+    { label: "Technical Decisions", items: copy.decisions },
+  ];
+}
 
 /** The one line under each title in the list — a notes app's preview snippet. */
 function previewOf(entry: Entry): string {
@@ -182,12 +186,12 @@ function previewOf(entry: Entry): string {
   }
 }
 
-function metaOf(entry: Entry): string {
+function metaOf(entry: Entry, statusLabels: Record<DecisionStatus, string>): string {
   switch (entry.kind) {
     case "highlight":
       return `${entry.period} · ${entry.org}`;
     case "decision":
-      return `${STATUS_LABEL[entry.status]} · ${entry.year}`;
+      return `${statusLabels[entry.status]} · ${entry.year}`;
   }
 }
 
@@ -209,18 +213,17 @@ const STATUS_TONE: Record<DecisionStatus, string> = {
   Reverted: "border-[#b03a2e]/30 text-[#a03225]",
 };
 
-/** The chip text, exactly as the CV prints each state. */
-const STATUS_LABEL: Record<DecisionStatus, string> = {
-  Shipped: "Đã triển khai",
-  Held: "Đã đo, chưa triển khai",
-  Reverted: "Đã gỡ bỏ",
-};
-
 /**
  * One entry at full length. An h2, not the h1 it used to be: the window's own
  * title is the page's H1 on /decisions, and a page gets exactly one.
  */
-function Detail({ entry }: { entry: Entry }) {
+function Detail({
+  entry,
+  statusLabels,
+}: {
+  entry: Entry;
+  statusLabels: Record<DecisionStatus, string>;
+}) {
   if (entry.kind === "highlight") {
     return (
       <article>
@@ -239,7 +242,7 @@ function Detail({ entry }: { entry: Entry }) {
     <article>
       <div className="flex flex-wrap items-center gap-2">
         <span className={cn(CHIP_CLASS, STATUS_TONE[entry.status])}>
-          {STATUS_LABEL[entry.status]}
+          {statusLabels[entry.status]}
         </span>
         <span className={cn(ROW_META, "text-black/45")}>{entry.year}</span>
       </div>
@@ -291,8 +294,11 @@ function Detail({ entry }: { entry: Entry }) {
 }
 
 export function DecisionsWindow() {
-  const [selectedId, setSelectedId] = useState(ALL[0].id);
-  const selected = ALL.find((e) => e.id === selectedId) ?? ALL[0];
+  const copy = useLocale() === "en" ? EN_DECISIONS : VI_COPY;
+  const groups = groupsOf(copy);
+  const all: readonly Entry[] = groups.flatMap((g) => g.items);
+  const [selectedId, setSelectedId] = useState(all[0].id);
+  const selected = all.find((e) => e.id === selectedId) ?? all[0];
 
   return (
     // `calc(100% - 44px)`: WindowFrame keeps its 44px title bar INSIDE the scroll
@@ -308,7 +314,7 @@ export function DecisionsWindow() {
         aria-label="Leadership and technical decisions"
         className="portos-scroll w-full shrink-0 border-black/10 min-[700px]:w-[250px] min-[700px]:border-r"
       >
-        {GROUPS.map((group) => (
+        {groups.map((group) => (
           <div key={group.label}>
             <p className={GROUP_LABEL}>{group.label}</p>
             {group.items.map((item) => {
@@ -328,7 +334,7 @@ export function DecisionsWindow() {
                     {item.title}
                   </span>
                   <span className={cn(ROW_META, "line-clamp-1 text-black/45")}>
-                    {metaOf(item)}
+                    {metaOf(item, copy.statusLabels)}
                   </span>
                   <span className={cn(ROW_META, "line-clamp-2 text-black/55")}>
                     {previewOf(item)}
@@ -347,9 +353,9 @@ export function DecisionsWindow() {
           than only the selected one existing. Same screen, but /decisions now
           carries all six write-ups in its server HTML, not just the first. */}
       <section className="portos-scroll hidden min-w-0 flex-1 px-6 py-6 min-[700px]:block">
-        {ALL.map((entry) => (
+        {all.map((entry) => (
           <div key={entry.id} hidden={entry.id !== selected.id}>
-            <Detail entry={entry} />
+            <Detail entry={entry} statusLabels={copy.statusLabels} />
           </div>
         ))}
       </section>

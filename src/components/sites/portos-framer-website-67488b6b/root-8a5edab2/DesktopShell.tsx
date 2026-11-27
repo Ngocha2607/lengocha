@@ -3,6 +3,8 @@
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { trackEvent, type OpenVia, type TrackedSection } from "@/lib/analytics";
+import { useLocale } from "@/i18n/LocaleProvider";
+import { LOCALES, type Locale } from "@/i18n/locale";
 import { pathForApp } from "@/lib/sections";
 import {
   PORTOS_ASSETS,
@@ -128,15 +130,39 @@ function reportWindowOpen(app: PortosAppId, via: OpenVia): void {
 }
 
 /**
- * The URL the desktop should show: the front window's own page, the article
- * the Writing window is on, or the home page when nothing is open. Every one
- * of these is a real route (see app/[section] and app/writing), so whatever a
+ * The URL the desktop should show in a language: the front window's own page,
+ * the article the Writing window is on, or the home page when nothing is open.
+ * Every one of these is a real route (see app/(vi) and app/en), so whatever a
  * visitor copies out of the address bar opens the same view.
+ *
+ * An article has ONE URL, the Vietnamese `/writing/<slug>`, whichever desktop
+ * it is read in: there is no English twin to point at.
  */
-function pathForView(front: PortosAppId | null, writingView: string | null): string {
-  if (front === null) return "/";
+function pathForView(
+  front: PortosAppId | null,
+  writingView: string | null,
+  locale: Locale,
+): string {
   if (front === "writing" && writingView) return `/writing/${writingView}`;
-  return pathForApp(front) ?? "/";
+  const home = locale === "en" ? "/en" : "/";
+  if (front === null) return home;
+  return pathForApp(front, locale) ?? home;
+}
+
+/**
+ * Where the VI | EN switch goes from the current view: the same window in the
+ * other language. An article has no English twin, so from an article EN goes
+ * to the English Writing list, and VI to the article itself.
+ */
+function switchTargets(front: PortosAppId | null, writingView: string | null): Record<Locale, string> {
+  const targets = {} as Record<Locale, string>;
+  for (const locale of LOCALES) {
+    targets[locale] =
+      locale === "en" && front === "writing" && writingView
+        ? pathForView("writing", null, "en")
+        : pathForView(front, writingView, locale);
+  }
+  return targets;
 }
 
 interface DesktopShellProps {
@@ -165,6 +191,12 @@ export function DesktopShell({
   initialPosts = null,
   initialPost = null,
 }: DesktopShellProps) {
+  /**
+   * The route's language — `en` under /en, Vietnamese everywhere else — from
+   * the LocaleProvider the route wraps the shell in (app/_shared). Every
+   * window reads the same context.
+   */
+  const locale = useLocale();
   /**
    * The window a route boots with, and only until the visitor closes it. It is
    * mounted while the pre-loader still covers the desktop (on the server, in
@@ -230,7 +262,7 @@ export function DesktopShell({
 
   /** The window on top. It is "the page": it owns the address bar and the H1. */
   const front = open.length > 0 ? open[open.length - 1] : null;
-  const viewPath = pathForView(front, writingView);
+  const viewPath = pathForView(front, writingView, locale);
 
   /**
    * Mirrors the front window into the address bar WITHOUT a router
@@ -405,7 +437,11 @@ export function DesktopShell({
       {/* Constant scrim — measured at rgba(0,0,0,0.24) whether or not a window is open. */}
       <div className="absolute inset-0 bg-black/24" aria-hidden="true" />
 
-      <MenuBar onOpen={openWindow} onSearch={() => setSpotlightOpen(true)} />
+      <MenuBar
+        onOpen={openWindow}
+        onSearch={() => setSpotlightOpen(true)}
+        languageTargets={switchTargets(front, writingView)}
+      />
 
       {/* Desktop container: inset 50px (desktop) / 30px (tablet) / 20px (mobile),
           24px from the bottom at every breakpoint. At the desktop breakpoint only, the

@@ -55,23 +55,35 @@ to match any reference site.
 ```
 src/
   app/
+    (vi)/           # Vietnamese pages, at the root URLs — own root layout, <html lang="vi">
+      [section]/    # /about, /experience, ... — the desktop booted with that window open
+      writing/      # /writing and /writing/[slug], server-rendered from Notion (ISR)
+      page.tsx      # / — the desktop shell, no window open
+    en/             # English pages under /en — own root layout, <html lang="en">
+                    # (/en, /en/[section], /en/writing; articles stay Vietnamese-only)
+    _shared/        # What both languages render: the <html> document, fonts, home,
+                    # window pages, Writing list (private folder, not a route)
     api/writing/    # Notion-backed routes for the Writing window
-    [section]/      # /about, /experience, ... — the desktop booted with that window open
-    writing/        # /writing and /writing/[slug], server-rendered from Notion (ISR)
-    layout.tsx      # Root layout, fonts, site-wide metadata defaults
-    page.tsx        # Renders the desktop shell (home: no window open)
+    global-not-found.tsx  # 404 for unmatched URLs (two root layouts, so no shared one)
     globals.css     # Tailwind v4 theme + design tokens
   components/
     sites/portos-framer-website-67488b6b/root-8a5edab2/
                     # The desktop shell and every window, one file each
     ui/             # shadcn/ui primitives
+  i18n/
+    en.ts           # EVERY English string (Vietnamese stays in its component)
+    locale.ts       # vi/en, /en URL mapping
+    types.ts        # Copy shapes shared by both languages
+  data/
+    writing-en.ts   # English titles/summaries for /en/writing, keyed by slug
   lib/
+    analytics.ts    # trackEvent() and the analytics ids (Vercel, Umami, Cloudflare, GA4)
     utils.ts        # cn() utility (shadcn)
     notion.ts       # Notion client and query helpers
     markdown.ts     # Notion blocks -> HTML
     posts.ts        # One rendered article, shared by the API route and the page
-    sections.ts     # Which windows are pages, their URLs and search copy
-    seo.ts          # Per-page metadata builder, meta-description overrides
+    sections.ts     # Which windows are pages, their URLs (per language) and search copy
+    seo.ts          # Per-page metadata builder (canonical, hreflang), meta-description overrides
     site.ts         # Origin, site title/description, Person JSON-LD
   types/
     portos.ts       # Shared types and the PORTOS_ASSETS path constant
