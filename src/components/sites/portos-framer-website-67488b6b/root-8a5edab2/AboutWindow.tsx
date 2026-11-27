@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { PORTOS_ASSETS, type AboutCounter } from "@/types/portos";
 import { AboutBulletBlocks, AboutExperience } from "./AboutDetails";
+import { AboutTestimonials } from "./AboutTestimonials";
 import { useHydrated } from "./useHydrated";
 
 /**
@@ -254,6 +255,10 @@ export function AboutWindow() {
 
         {/* Region 2 — full width, portrait released. */}
         <AboutExperience />
+
+        {/* Region 3 — what colleagues say. Renders nothing when this
+            deployment has no entry it may show (see data/testimonials.ts). */}
+        <AboutTestimonials />
       </div>
     </div>
   );
