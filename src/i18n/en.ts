@@ -44,7 +44,7 @@ export const EN_META: MetaCopy = {
   // VI: SECTION_PAGES in lib/sections.ts.
   sections: {
     about:
-      "Lê Ngọc Hà, Fullstack Developer, Frontend Tech Lead at SAPP Academy. Almost 5 years of EdTech and TravelTech web: React, Next.js, NestJS, Spring Boot and cloud.",
+      "Fullstack Developer and Frontend Tech Lead at SAPP Academy. Almost 5 years building EdTech and TravelTech web systems with React, Next.js, NestJS and cloud.",
     experience:
       "Lê Ngọc Hà's Fullstack experience: Frontend Tech Lead at SAPP Academy (Payoo POS on NestJS, AWS to CMC Cloud move), Tweet World Travel, Minastik.",
     projects:
@@ -70,7 +70,8 @@ export const EN_MENU_BAR: MenuBarCopy = {
 /** VI: DesktopIntro.tsx. The H1 ("Lê Ngọc Hà — Fullstack Developer") is the same. */
 export const EN_DESKTOP_INTRO: DesktopIntroCopy = {
   closeLabel: "Close the introduction",
-  tagline: "Frontend Tech Lead at SAPP Academy. React, Next.js, TypeScript, NestJS on the backend, and cloud.",
+  tagline:
+    "Frontend Tech Lead at SAPP Academy. React, Next.js and TypeScript on the frontend; NestJS and cloud on the backend.",
   navLabel: "Sections",
 };
 
@@ -82,7 +83,7 @@ export const EN_ABOUT: AboutCopy = {
   greeting: "Hi, I'm Hà.",
   paragraphs: [
     "Fullstack Developer, currently Frontend Tech Lead at SAPP Academy. Almost 5 years building web systems for EdTech and TravelTech, from React/Next.js interfaces to NestJS and Spring Boot backends and cloud infrastructure.",
-    "Strongest on the frontend: monorepo architecture, performance and engineering process for the team. At SAPP I also work on the backend and infrastructure: I integrated the Payoo POS payment gateway on NestJS, and I led the move of the dev servers, GitLab and the production database from AWS to CMC Cloud without renting extra machines. Each piece of work has before and after measurements, recorded in Writing.",
+    "Strongest on the frontend: monorepo architecture, performance and engineering process for the team. At SAPP I also work on the backend and infrastructure: I integrated the Payoo POS payment gateway on NestJS, and I led the move of the dev servers, GitLab and the production database from AWS to CMC Cloud without renting extra machines. Each piece of work has before-and-after numbers; many have a detailed write-up in Writing.",
   ],
   counters: [
     { label: "• Experience", value: "5 years", target: 5, suffix: " years" },
@@ -204,7 +205,7 @@ export const EN_PROJECTS: Record<ProjectId, ProjectCopy> = {
   },
   subscriber: {
     period: "2023 — 2025",
-    description: "Management platform for a travel business",
+    description: "Management platform for a travel business.",
   },
   b2b: {
     period: "2023 — 2024",

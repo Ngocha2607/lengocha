@@ -14,7 +14,7 @@ Titles are the window titles and are the same in both languages: “Lê Ngọc H
 | Page | Meta description (characters) |
 |---|---|
 | `/en` | Fullstack Developer, Frontend Tech Lead at SAPP Academy: React, Next.js, TypeScript on the frontend; NestJS and cloud on the backend. Explore it like a Mac. (156) |
-| `/en/about` | Lê Ngọc Hà, Fullstack Developer, Frontend Tech Lead at SAPP Academy. Almost 5 years of EdTech and TravelTech web: React, Next.js, NestJS, Spring Boot and cloud. (160) |
+| `/en/about` | Fullstack Developer and Frontend Tech Lead at SAPP Academy. Almost 5 years building EdTech and TravelTech web systems with React, Next.js, NestJS and cloud. (156) |
 | `/en/experience` | Lê Ngọc Hà's Fullstack experience: Frontend Tech Lead at SAPP Academy (Payoo POS on NestJS, AWS to CMC Cloud move), Tweet World Travel, Minastik. (145) |
 | `/en/projects` | Projects by Lê Ngọc Hà: SAPP Academy's LMS and operations system; Tweet World Travel's admin platform, B2B website and newsletter; EVN Hanoi modules. (149) |
 | `/en/contact` | Contact Lê Ngọc Hà by email, GitHub or LinkedIn. Available for remote work, currently in Hanoi, Vietnam (UTC+7). (112) |
@@ -34,7 +34,7 @@ Vietnamese originals: `SITE_DESCRIPTION` in `src/lib/site.ts`, `SECTION_PAGES` i
 Vietnamese original: `DesktopIntro.tsx`.
 
 - Heading (H1): “Lê Ngọc Hà — Fullstack Developer”
-- Line: “Frontend Tech Lead at SAPP Academy. React, Next.js, TypeScript, NestJS on the backend, and cloud.”
+- Line: “Frontend Tech Lead at SAPP Academy. React, Next.js and TypeScript on the frontend; NestJS and cloud on the backend.”
 - Close button label: “Close the introduction”
 - Links label: “Sections”; links: About, Experience, Projects, Writing, Contact
 
@@ -46,7 +46,7 @@ Vietnamese originals: `AboutWindow.tsx` (greeting, paragraphs, counters), `About
 
 - Greeting: “Hi, I'm Hà.”
 - Paragraph 1: “Fullstack Developer, currently Frontend Tech Lead at SAPP Academy. Almost 5 years building web systems for EdTech and TravelTech, from React/Next.js interfaces to NestJS and Spring Boot backends and cloud infrastructure.”
-- Paragraph 2: “Strongest on the frontend: monorepo architecture, performance and engineering process for the team. At SAPP I also work on the backend and infrastructure: I integrated the Payoo POS payment gateway on NestJS, and I led the move of the dev servers, GitLab and the production database from AWS to CMC Cloud without renting extra machines. Each piece of work has before and after measurements, recorded in Writing.”
+- Paragraph 2: “Strongest on the frontend: monorepo architecture, performance and engineering process for the team. At SAPP I also work on the backend and infrastructure: I integrated the Payoo POS payment gateway on NestJS, and I led the move of the dev servers, GitLab and the production database from AWS to CMC Cloud without renting extra machines. Each piece of work has before-and-after numbers; many have a detailed write-up in Writing.”
 
 ### Counters
 
@@ -125,7 +125,7 @@ Vietnamese original: `PROJECTS` in `ProjectsWindow.tsx`. Titles, tags and image 
 |---|---|---|
 | LMS Platform · SAPP Academy | 2025 — Present | Online learning management system; technical lead for the frontend. |
 | Operations · SAPP Academy | 2025 — Present | 18 operations modules: classes, grading, attendance. |
-| Subscriber Platform · Tweet World Travel | 2023 — 2025 | Management platform for a travel business |
+| Subscriber Platform · Tweet World Travel | 2023 — 2025 | Management platform for a travel business. |
 | Website B2B · Tweet World Travel | 2023 — 2024 | Multilingual travel e-commerce platform serving ~1,000 users/month; page load 3.2s → 1.1s, Lighthouse 85. |
 | Newsletter System · Tweet World Travel | 2023 — 2024 | Drag-and-drop email builder and subscriber management system. |
 | EVN Hanoi Power Company | 2022 — 2023 | UI/UX for power utility management modules. |
