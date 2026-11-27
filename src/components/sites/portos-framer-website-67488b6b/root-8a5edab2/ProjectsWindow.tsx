@@ -4,6 +4,7 @@ import { LayoutGrid, Rows3 } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { PORTOS_ASSETS } from "@/types/portos";
+import { WindowLink } from "./WindowLink";
 
 /**
  * The two layouts the title-bar switch flips between.
@@ -35,8 +36,8 @@ export interface Project {
   href?: string;
   /**
    * Set instead of `href` when the write-up lives in this site's own Writing
-   * window. These used to be absolute links to `/writing/<slug>`, which 404s:
-   * the articles are read inside the desktop and no such page route exists.
+   * window. The card links to `/writing/<slug>` — a real route now — and a
+   * plain click opens the article in the Writing window instead of navigating.
    */
   writingSlug?: string;
 }
@@ -333,21 +334,20 @@ export function ProjectsWindow({ mode, onOpenWriting }: ProjectsWindowProps) {
                 "group flex w-full flex-col items-start text-left transition-opacity duration-200";
               const interactive = cn(shared, "cursor-pointer hover:opacity-95");
 
-              // An internal write-up opens the Writing window rather than
-              // navigating. There is no /writing/<slug> route — the articles are
-              // read inside the desktop — so linking to one only ever 404'd.
+              // An internal write-up: a real link to the article's page, whose
+              // plain click opens it in the Writing window instead.
               if (project.writingSlug) {
                 const slug = project.writingSlug;
                 return (
-                  <button
+                  <WindowLink
                     key={index}
-                    type="button"
+                    href={`/writing/${slug}`}
+                    onOpen={() => onOpenWriting(slug)}
                     data-no-drag
-                    onClick={() => onOpenWriting(slug)}
                     className={interactive}
                   >
                     <ProjectCardBody project={project} isList={isList} />
-                  </button>
+                  </WindowLink>
                 );
               }
 

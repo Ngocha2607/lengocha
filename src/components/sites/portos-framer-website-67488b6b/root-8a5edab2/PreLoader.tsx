@@ -92,12 +92,25 @@ interface PreLoaderProps {
 /**
  * Full-screen intro overlay that plays once and removes itself.
  *
- * The exit is driven entirely by `container-wrap` collapsing its height from
- * `100vh` to `2px`. Because `container-mask` is absolutely bottom-anchored
- * inside that wrap, the collapse carries the mask up and out of frame while its
- * border-radius rounds to an ellipse — no manual translation involved. The
- * headline lives *inside* the mask, so the ellipse clips the text and the
- * background together as it closes.
+ * The exit carries `container-wrap` up until only its bottom 2px are left on
+ * screen, taking `container-mask` (bottom-anchored inside it) up and out of
+ * frame while the mask's border-radius rounds to an ellipse. The headline
+ * lives *inside* the mask, so the ellipse clips the text and the background
+ * together as it closes.
+ *
+ * That travel is a `transform`, and it used to be the wrap's `height` (100vh
+ * to 2px), which drew exactly the same frames: the mask rides the wrap's
+ * bottom edge either way, and the clip at the top is the viewport's. The
+ * difference is invisible and large. A height change moves the mask by
+ * LAYOUT, so every frame of the exit counted as a layout shift of a
+ * viewport-sized element: about 40 shifts in one second, measured at 0.29 CLS
+ * on a 1440px desktop and 0.46 on a 390px phone. A transform is
+ * compositor-only and does not count; the same measurement now reads 0.
+ *
+ * None of the text here is a heading. It is decoration over the real page
+ * (`aria-hidden`), and its old `<h1>Portfolio</h1>` was the only H1 in every
+ * page's server HTML — the one heading a crawler would take for the page's
+ * subject. The tags changed; the type did not.
  */
 export function PreLoader({ onFinish }: PreLoaderProps) {
   const [phase, setPhase] = useState<Phase>("in");
@@ -148,12 +161,14 @@ export function PreLoader({ onFinish }: PreLoaderProps) {
       className="fixed inset-0 z-10 flex h-full w-full items-center justify-center overflow-clip"
     >
       <div className="flex h-full w-full flex-col items-center justify-between overflow-clip">
-        {/* container-wrap — its height is the animated property that drives the exit. */}
+        {/* container-wrap — its translation is what drives the exit. Moving
+            it up by 100vh - 2px leaves the same 2px on screen that collapsing
+            its height to 2px used to. */}
         <div
-          className="relative flex w-full flex-col items-center justify-end gap-[10px] overflow-clip"
+          className="relative flex h-screen w-full flex-col items-center justify-end gap-[10px] overflow-clip"
           style={{
-            height: isOut ? "2px" : "100vh",
-            transition: reduced ? undefined : `height ${EXIT_DURATION}ms ${EASE}`,
+            transform: isOut ? "translateY(calc(2px - 100vh))" : "translateY(0px)",
+            transition: reduced ? undefined : `transform ${EXIT_DURATION}ms ${EASE}`,
           }}
         >
           {/* container-mask — bleeds 144px past both edges, bottom-anchored at 10px.
@@ -207,7 +222,7 @@ export function PreLoader({ onFinish }: PreLoaderProps) {
               <div className="flex items-center justify-center">
                 {/* Title Wrapper */}
                 <div className="z-[1] flex w-full max-w-[433px] flex-col items-center justify-center gap-2">
-                  <h5
+                  <p
                     className={cn(
                       "whitespace-pre text-center font-sans font-[200] text-white/70",
                       "text-[16px] leading-[20.8px] tracking-[-0.32px]",
@@ -216,9 +231,9 @@ export function PreLoader({ onFinish }: PreLoaderProps) {
                     )}
                   >
                     {HEADING_KICKER}
-                  </h5>
+                  </p>
 
-                  <h1
+                  <p
                     className={cn(
                       "whitespace-pre text-start font-display font-bold text-white",
                       "text-[70px] leading-[70px] tracking-[-0.7px]",
@@ -227,7 +242,7 @@ export function PreLoader({ onFinish }: PreLoaderProps) {
                     )}
                   >
                     {HEADING_TITLE}
-                  </h1>
+                  </p>
 
                   <p className="whitespace-pre text-center font-sans text-[12px] font-normal leading-[16.8px] text-white/80">
                     {Array.from(TAGLINE).map((character, index) => (

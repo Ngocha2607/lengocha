@@ -4,6 +4,15 @@ const nextConfig: NextConfig = {
   /* config options here */
   // output: "standalone",
 
+  /**
+   * When this build was made, for the sitemap's `lastmod` on pages whose
+   * content only changes with a deploy (home and the window pages). Inlined at
+   * build time, so every server instance of one deploy reports the same date.
+   */
+  env: {
+    SITE_BUILT_AT: new Date().toISOString(),
+  },
+
   images: {
     /**
      * Next 16 narrowed `images.qualities` from "anything" to `[75]`, and a

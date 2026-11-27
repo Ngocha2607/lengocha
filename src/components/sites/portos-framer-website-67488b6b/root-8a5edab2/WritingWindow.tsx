@@ -4,12 +4,14 @@ import { track } from "@vercel/analytics";
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
+import { isPlainLeftClick, WindowLink } from "./WindowLink";
 import {
   fetchPost,
   fetchPostList,
   getCachedPost,
   invalidatePost,
   prefetchPost,
+  primePost,
   type PostDetail,
   type PostMeta,
 } from "./writingClient";
@@ -30,17 +32,33 @@ import {
  * Articles cross-reference each other with Notion URLs; the server rewrites the
  * ones it recognises to `/writing/<slug>` anchors tagged `data-post`, and this
  * window intercepts those clicks to navigate in place instead of leaving.
+ *
+ * On /writing and /writing/<slug> the window does not start empty: the route
+ * hands it the list or the rendered article, so the server HTML carries the
+ * real content — the only content a crawler without JavaScript ever sees.
+ * Every card, the Back pill and each table-of-contents entry is a real link
+ * for the same reason; a plain click is intercepted and stays in the window.
  */
 
-/** Matches the article dates on the owner's own site. */
+/**
+ * Matches the article dates on the owner's own site.
+ *
+ * Pinned to the author's time zone. These dates are rendered on the server
+ * now and must hydrate to the same string in the browser — and a date-only
+ * value like "2026-09-05" is midnight UTC, which the old local-time format
+ * showed as September 4 to anyone west of Greenwich.
+ */
+const DATE_FORMAT = new Intl.DateTimeFormat("en-US", {
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+  timeZone: "Asia/Ho_Chi_Minh",
+});
+
 function formatDate(iso: string): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "";
-  return new Intl.DateTimeFormat("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  }).format(date);
+  return DATE_FORMAT.format(date);
 }
 
 const LABEL_CLASS = "font-sans text-[11px] leading-[15px] font-medium tracking-[0.14em] text-black/45";
@@ -101,6 +119,10 @@ interface WritingWindowProps {
    * links to a write-up — a project card, Spotlight, or the /writing/[slug] route.
    */
   initialSlug?: string | null;
+  /** The list as the server rendered it; shown at once, then refreshed. */
+  initialPosts?: PostMeta[] | null;
+  /** `initialSlug`'s article, already rendered on the server. */
+  initialPost?: PostDetail | null;
   /**
    * Reports every navigation (article opened, back to list) so the shell can
    * keep the address bar honest. Null means "showing the list".
@@ -108,8 +130,13 @@ interface WritingWindowProps {
   onSlugChange?: (slug: string | null) => void;
 }
 
-export function WritingWindow({ initialSlug = null, onSlugChange }: WritingWindowProps) {
-  const [posts, setPosts] = useState<PostMeta[] | null>(null);
+export function WritingWindow({
+  initialSlug = null,
+  initialPosts = null,
+  initialPost = null,
+  onSlugChange,
+}: WritingWindowProps) {
+  const [posts, setPosts] = useState<PostMeta[] | null>(initialPosts);
   const [listError, setListError] = useState<string | null>(null);
   const [activeTag, setActiveTag] = useState<string | null>(null);
 
@@ -124,7 +151,11 @@ export function WritingWindow({ initialSlug = null, onSlugChange }: WritingWindo
     slug: string;
     post?: PostDetail;
     error?: string;
-  } | null>(null);
+  } | null>(() =>
+    initialPost && initialPost.slug === initialSlug
+      ? { slug: initialSlug, post: initialPost }
+      : null,
+  );
 
   const [copied, setCopied] = useState(false);
   /** Bumped by "Try again" so the fetch effect re-runs for the SAME slug. */
@@ -156,7 +187,14 @@ export function WritingWindow({ initialSlug = null, onSlugChange }: WritingWindo
   // The slug tag means a fast second click cannot have its result overwritten
   // by the first request landing late.
   useEffect(() => {
-    if (!openSlug || getCachedPost(openSlug)) return;
+    if (!openSlug) return;
+    // The article the page was rendered with is already on screen: keep it for
+    // the rest of the visit instead of fetching it a second time.
+    if (initialPost && initialPost.slug === openSlug) {
+      primePost(initialPost);
+      return;
+    }
+    if (getCachedPost(openSlug)) return;
     let cancelled = false;
 
     fetchPost(openSlug)
@@ -170,7 +208,7 @@ export function WritingWindow({ initialSlug = null, onSlugChange }: WritingWindo
     return () => {
       cancelled = true;
     };
-  }, [openSlug, retryNonce]);
+  }, [openSlug, retryNonce, initialPost]);
 
   // Trust the shared cache first, then whatever this window loaded — but only
   // if it belongs to the article currently open.
@@ -304,9 +342,9 @@ export function WritingWindow({ initialSlug = null, onSlugChange }: WritingWindo
             measure whatever the frame does. */}
         <div ref={articleTopRef} className="mx-auto w-full min-[880px]:max-w-[824px]">
           <div className="flex items-center justify-between gap-2">
-            <button type="button" onClick={close} className={PILL_BUTTON_CLASS}>
+            <WindowLink href="/writing" onOpen={close} className={PILL_BUTTON_CLASS}>
               ← Back
-            </button>
+            </WindowLink>
             {/* Only offered once the article exists — a copied link to a 404 helps nobody. */}
             {post ? (
               <button type="button" onClick={copyLink} className={PILL_BUTTON_CLASS}>
@@ -335,8 +373,14 @@ export function WritingWindow({ initialSlug = null, onSlugChange }: WritingWindo
           ) : (
             <article className="mt-8">
               <header className="border-b border-black/10 pb-6">
-                <h1 className="font-display text-[26px] leading-[32px] font-bold tracking-[-0.52px] text-black">
-                  {post.emoji ? `${post.emoji} ` : ""}
+                {/* The page's H1 on /writing/<slug>, so its text is the title
+                    and nothing else. The Notion emoji is still drawn in front
+                    of it, by `::before` from the data attribute, which keeps
+                    it on screen and out of the heading's text. */}
+                <h1
+                  data-emoji={post.emoji || undefined}
+                  className="font-display text-[26px] leading-[32px] font-bold tracking-[-0.52px] text-black data-[emoji]:before:mr-[0.25em] data-[emoji]:before:content-[attr(data-emoji)]"
+                >
                   {post.title}
                 </h1>
                 <p className={cn(LABEL_CLASS, "mt-4")}>
@@ -367,13 +411,20 @@ export function WritingWindow({ initialSlug = null, onSlugChange }: WritingWindo
                   <ul className="mt-2 space-y-1">
                     {post.toc.map((entry) => (
                       <li key={entry.id} className={entry.depth === 3 ? "pl-4" : undefined}>
-                        <button
-                          type="button"
-                          onClick={() => scrollToHeading(entry.id)}
+                        {/* A fragment link, so the contents work as links in
+                            the server HTML too; the click scrolls the window
+                            body smoothly instead of jumping the page. */}
+                        <a
+                          href={`#${entry.id}`}
+                          onClick={(event) => {
+                            if (!isPlainLeftClick(event)) return;
+                            event.preventDefault();
+                            scrollToHeading(entry.id);
+                          }}
                           className="font-sans cursor-pointer text-left text-[12px] leading-[18px] text-black/60 transition-colors hover:text-black"
                         >
                           {entry.text}
-                        </button>
+                        </a>
                       </li>
                     ))}
                   </ul>
@@ -400,12 +451,14 @@ export function WritingWindow({ initialSlug = null, onSlugChange }: WritingWindo
     : [];
   const visiblePosts =
     posts && activeTag ? posts.filter((post) => post.tags.includes(activeTag)) : posts;
+  // A failed refresh must not throw away a list the server already rendered.
+  const showListError = listError !== null && !(posts && posts.length > 0);
 
   return (
     <div className="px-5 pb-[60px]">
       {/* The card list DOES follow the frame — cards are art, not prose. */}
       <div className="mx-auto w-full min-[880px]:max-w-[var(--portos-content-max)]">
-        {listError ? (
+        {showListError ? (
           <div className="mt-6">
             <p className={NOTE_CLASS}>{listError}</p>
             <button
@@ -468,12 +521,12 @@ export function WritingWindow({ initialSlug = null, onSlugChange }: WritingWindo
                 className="mt-6 grid grid-cols-1 gap-x-4 gap-y-8 min-[560px]:grid-cols-2 min-[880px]:grid-cols-3"
               >
                 {(visiblePosts ?? []).map((post) => (
-                  <button
+                  <WindowLink
                     key={post.id}
-                    type="button"
+                    href={`/writing/${post.slug}`}
+                    onOpen={() => openArticle(post.slug)}
                     data-no-drag
                     data-slug={post.slug}
-                    onClick={() => openArticle(post.slug)}
                     onPointerEnter={() => prefetch(post.slug)}
                     onFocus={() => prefetch(post.slug)}
                     className="group flex w-full cursor-pointer flex-col items-start text-left"
@@ -499,10 +552,12 @@ export function WritingWindow({ initialSlug = null, onSlugChange }: WritingWindo
                       {post.readingMinutes ? <> · {post.readingMinutes} min read</> : null}
                     </p>
 
-                    <p className="font-display mt-[6px] text-[15px] leading-[21px] font-medium tracking-[-0.3px] text-black">
+                    {/* h2 under the window's "Writing" H1, so the list reads as
+                        a list of articles. Same type as before. */}
+                    <h2 className="font-display mt-[6px] text-[15px] leading-[21px] font-medium tracking-[-0.3px] text-black">
                       {post.emoji ? `${post.emoji} ` : ""}
                       {post.title}
-                    </p>
+                    </h2>
 
                     {post.description ? (
                       <p className="font-sans mt-2 text-[12px] leading-[16.8px] text-black/70">
@@ -519,7 +574,7 @@ export function WritingWindow({ initialSlug = null, onSlugChange }: WritingWindo
                         ))}
                       </ul>
                     ) : null}
-                  </button>
+                  </WindowLink>
                 ))}
               </div>
             )}

@@ -1,7 +1,9 @@
 "use client";
 
 import Image from "next/image";
+import { pathForApp } from "@/lib/sections";
 import { PORTOS_ASSETS, type DesktopIcon, type PortosAppId } from "@/types/portos";
+import { WindowLink } from "./WindowLink";
 
 interface DesktopIconsProps {
   onOpen: (app: PortosAppId) => void;
@@ -47,16 +49,21 @@ const HOVER_PLATE_CLASS =
   "group-hover:opacity-100 group-focus-visible:opacity-100";
 
 /**
- * A single 58x78.59 desktop folder. Hovering the button presses the artwork in
+ * A single 58x78.59 desktop folder. Hovering it presses the artwork in
  * (`scale(0.9)`, 0.2s ease-out) and raises a plate behind it; the label itself
  * is left untouched, as measured. A single click opens the matching window.
+ *
+ * A link to the window's own URL rather than a button — see WindowLink. The
+ * label is the link text, which is what a crawler reads as its anchor.
+ * `[-webkit-touch-callout:none]` keeps a long press on iOS from popping the
+ * link preview sheet, which a button never did.
  */
 function DesktopIconButton({ icon, onOpen }: DesktopIconButtonProps) {
   return (
-    <button
-      type="button"
-      onClick={() => onOpen(icon.app)}
-      className="group relative flex h-[78.59px] w-[58px] cursor-pointer flex-col items-center justify-center"
+    <WindowLink
+      href={pathForApp(icon.app) ?? "/"}
+      onOpen={() => onOpen(icon.app)}
+      className="group relative flex h-[78.59px] w-[58px] cursor-pointer flex-col items-center justify-center [-webkit-touch-callout:none]"
     >
       <span aria-hidden="true" className={HOVER_PLATE_CLASS} />
       <span className="relative flex h-[59px] w-[58px] cursor-pointer items-center justify-center transition-transform duration-200 ease-out group-hover:scale-90">
@@ -75,7 +82,7 @@ function DesktopIconButton({ icon, onOpen }: DesktopIconButtonProps) {
       <p className="relative font-display text-[14px] font-normal leading-[19.6px] tracking-[-0.14px] text-white">
         {icon.label}
       </p>
-    </button>
+    </WindowLink>
   );
 }
 
