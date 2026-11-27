@@ -23,45 +23,51 @@
 
 import { STACK_ICONS, type StackName } from "./StackIcons";
 
-interface BulletBlock {
-  heading: string;
-  left: readonly string[];
-  right: readonly string[];
-}
-
 interface ExperienceEntry {
   dates: string;
   company: string;
   role: string;
 }
 
-const EXPERTISE_BLOCK: BulletBlock = {
-  heading: "Expertise",
-  left: [
-    "•   Frontend Architecture",
-    "•   Performance Engineering",
-    "•   Design System & Monorepo",
-  ],
-  right: [
-    "•   Security Engineering",
-    "•   AI-assisted Development",
-    "•   Technical Leadership",
-  ],
-};
+/**
+ * Read down the left column, then down the right. Frontend first, then the
+ * backend and infrastructure work that backs the Fullstack headline, then the
+ * cross-cutting skills.
+ */
+const EXPERTISE: readonly string[] = [
+  "Frontend Architecture",
+  "Backend & Payment Integration",
+  "Cloud Migration & DevOps",
+  "Performance Engineering",
+  "Design System & Monorepo",
+  "Security Engineering",
+  "AI-assisted Development",
+  "Technical Leadership",
+];
 
-/** Split into the same two columns the bullet blocks use, so the rows line up. */
-const STACK_LEFT: readonly StackName[] = [
+/** Same reading order as Expertise: down the left column, then the right. */
+const STACK: readonly StackName[] = [
   "React",
   "Next.js",
   "TypeScript",
+  "NestJS",
   "Spring Boot",
-];
-const STACK_RIGHT: readonly StackName[] = [
+  "PostgreSQL",
   "Turborepo",
   "Docker",
   "GitLab CI/CD",
+  "AWS",
   "Vercel",
 ];
+
+/** Left column takes the extra item when the count is odd. */
+function splitColumns<T>(items: readonly T[]): [readonly T[], readonly T[]] {
+  const half = Math.ceil(items.length / 2);
+  return [items.slice(0, half), items.slice(half)];
+}
+
+const [EXPERTISE_LEFT, EXPERTISE_RIGHT] = splitColumns(EXPERTISE);
+const [STACK_LEFT, STACK_RIGHT] = splitColumns(STACK);
 
 /**
  * Chronological, oldest first — the reading order a left-to-right timeline
@@ -92,42 +98,93 @@ const HEADING_CLASS =
 
 const BULLET_CLASS =
   "font-display text-[14px] leading-[19.6px] tracking-[-0.14px] whitespace-pre text-black/60";
+/** The bullet and its run of spaces, as the live site writes them. */
+const BULLET = "•   ";
 
 /** Same size and colour as a bullet row, but laid out around a 16px logo. */
 const STACK_ROW_CLASS =
   "flex items-center gap-2 font-display text-[14px] leading-[19.6px] tracking-[-0.14px] text-black/70";
 
 /**
- * The two-column frame shared by Expertise and Stack.
+ * The two-column list shared by Expertise and Stack, under a full-width heading.
  *
  * `flex-1` on both halves with a 19px gap is not a guess — it is the SAME rule
  * the counters block above uses, and that is the entire point. The counters split
- * the 470px column into two 225.5px halves, so the second bullet column now
- * starts at 244.5px: directly under "• Faster Page Load" and "• Productivity
- * Gain". Change the counters' gap and these must change with it.
+ * the 470px column into two 225.5px halves, so the second list column now
+ * starts at 244.5px: directly under the second counter in each row. Change the
+ * counters' gap and these must change with it.
  *
  * This REPLACES a measured 155px width. On the live site the second column is a
  * fixed 155px flush to the right edge, starting at x = 315.4 — which lines up
  * with nothing above it. Aligning the two was requested; see ARTIFACT_MANIFEST.md.
+ *
+ * The heading sits above BOTH columns and the columns are top-aligned. It used
+ * to sit inside the left column, with the row bottom-aligned (`items-end`) so the
+ * right list lined up with the left one. That only works while the two lists
+ * are the same length: with an odd count (Stack has 11) the right column would
+ * start a row lower than the left. Top-aligned, the odd item is simply the left
+ * column's last row.
+ *
+ * Below 560px the halves stack into one list. The gap between them is the
+ * list's own row gap, passed in, so the stacked result reads as one continuous
+ * list rather than two groups.
  */
-const BLOCK_ROW_CLASS =
-  "flex w-full flex-col items-start gap-6 min-[560px]:flex-row min-[560px]:items-end min-[560px]:gap-[19px]";
-/** Each half of that frame — half the column, matching one counter cell. */
-const BLOCK_COL_CLASS = "min-[560px]:flex-1";
+const LIST_ROW_CLASS =
+  "flex w-full flex-col items-start min-[560px]:flex-row min-[560px]:gap-[19px]";
+/**
+ * Each half of that frame — half the column, matching one counter cell.
+ *
+ * The half carries NO padding; the indent below goes on the list inside it.
+ * `flex-1` shares out the space left after padding, so an 8px indent on the
+ * half itself makes that half 8px wider than the other (measured 230/222
+ * instead of 225.5/225.5) and pushes the right column off the second counter.
+ */
+const LIST_HALF_CLASS = "w-full min-[560px]:flex-1";
 
 /**
- * The right half, which needs the left list's 8px indent ONLY while stacked.
+ * The left list's 8px indent, which the right list needs ONLY while stacked.
  *
  * The live site gives the left list `padding-left: 8px` and the right list none.
  * Side by side that is invisible — each column starts at its own edge. Below
  * 560px they stack into one column, and the indent that used to be private to
- * the left list becomes a visible 8px step between the two groups: "Frontend
- * Architecture" sits 8px right of "Monorepo Design" under the same heading.
+ * the left list would become a visible 8px step halfway down the list.
  *
  * So the indent is matched while stacked and dropped again at 560px, where the
  * measured two-column layout takes over.
  */
-const BLOCK_RIGHT_COL_CLASS = `pl-2 min-[560px]:pl-0 ${BLOCK_COL_CLASS}`;
+const LIST_LEFT_CLASS = "flex flex-col pl-2";
+const LIST_RIGHT_CLASS = "flex flex-col pl-2 min-[560px]:pl-0";
+
+interface TwoColumnBlockProps<T> {
+  heading: string;
+  left: readonly T[];
+  right: readonly T[];
+  /** Row gap inside each list, and between the two lists while stacked. */
+  gapClass: string;
+  renderItem: (item: T) => React.ReactNode;
+}
+
+function TwoColumnBlock<T extends string>({
+  heading,
+  left,
+  right,
+  gapClass,
+  renderItem,
+}: TwoColumnBlockProps<T>) {
+  return (
+    <div className="flex w-full flex-col gap-4">
+      <p className={HEADING_CLASS}>{heading}</p>
+      <div className={`${LIST_ROW_CLASS} ${gapClass}`}>
+        <div className={LIST_HALF_CLASS}>
+          <div className={`${LIST_LEFT_CLASS} ${gapClass}`}>{left.map(renderItem)}</div>
+        </div>
+        <div className={LIST_HALF_CLASS}>
+          <div className={`${LIST_RIGHT_CLASS} ${gapClass}`}>{right.map(renderItem)}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 /** The timeline marker colour. Not a token — introduced with the timeline. */
 const TIMELINE_ACCENT = "#8B5CF6";
@@ -158,67 +215,47 @@ const RAIL_Y_END = RAIL_Y_AT_LAST + RAIL_SLOPE * RAIL_OVERSHOOT_PCT;
 const RAIL_X_END = `${LAST_INDEX * 20 + RAIL_OVERSHOOT_PCT}%`;
 
 /**
- * The two bullet blocks — bottom-aligned halves of the 470px column.
+ * The two bullet blocks — top-aligned halves of the 470px column.
  *
  * Column widths, and why they are no longer the live site's measured 155px, are
- * documented on `BLOCK_ROW_CLASS` above. Below 560px the halves stack; the live
+ * documented on `LIST_ROW_CLASS` above. Below 560px the halves stack; the live
  * site clips rather than reflows, so that fallback is our own.
  */
 export function AboutBulletBlocks() {
   return (
     <>
-      {/* Expertise — plain bullets. */}
-      <div className={BLOCK_ROW_CLASS}>
-        <div className={`flex flex-col gap-4 ${BLOCK_COL_CLASS}`}>
-          <p className={HEADING_CLASS}>{EXPERTISE_BLOCK.heading}</p>
-          {/* List — gap 0, padding-left 8px. */}
-          <div className="flex flex-col pl-2">
-            {EXPERTISE_BLOCK.left.map((item) => (
-              <p key={item} className={BULLET_CLASS}>
-                {item}
-              </p>
-            ))}
-          </div>
-        </div>
-        <div className={`flex flex-col ${BLOCK_RIGHT_COL_CLASS}`}>
-          {EXPERTISE_BLOCK.right.map((item) => (
-            <p key={item} className={BULLET_CLASS}>
-              {item}
-            </p>
-          ))}
-        </div>
-      </div>
+      {/* Expertise — plain bullets, gap 0. */}
+      <TwoColumnBlock
+        heading="Expertise"
+        left={EXPERTISE_LEFT}
+        right={EXPERTISE_RIGHT}
+        gapClass="gap-0"
+        renderItem={(item) => (
+          <p key={item} className={BULLET_CLASS}>
+            {BULLET}
+            {item}
+          </p>
+        )}
+      />
 
       {/* Stack — same two-column geometry, but each item carries its own logo in
           place of the bullet. Rows gain a 6px gap because a 16px mark does not
           sit comfortably inside a 19.6px line box the way a bullet does. */}
-      <div className={BLOCK_ROW_CLASS}>
-        <div className={`flex flex-col gap-4 ${BLOCK_COL_CLASS}`}>
-          <p className={HEADING_CLASS}>Stack</p>
-          <div className="flex flex-col gap-[6px] pl-2">
-            {STACK_LEFT.map((name) => {
-              const Icon = STACK_ICONS[name];
-              return (
-                <p key={name} className={STACK_ROW_CLASS}>
-                  <Icon className="size-4" />
-                  {name}
-                </p>
-              );
-            })}
-          </div>
-        </div>
-        <div className={`flex flex-col gap-[6px] ${BLOCK_RIGHT_COL_CLASS}`}>
-          {STACK_RIGHT.map((name) => {
-            const Icon = STACK_ICONS[name];
-            return (
-              <p key={name} className={STACK_ROW_CLASS}>
-                <Icon className="size-4" />
-                {name}
-              </p>
-            );
-          })}
-        </div>
-      </div>
+      <TwoColumnBlock
+        heading="Stack"
+        left={STACK_LEFT}
+        right={STACK_RIGHT}
+        gapClass="gap-[6px]"
+        renderItem={(name) => {
+          const Icon = STACK_ICONS[name];
+          return (
+            <p key={name} className={STACK_ROW_CLASS}>
+              <Icon className="size-4" />
+              {name}
+            </p>
+          );
+        }}
+      />
     </>
   );
 }

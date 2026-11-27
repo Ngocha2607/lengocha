@@ -5,7 +5,7 @@ import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import {
-  DEFAULT_OG_IMAGE,
+  DEFAULT_OG_CARD,
   SITE_DESCRIPTION,
   SITE_NAME,
   SITE_TITLE,
@@ -106,13 +106,13 @@ export const metadata: Metadata = {
     locale: "vi_VN",
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
-    images: [DEFAULT_OG_IMAGE],
+    images: [DEFAULT_OG_CARD],
   },
   twitter: {
     card: "summary_large_image",
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
-    images: [DEFAULT_OG_IMAGE],
+    images: [DEFAULT_OG_CARD],
   },
   robots: { "max-image-preview": "large" },
 };

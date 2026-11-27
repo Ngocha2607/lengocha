@@ -15,8 +15,12 @@ import { cn } from "@/lib/utils";
  *
  * Content is carried VERBATIM (Vietnamese) from the CV at
  * `public/Le-Ngoc-Ha-Senior-Frontend-Developer.pdf`, on request, so the two
- * stay in step. The FPT internship is the one entry the two-page CV cut for
- * space; it is kept here (and on the About timeline) with its own wording.
+ * stay in step. Two exceptions. The SAPP highlights were rewritten by the owner
+ * on 2026-11-27 for the Fullstack headline: they add the Payoo POS backend and
+ * the AWS -> CMC Cloud migration, and fold the Next.js upgrade and the
+ * performance numbers into one line, so they run ahead of that PDF. And the FPT
+ * internship is the one entry the two-page CV cut for space; it is kept here
+ * (and on the About timeline) with its own wording.
  *
  * The window keeps the measured 720x596 geometry rather than the standard
  * 864x630. That was sized for a wallpaper carousel, but it happens to leave a
@@ -46,9 +50,10 @@ const ROLES: readonly Role[] = [
     highlights: [
       "Dẫn dắt Frontend LMS + Ops, review 100% Merge Request và mentor 2 Junior Frontend.",
       "Thiết kế Monorepo với pnpm Workspace + Turborepo, hợp nhất 4 frontend và chuẩn hóa hệ thống package dùng chung.",
-      "Nâng cấp LMS từ Next.js 12 → 14 App Router, tạo nền tảng cho các cải tiến rendering và hiệu năng.",
+      "Phụ trách backend tích hợp cổng thanh toán Payoo POS trên NestJS (ops, payment-service, background-job-service): tạo, hủy, tra cứu đơn, xử lý IPN, cron đối soát, đồng bộ HubSpot và SAP, 174 test case.",
+      "Dẫn dắt chuyển server dev (16 app NestJS), GitLab và database production hợp đồng điện tử từ AWS sang CMC Cloud trong 7 tuần, không thuê thêm máy; database production chỉ gián đoạn khoảng 2,5 phút.",
+      "Nâng cấp LMS từ Next.js 12 → 14 App Router và tối ưu hiệu năng: giảm 60% thời gian tải trang (15.2s → 6.1s), Lighthouse 29 → 65+.",
       "Thay editor thương mại bằng Tiptap, xây dựng thành private package dùng chung, giảm phụ thuộc nhà cung cấp và chi phí license.",
-      "Tối ưu hiệu năng: giảm 60% thời gian tải trang (15.2s → 6.1s), Lighthouse 29 → 65+.",
       "Tích hợp Gitleaks, Trivy, Semgrep, OWASP ZAP vào CI/CD và xây dựng AI Workflow, tăng 30% năng suất, tiết kiệm ~10 giờ/tuần.",
     ],
   },

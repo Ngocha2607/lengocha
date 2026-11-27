@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { DEFAULT_OG_IMAGE, SITE_NAME } from "@/lib/site";
+import { DEFAULT_OG_CARD, SITE_NAME } from "@/lib/site";
 
 /**
  * Per-page metadata, built one way for every route.
@@ -100,7 +100,9 @@ export function pageMetadata({
   publishedTime,
   tags,
 }: PageMetadataInput): Metadata {
-  const images = [image || DEFAULT_OG_IMAGE];
+  // A cover's size is unknown (it is an external URL), so only the site card
+  // carries width, height and alt.
+  const images = image ? [image] : [DEFAULT_OG_CARD];
   return {
     title,
     description,
