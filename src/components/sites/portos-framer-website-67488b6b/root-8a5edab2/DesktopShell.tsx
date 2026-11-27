@@ -1,7 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { trackEvent, type OpenVia, type TrackedSection } from "@/lib/analytics";
 import { pathForApp } from "@/lib/sections";
 import {
   PORTOS_ASSETS,
@@ -104,6 +105,28 @@ const SPOTLIGHT_WINDOWS = (Object.keys(WINDOWS) as PortosAppId[]).map((app) => (
   title: WINDOWS[app].title,
 }));
 
+/** The windows `window_open` reports — every content window, not the Recycle Bin. */
+const TRACKED_SECTIONS: ReadonlySet<PortosAppId> = new Set<TrackedSection>([
+  "about",
+  "experience",
+  "projects",
+  "writing",
+  "contact",
+  "resume",
+  "decisions",
+  "gallery",
+]);
+
+/**
+ * Reports a window that was not open becoming open. Resume doubles as the CV,
+ * so it also reports `cv_open`.
+ */
+function reportWindowOpen(app: PortosAppId, via: OpenVia): void {
+  if (!TRACKED_SECTIONS.has(app)) return;
+  trackEvent("window_open", { section: app as TrackedSection, via });
+  if (app === "resume") trackEvent("cv_open", { via });
+}
+
 /**
  * The URL the desktop should show: the front window's own page, the article
  * the Writing window is on, or the home page when nothing is open. Every one
@@ -181,6 +204,30 @@ export function DesktopShell({
     () => (initialApp ? { [initialApp]: 0 } : {}),
   );
 
+  /**
+   * The open windows as of the last render, for the open handlers: they report
+   * a window only when it was NOT already open (a dock click on an open or
+   * parked window brings it forward; that is not a new open). Read from a ref
+   * so the handlers keep a stable identity, and so the report is made in the
+   * handler itself rather than inside a state updater, which React may run
+   * twice.
+   */
+  const openRef = useRef(open);
+  useEffect(() => {
+    openRef.current = open;
+  }, [open]);
+
+  /**
+   * The window a deep link booted with counts as opened, once. The ref keeps
+   * a development-mode double mount from reporting it twice.
+   */
+  const bootReported = useRef(false);
+  useEffect(() => {
+    if (bootReported.current || !initialApp) return;
+    bootReported.current = true;
+    reportWindowOpen(initialApp, "url");
+  }, [initialApp]);
+
   /** The window on top. It is "the page": it owns the address bar and the H1. */
   const front = open.length > 0 ? open[open.length - 1] : null;
   const viewPath = pathForView(front, writingView);
@@ -235,6 +282,7 @@ export function DesktopShell({
 
   const openWindow = useCallback(
     (app: PortosAppId) => {
+      if (!openRef.current.includes(app)) reportWindowOpen(app, "desktop");
       if (app === "writing") {
         setWritingSlug(null);
         setWritingView(null);
@@ -252,6 +300,7 @@ export function DesktopShell({
   /** A project card asking for its write-up: open Writing already on that article. */
   const openWriting = useCallback(
     (slug: string) => {
+      if (!openRef.current.includes("writing")) reportWindowOpen("writing", "desktop");
       setWritingSlug(slug);
       setWritingView(slug);
       claimCascade("writing");

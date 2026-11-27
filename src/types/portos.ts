@@ -35,8 +35,10 @@ export interface DockItem {
   alt: string;
   /** Set for in-app icons. */
   app?: PortosAppId;
-  /** Set for the two external icons (Instagram, Framer). */
+  /** Set for the two external icons (LinkedIn, GitHub). */
   href?: string;
+  /** How a click on an external icon is reported (`outbound_click`). */
+  outbound?: "linkedin" | "github";
   /**
    * What the hover tooltip says. Deliberately NOT `name`: that is the live
    * site's Framer layer name, which is the macOS app the icon is borrowed
