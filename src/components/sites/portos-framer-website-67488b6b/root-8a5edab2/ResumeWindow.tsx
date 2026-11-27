@@ -1,5 +1,7 @@
 "use client";
 
+import { trackEvent } from "@/lib/analytics";
+
 /** Served straight from `public/`, so the window works offline with the app. */
 const RESUME_PDF = "/Le-Ngoc-Ha-Senior-Frontend-Developer.pdf";
 const RESUME_FILENAME = "Le-Ngoc-Ha-Senior-Frontend-Developer.pdf";
@@ -11,6 +13,21 @@ const RESUME_FILENAME = "Le-Ngoc-Ha-Senior-Frontend-Developer.pdf";
  * simply opens at its own default zoom.
  */
 const VIEWER_SRC = `${RESUME_PDF}#view=FitH`;
+
+/**
+ * `cv_download` for a click on either link to the PDF: "Download" saves it,
+ * "Open" reads it in a new tab. Middle clicks count too. (Opening this window
+ * is `cv_open`, reported by the desktop.)
+ */
+function pdfLinkTracking(method: "download" | "new_tab") {
+  const report = () => trackEvent("cv_download", { method, from: "resume" });
+  return {
+    onClick: report,
+    onAuxClick: (event: { button: number }) => {
+      if (event.button === 1) report();
+    },
+  };
+}
 
 const ACTION_CLASS =
   "font-sans rounded-full border border-black/15 px-3 py-[3px] text-[11px] leading-[16px] text-black/70 transition-colors hover:border-black/40 hover:text-black";
@@ -59,10 +76,21 @@ export function ResumeWindow() {
             Mobile browsers cannot display a PDF inline. Open it in a new tab or save it.
           </p>
           <div className="flex items-center gap-2">
-            <a href={RESUME_PDF} target="_blank" rel="noreferrer noopener" className={ACTION_CLASS}>
+            <a
+              href={RESUME_PDF}
+              target="_blank"
+              rel="noreferrer noopener"
+              className={ACTION_CLASS}
+              {...pdfLinkTracking("new_tab")}
+            >
               Open ↗
             </a>
-            <a href={RESUME_PDF} download={RESUME_FILENAME} className={ACTION_CLASS}>
+            <a
+              href={RESUME_PDF}
+              download={RESUME_FILENAME}
+              className={ACTION_CLASS}
+              {...pdfLinkTracking("download")}
+            >
               Download ↓
             </a>
           </div>
@@ -75,10 +103,21 @@ export function ResumeWindow() {
           {RESUME_FILENAME}
         </p>
         <div className="flex shrink-0 items-center gap-2">
-          <a href={RESUME_PDF} target="_blank" rel="noreferrer noopener" className={ACTION_CLASS}>
+          <a
+            href={RESUME_PDF}
+            target="_blank"
+            rel="noreferrer noopener"
+            className={ACTION_CLASS}
+            {...pdfLinkTracking("new_tab")}
+          >
             Open ↗
           </a>
-          <a href={RESUME_PDF} download={RESUME_FILENAME} className={ACTION_CLASS}>
+          <a
+            href={RESUME_PDF}
+            download={RESUME_FILENAME}
+            className={ACTION_CLASS}
+            {...pdfLinkTracking("download")}
+          >
             Download ↓
           </a>
         </div>

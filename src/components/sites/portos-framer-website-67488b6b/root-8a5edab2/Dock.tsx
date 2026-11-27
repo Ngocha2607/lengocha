@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { outboundLinkProps } from "@/lib/analytics";
 import { pathForApp } from "@/lib/sections";
 import { cn } from "@/lib/utils";
 import {
@@ -73,12 +74,14 @@ const DOCK_ITEMS: DockItem[] = [
     icon: `${PORTOS_ASSETS}/images/dock-linkedin.svg`,
     alt: "LinkedIn",
     href: PORTOS_PROFILES.linkedin,
+    outbound: "linkedin",
   },
   {
     name: "GitHub",
     icon: `${PORTOS_ASSETS}/images/dock-github.svg`,
     alt: "GitHub",
     href: PORTOS_PROFILES.github,
+    outbound: "github",
     hideOnMobile: true,
   },
   {
@@ -229,6 +232,7 @@ function DockIcon({
       rel="noreferrer noopener"
       data-framer-name={item.name}
       className={className}
+      {...(item.outbound ? outboundLinkProps(item.outbound, "dock") : {})}
     >
       {image}
     </a>

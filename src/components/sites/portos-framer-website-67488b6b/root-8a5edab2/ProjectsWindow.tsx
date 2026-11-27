@@ -2,6 +2,7 @@
 
 import { LayoutGrid, Rows3 } from "lucide-react";
 import Image from "next/image";
+import { outboundLinkProps } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 import { PORTOS_ASSETS } from "@/types/portos";
 import { WindowLink } from "./WindowLink";
@@ -359,6 +360,7 @@ export function ProjectsWindow({ mode, onOpenWriting }: ProjectsWindowProps) {
                   rel="noreferrer noopener"
                   data-no-drag
                   className={interactive}
+                  {...outboundLinkProps("project", "projects")}
                 >
                   <ProjectCardBody project={project} isList={isList} />
                 </a>

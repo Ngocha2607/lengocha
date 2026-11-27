@@ -2,6 +2,7 @@
 
 import { Menu } from "@base-ui/react/menu";
 import Image from "next/image";
+import { outboundLinkProps } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 import {
   PORTOS_ASSETS,
@@ -114,6 +115,7 @@ export function AppleMenu({ onOpen }: AppleMenuProps) {
               href={PORTOS_PROFILES.github}
               target="_blank"
               rel="noreferrer noopener"
+              {...outboundLinkProps("github", "menu")}
             >
               GitHub
               <span aria-hidden="true" className="text-[11px] text-white/45">
@@ -125,6 +127,7 @@ export function AppleMenu({ onOpen }: AppleMenuProps) {
               href={PORTOS_PROFILES.linkedin}
               target="_blank"
               rel="noreferrer noopener"
+              {...outboundLinkProps("linkedin", "menu")}
             >
               LinkedIn
               <span aria-hidden="true" className="text-[11px] text-white/45">

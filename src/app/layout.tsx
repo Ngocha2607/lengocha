@@ -4,6 +4,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { AnalyticsScripts } from "@/components/AnalyticsScripts";
 import {
   DEFAULT_OG_CARD,
   SITE_DESCRIPTION,
@@ -132,6 +133,8 @@ export default function RootLayout({
       <body className="min-h-full">
         {children}
         <Analytics />
+        {/* Cloudflare, Umami and GA4, each only when configured — see lib/analytics.ts. */}
+        <AnalyticsScripts />
         <SpeedInsights />
       </body>
     </html>

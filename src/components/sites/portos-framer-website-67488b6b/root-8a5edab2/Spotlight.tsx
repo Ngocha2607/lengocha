@@ -2,6 +2,7 @@
 
 import { Search } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { trackEvent } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 import type { PortosAppId } from "@/types/portos";
 import { PROJECTS } from "./ProjectsWindow";
@@ -112,7 +113,10 @@ export function Spotlight({ onClose, onOpenApp, onOpenWriting, windows }: Spotli
       prefetchSlug: p.writingSlug,
       run: () => {
         if (p.writingSlug) onOpenWriting(p.writingSlug);
-        else if (p.href) window.open(p.href, "_blank", "noreferrer");
+        else if (p.href) {
+          trackEvent("outbound_click", { target: "project", from: "spotlight" });
+          window.open(p.href, "_blank", "noreferrer");
+        }
         else onOpenApp("projects");
       },
     }));

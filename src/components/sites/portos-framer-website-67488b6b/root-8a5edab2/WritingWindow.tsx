@@ -1,8 +1,8 @@
 "use client";
 
-import { track } from "@vercel/analytics";
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { trackEvent } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 import { isPlainLeftClick, WindowLink } from "./WindowLink";
 import {
@@ -241,11 +241,12 @@ export function WritingWindow({
 
   // The per-article pageview. Vercel counts /writing/<slug> visits on its own;
   // this event is what covers articles opened INSIDE the desktop, where the
-  // path never navigates.
+  // path never navigates. Same name and properties as ever; the wrapper adds
+  // `locale` and sends it to the other providers too.
   useEffect(() => {
     if (!openSlug || !current?.post || viewedSlugs.has(openSlug)) return;
     viewedSlugs.add(openSlug);
-    track("article_view", { slug: openSlug, title: current.post.title });
+    trackEvent("article_view", { slug: openSlug, title: current.post.title });
   }, [openSlug, current?.post]);
 
   /** Warm the caches before the click lands. Pointing at a card is signal enough. */

@@ -2,6 +2,7 @@
 
 import { CircleCheck, FileText, Globe, Mail, MapPin } from "lucide-react";
 import { useState } from "react";
+import { outboundLinkProps, trackEvent } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 import { GitHubGlyph, LinkedInGlyph } from "./SocialIcons";
 
@@ -41,20 +42,45 @@ const CONTACT_FIELDS = [
  * and `https://linkedin.com` root URLs) are gone — he has no Twitter or Dribbble.
  */
 const SOCIAL_LINKS = [
-  { label: "GitHub", href: "https://github.com/Ngocha2607", Icon: GitHubGlyph },
+  { label: "GitHub", href: "https://github.com/Ngocha2607", Icon: GitHubGlyph, track: "github" },
   {
     label: "LinkedIn",
     href: "https://www.linkedin.com/in/ng%E1%BB%8Dc-h%C3%A0-l%C3%AA-886aa3228/",
     Icon: LinkedInGlyph,
+    track: "linkedin",
   },
-  { label: "Portfolio", href: "https://lengocha.vercel.app", Icon: Globe },
+  // The site itself: not outbound, so not tracked.
+  { label: "Portfolio", href: "https://lengocha.vercel.app", Icon: Globe, track: null },
   // "CV" rather than "Résumé": the row is tight and the labels have to fit.
   {
     label: "CV",
     href: "https://lengocha.vercel.app/Le-Ngoc-Ha-Senior-Frontend-Developer.pdf",
     Icon: FileText,
+    track: "cv",
   },
 ] as const;
+
+type SocialLink = (typeof SOCIAL_LINKS)[number];
+
+/** The click reporting for one social link: outbound, the CV, or nothing. */
+function socialTrackingProps(track: SocialLink["track"]) {
+  if (track === "github" || track === "linkedin") return outboundLinkProps(track, "contact");
+  if (track === "cv") {
+    const report = () => trackEvent("cv_download", { method: "new_tab", from: "contact" });
+    return {
+      onClick: report,
+      onAuxClick: (event: { button: number }) => {
+        if (event.button === 1) report();
+      },
+    };
+  }
+  return {};
+}
+
+/** FormSubmit's AJAX answer. `success` arrives as the STRING "true" or "false". */
+interface FormSubmitReply {
+  success?: string | boolean;
+}
 
 /**
  * Where the form actually delivers. FormSubmit's AJAX endpoint forwards the
@@ -121,6 +147,10 @@ export function ContactWindow() {
     if (data.get("_honey")) return;
 
     setStatus("sending");
+    // Reported only once FormSubmit has answered — never on the click — so the
+    // success count is messages that actually went out. Nothing from the form
+    // itself goes into an event.
+    let failure: "http" | "rejected" | "network" = "network";
     try {
       const response = await fetch(FORMSUBMIT_ENDPOINT, {
         method: "POST",
@@ -140,11 +170,25 @@ export function ContactWindow() {
           _captcha: "false",
         }),
       });
-      if (!response.ok) throw new Error(`FormSubmit responded ${response.status}`);
+      if (!response.ok) {
+        failure = "http";
+        throw new Error(`FormSubmit responded ${response.status}`);
+      }
+      // A 200 is not a delivery on its own: FormSubmit answers 200 with
+      // `success: "false"` when it holds a message (an unactivated form, for
+      // one). Only an explicit success counts as sent; anything else shows
+      // the error line, whose mailto link is the way through.
+      const reply = (await response.json().catch(() => ({}))) as FormSubmitReply;
+      if (String(reply.success) !== "true") {
+        failure = "rejected";
+        throw new Error("FormSubmit did not accept the message");
+      }
       form.reset();
       setStatus("sent");
+      trackEvent("contact_submit_success", {});
     } catch {
       setStatus("error");
+      trackEvent("contact_submit_error", { reason: failure });
     }
   };
 
@@ -272,7 +316,11 @@ export function ContactWindow() {
                 {status === "error" ? (
                   <span className="text-[#a03225]">
                     Gửi không thành công. Vui lòng gửi trực tiếp tới{" "}
-                    <a href={`mailto:${CONTACT_EMAIL}`} className="underline">
+                    <a
+                      href={`mailto:${CONTACT_EMAIL}`}
+                      className="underline"
+                      {...outboundLinkProps("email", "contact")}
+                    >
                       {CONTACT_EMAIL}
                     </a>
                     .
@@ -294,6 +342,7 @@ export function ContactWindow() {
                   target="_blank"
                   rel="noreferrer noopener"
                   className={cn(BLOCK_VALUE, "flex items-center gap-2")}
+                  {...outboundLinkProps("email", "contact")}
                 >
                   <Mail className={ICON_CLASS} aria-hidden="true" />
                   ngocha2k0.ln@gmail.com
@@ -344,6 +393,7 @@ export function ContactWindow() {
                       target="_blank"
                       rel="noreferrer noopener"
                       className="group/social flex items-center gap-2"
+                      {...socialTrackingProps(social.track)}
                     >
                       <social.Icon className={ICON_CLASS} />
                       <span className="flex h-[22.4px] overflow-clip">
