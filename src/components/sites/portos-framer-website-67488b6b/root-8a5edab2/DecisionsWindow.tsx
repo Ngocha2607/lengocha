@@ -27,7 +27,7 @@ import { cn } from "@/lib/utils";
  *
  * The two groups mirror the CV's own two sections — LEADERSHIP and TECHNICAL
  * DECISIONS — and carry its Vietnamese text VERBATIM, on request
- * (`public/Le-Ngoc-Ha-Senior-Frontend-Developer.pdf`). The option lists, most
+ * (the CV's source is `cv/content.vi.json`). The option lists, most
  * consequence lists and the fourth decision (a stub the CV cut for space) have
  * no CV counterpart; that wording is our own Vietnamese rendering of the
  * portfolio content this window used to carry in English. A third group of six

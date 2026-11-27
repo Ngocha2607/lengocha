@@ -16,8 +16,8 @@ export const SITE_NAME = "Lê Ngọc Hà";
  * the owner's headline title as of 2026-11-26, and the About and Experience
  * windows (and their meta descriptions in lib/sections.ts) use the same
  * framing since 2026-11-27. "Frontend Tech Lead" remains the real job title
- * at SAPP Academy and is stated alongside it, never replaced by it. The CV PDF
- * behind the Resume window still carries its own older wording.
+ * at SAPP Academy and is stated alongside it, never replaced by it. The CV
+ * PDFs behind the Resume window (built from cv/) use the same headline.
  */
 export const SITE_TITLE = "Lê Ngọc Hà — Fullstack Developer";
 

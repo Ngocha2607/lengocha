@@ -7,7 +7,6 @@ import type {
   MetaCopy,
   ProjectCopy,
   ProjectId,
-  ResumeCopy,
   RoleCopy,
   TestimonialsCopy,
   WritingCopy,
@@ -30,7 +29,8 @@ import type {
  *   - Nothing may say or imply fluent or native English.
  *
  * The one thing the English pages say that the Vietnamese ones do not is
- * which content is still Vietnamese: the CV PDF and the articles.
+ * which content is still Vietnamese: the articles. (The CV has its own
+ * English PDF; its text is in cv/content.en.json, not here.)
  *
  * Article titles and summaries for /en/writing are in src/data/writing-en.ts.
  * A readable copy of all of it is in docs/english-copy.md.
@@ -52,7 +52,7 @@ export const EN_META: MetaCopy = {
     contact:
       "Contact Lê Ngọc Hà by email, GitHub or LinkedIn. Available for remote work, currently in Hanoi, Vietnam (UTC+7).",
     resume:
-      "Lê Ngọc Hà's CV: read it in the browser or download the PDF. The CV is in Vietnamese.",
+      "Lê Ngọc Hà's CV: read it in the browser or download the PDF.",
     decisions:
       "How Lê Ngọc Hà leads a team and makes technical decisions: leading with data, engineering standards, mentoring, a monorepo and an in-house Tiptap editor.",
     gallery:
@@ -146,7 +146,7 @@ export const EN_EXPERIENCE: readonly RoleCopy[] = [
       "Owned the backend integration of the Payoo POS payment gateway on NestJS (ops, payment-service, background-job-service): create, cancel and look up orders, IPN handling, a reconciliation cron, HubSpot and SAP sync, 174 test cases.",
       "Led the move of the dev server (16 NestJS apps), GitLab and the e-contract production database from AWS to CMC Cloud in 7 weeks, without renting extra machines; the production database was down for only about 2.5 minutes.",
       "Upgraded the LMS from Next.js 12 → 14 App Router and optimised performance: page load time down 60% (15.2s → 6.1s), Lighthouse 29 → 65+.",
-      "Replaced a commercial editor with Tiptap, built as a shared private package, which reduced vendor dependence and license costs.",
+      "Replaced a commercial editor with Tiptap, built as a shared private package, which reduced vendor dependence and licence costs.",
       "Added Gitleaks, Trivy, Semgrep and OWASP ZAP to CI/CD and built an AI Workflow: productivity up 30%, ~10 hours/week saved.",
     ],
   },
@@ -229,11 +229,6 @@ export const EN_CONTACT: ContactCopy = {
   sent: "Sent — I will reply as soon as I can.",
   failedBefore: "Sending failed. Please email me directly at",
   failedAfter: ".",
-};
-
-/** The Resume window is already English; the CV inside it is not. */
-export const EN_RESUME: ResumeCopy = {
-  languageNote: "The CV is in Vietnamese",
 };
 
 /** VI: DecisionsWindow.tsx. Group and section labels are already English. */
@@ -338,7 +333,7 @@ export const EN_DECISIONS: DecisionsCopy = {
       decision:
         "I decided to move to Tiptap, and to build it and package it as a shared package in the monorepo.",
       consequences: [
-        "A variable license cost became a fixed engineering cost, and monthly spending went down with it.",
+        "A variable licence cost became a fixed engineering cost, and monthly spending went down with it.",
         "The monorepo no longer loads TinyMCE anywhere.",
         "The trade-off: the team owns all development and maintenance of the editor; in return it depends less on a vendor and has better control of long-term cost.",
       ],

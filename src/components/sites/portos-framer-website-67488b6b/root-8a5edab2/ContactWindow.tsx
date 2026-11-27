@@ -5,7 +5,9 @@ import { useState } from "react";
 import { EN_CONTACT } from "@/i18n/en";
 import { useLocale } from "@/i18n/LocaleProvider";
 import type { ContactCopy } from "@/i18n/types";
+import type { Locale } from "@/i18n/locale";
 import { outboundLinkProps, trackEvent } from "@/lib/analytics";
+import { CV_PDF } from "@/lib/cv";
 import { cn } from "@/lib/utils";
 import { GitHubGlyph, LinkedInGlyph } from "./SocialIcons";
 
@@ -55,15 +57,16 @@ const SOCIAL_LINKS = [
   // The site itself: not outbound, so not tracked.
   { label: "Portfolio", href: "https://lengocha.vercel.app", Icon: Globe, track: null },
   // "CV" rather than "Résumé": the row is tight and the labels have to fit.
-  {
-    label: "CV",
-    href: "https://lengocha.vercel.app/Le-Ngoc-Ha-Senior-Frontend-Developer.pdf",
-    Icon: FileText,
-    track: "cv",
-  },
+  // The href is the Vietnamese PDF; `socialHref` swaps in the English one on /en.
+  { label: "CV", href: CV_PDF.vi.href, Icon: FileText, track: "cv" },
 ] as const;
 
 type SocialLink = (typeof SOCIAL_LINKS)[number];
+
+/** Where a social link points on a page in `locale`: only the CV differs. */
+function socialHref(social: SocialLink, locale: Locale): string {
+  return social.track === "cv" ? CV_PDF[locale].href : social.href;
+}
 
 /** The click reporting for one social link: outbound, the CV, or nothing. */
 function socialTrackingProps(track: SocialLink["track"]) {
@@ -409,7 +412,7 @@ export function ContactWindow() {
                   {SOCIAL_LINKS.map((social) => (
                     <a
                       key={social.label}
-                      href={social.href}
+                      href={socialHref(social, locale)}
                       target="_blank"
                       rel="noreferrer noopener"
                       className="group/social flex items-center gap-2"

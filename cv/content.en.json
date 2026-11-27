@@ -1,0 +1,308 @@
+{
+  "lang": "en",
+  "documentTitle": "Lê Ngọc Hà · Fullstack Developer · CV",
+  "name": "Lê Ngọc Hà",
+  "headline": "Fullstack Developer · Frontend Tech Lead at SAPP Academy",
+  "photoAlt": "Portrait of Lê Ngọc Hà",
+  "footer": {
+    "name": "Lê Ngọc Hà",
+    "site": "lengocha.vercel.app/en",
+    "href": "https://lengocha.vercel.app/en"
+  },
+  "pages": [
+    {
+      "sidebar": [
+        {
+          "type": "contact",
+          "heading": "Contact",
+          "items": [
+            {
+              "icon": "phone",
+              "text": "+84 964 972 693",
+              "href": "tel:+84964972693"
+            },
+            {
+              "icon": "mail",
+              "text": "ngocha2k0.ln@gmail.com",
+              "href": "mailto:ngocha2k0.ln@gmail.com"
+            },
+            {
+              "icon": "pin",
+              "text": "Hanoi, Vietnam (UTC+7)"
+            },
+            {
+              "icon": "globe",
+              "text": "lengocha.vercel.app/en",
+              "href": "https://lengocha.vercel.app/en"
+            },
+            {
+              "icon": "github",
+              "text": "github.com/Ngocha2607",
+              "href": "https://github.com/Ngocha2607"
+            },
+            {
+              "icon": "linkedin",
+              "text": "LinkedIn · Ngọc Hà Lê",
+              "href": "https://www.linkedin.com/in/ng%E1%BB%8Dc-h%C3%A0-l%C3%AA-886aa3228/"
+            }
+          ]
+        },
+        {
+          "type": "list",
+          "heading": "Expertise",
+          "items": [
+            "Frontend Architecture",
+            "Backend & Payment Integration",
+            "Cloud Migration & DevOps",
+            "Performance Engineering",
+            "Design System & Monorepo",
+            "Security Engineering",
+            "AI-assisted Development",
+            "Technical Leadership"
+          ]
+        },
+        {
+          "type": "rows",
+          "heading": "Frontend Stack",
+          "rows": [
+            "React • Next.js • TypeScript",
+            "Redux Toolkit • Zustand • TanStack Query",
+            "Antd • Tailwind • MUI • Shadcn",
+            "Tiptap • GrapeJS • React Hook Form",
+            "Vite"
+          ]
+        },
+        {
+          "type": "rows",
+          "heading": "Languages",
+          "rows": [
+            "Vietnamese (native)",
+            "English (TOEIC 665/990)"
+          ]
+        }
+      ],
+      "main": [
+        {
+          "type": "text",
+          "heading": "Professional Summary",
+          "paragraphs": [
+            "Fullstack Developer, currently Frontend Tech Lead at SAPP Academy, with almost 5 years building web systems for EdTech and TravelTech. Strongest on the frontend (React, Next.js, TypeScript): monorepo architecture, performance, and engineering and security process for the team. On the backend and infrastructure side, I integrated the Payoo POS payment gateway on NestJS, built Spring Boot microservices, and led the move of the dev servers, GitLab and a production database from AWS to CMC Cloud. **Every result comes with before-and-after numbers.**"
+          ]
+        },
+        {
+          "type": "entries",
+          "variant": "education",
+          "heading": "Education",
+          "entries": [
+            {
+              "title": "Hanoi University of Science and Technology",
+              "period": "2018 - 2022",
+              "notes": [
+                "Bachelor of Electronics and Telecommunications",
+                "Research paper — REV ECIT 2021 conference proceedings"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "entries",
+          "variant": "experience",
+          "heading": "Professional Experience",
+          "entries": [
+            {
+              "title": "Frontend Tech Lead",
+              "period": "03/2025 - Present",
+              "org": "SAPP Academy",
+              "bullets": [
+                "Lead the LMS + Ops frontend, review **100% of Merge Requests** and mentor **2 Junior Frontend developers**.",
+                "Designed a monorepo with **pnpm Workspace + Turborepo**, brought 4 frontends into it and standardised the shared packages.",
+                "Owned the backend integration of the **Payoo POS payment gateway on NestJS** (ops, payment-service, background-job-service): create, cancel and look up orders, IPN handling, a reconciliation cron, HubSpot and SAP sync, **174 test cases**.",
+                "Led the move of the dev server (16 NestJS apps), GitLab and the e-contract production database from **AWS to CMC Cloud** in 7 weeks, without renting extra machines; the production database was down for only about **2.5 minutes**.",
+                "Upgraded the LMS from **Next.js 12 → 14 App Router** and optimised performance: **page load time down 60% (15.2s → 6.1s)**, Lighthouse **29 → 65+**.",
+                "Replaced a commercial editor with **Tiptap**, built as a shared private package, which reduced vendor dependence and licence costs.",
+                "Added **Gitleaks, Trivy, Semgrep and OWASP ZAP** to CI/CD and built an AI Workflow: **productivity up 30%**, **~10 hours/week** saved."
+              ]
+            },
+            {
+              "title": "Fullstack Developer",
+              "period": "03/2023 - 02/2025",
+              "org": "Tweet World Travel Group",
+              "bullets": [
+                "Built **5 B2B TravelTech platforms** serving **~1,000 users/month**, plus a multilingual internal admin system.",
+                "Built and maintained backend services with **Spring Boot / microservices** in a monorepo.",
+                "Optimised SSR and frontend assets: page load 3.2s → 1.1s (-66%), Lighthouse kept at 85.",
+                "Mentored **3 Junior Frontend developers** and reviewed Pull Requests before they were merged into Staging.",
+                "Restructured and standardised the codebase to make it easier to extend and reuse."
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sidebar": [
+        {
+          "type": "rows",
+          "heading": "Backend Stack",
+          "rows": [
+            "NestJS • Node.js",
+            "Java • Spring Boot",
+            "PostgreSQL • TypeORM • Kafka",
+            "RESTful API • Microservices"
+          ]
+        },
+        {
+          "type": "rows",
+          "heading": "Cloud & DevOps",
+          "rows": [
+            "AWS • CMC Cloud",
+            "Docker • GitLab CI/CD • Vercel",
+            "Turborepo • pnpm Workspace",
+            "Gitleaks • Semgrep • Trivy • ZAP"
+          ]
+        },
+        {
+          "type": "entries",
+          "variant": "leadership",
+          "heading": "Leadership",
+          "entries": [
+            {
+              "title": "Leading with data",
+              "period": "2025",
+              "org": "LMS · SAPP Academy",
+              "text": [
+                "Prioritised optimisation work on real measurements across 15 pages: **page load time down 60% (15.2s → 6.1s)**, Lighthouse **49 → 67** for the learner pages and **72 → 89** for the instructor pages."
+              ]
+            },
+            {
+              "title": "Setting engineering standards for the team",
+              "period": "2026",
+              "org": "CI/CD pipeline · SAPP Academy",
+              "text": [
+                "Set code and security standards, automated the checks in CI/CD and personally review **100% of Merge Requests** — so machines catch the repeated mistakes and people focus on architecture and quality."
+              ]
+            },
+            {
+              "title": "Mentoring and growing junior engineers",
+              "period": "2023 - 2025",
+              "org": "SAPP Academy · Tweet World Travel",
+              "text": [
+                "Mentored **5 Junior Frontend developers** directly, teaching them how to analyse a problem and find the solution themselves instead of handing them the answer."
+              ]
+            }
+          ]
+        },
+        {
+          "type": "qr",
+          "heading": "Portfolio",
+          "text": "lengocha.vercel.app/en",
+          "href": "https://lengocha.vercel.app/en"
+        }
+      ],
+      "main": [
+        {
+          "type": "entries",
+          "variant": "experience",
+          "heading": "Professional Experience (cont.)",
+          "entries": [
+            {
+              "title": "Frontend Developer",
+              "period": "10/2021 - 02/2023",
+              "org": "Minastik JSC · Onsite at 3S Intersoft JSC",
+              "bullets": [
+                "Built and maintained several web applications with React.js, with responsive interfaces and a consistent user experience across platforms.",
+                "Worked with the backend team to integrate RESTful APIs, ship new features and fix bugs during development.",
+                "Worked in Agile/Scrum, closely with the rest of the team, to keep the project on schedule."
+              ]
+            }
+          ]
+        },
+        {
+          "type": "entries",
+          "variant": "projects",
+          "heading": "Selected Projects",
+          "entries": [
+            {
+              "title": "LMS Platform · SAPP Academy",
+              "period": "2025 - Present",
+              "text": [
+                "Online learning management system; technical lead for the frontend."
+              ],
+              "tags": "Next.js 14 • Monorepo • Antd • Tailwind CSS • Redux Toolkit • React Hook Form"
+            },
+            {
+              "title": "Operations · SAPP Academy",
+              "period": "2025 - Present",
+              "text": [
+                "18 operations modules: classes, grading, attendance."
+              ],
+              "tags": "React • TypeScript • Vite • Ant Design"
+            },
+            {
+              "title": "Payoo POS Payments · SAPP Academy",
+              "period": "2026",
+              "text": [
+                "Backend for card payments at the counter: create, cancel and look up orders, IPN, a reconciliation cron, HubSpot and SAP sync."
+              ],
+              "tags": "NestJS • TypeORM • PostgreSQL • Kafka • Jest"
+            },
+            {
+              "title": "AWS → CMC Cloud Migration · SAPP Academy",
+              "period": "2026",
+              "text": [
+                "Dev server (16 NestJS apps), GitLab, production database; 7 weeks, no extra machines rented, production database down for about 2.5 minutes."
+              ],
+              "tags": "Docker rootless • GitLab • MySQL 8.4 • Bash"
+            },
+            {
+              "title": "Subscriber Platform · Tweet World Travel",
+              "period": "2023 - 2025",
+              "text": [
+                "Management platform for a travel business."
+              ],
+              "tags": "Spring Boot • Microservices • React • Material UI"
+            },
+            {
+              "title": "Website B2B · Tweet World Travel",
+              "period": "2023 - 2024",
+              "text": [
+                "Multilingual travel e-commerce platform; page load 3.2s → 1.1s, Lighthouse 85."
+              ],
+              "tags": "Next.js 14 • Zustand • TypeScript • Tailwind • Shadcn"
+            }
+          ]
+        },
+        {
+          "type": "entries",
+          "variant": "decisions",
+          "heading": "Technical Decisions",
+          "entries": [
+            {
+              "title": "User-facing performance over server metrics",
+              "period": "Measured, not shipped · 2026",
+              "text": [
+                "One change cut server response time from 60ms → 3ms on 20 pages. But real measurements showed that users barely noticed the improvement. I decided not to ship it and moved the effort to the bottleneck that does affect the real experience."
+              ]
+            },
+            {
+              "title": "Merging 4 products into one shared platform",
+              "period": "Shipped · 2025",
+              "text": [
+                "The four products used to live in four separate repositories, so shared features had to be built again in each one. I decided to move to a **monorepo with pnpm Workspace + Turborepo**, and to centralise the shared UI, editor and styles.",
+                "**Result**: less repeated work, consistent quality, and new products inherit the engineering and security standards straight away."
+              ]
+            },
+            {
+              "title": "Replacing a paid editor with an in-house one built on Tiptap",
+              "period": "Shipped · 2025",
+              "text": [
+                "The old editor was priced per user, so its cost grew with the number of learners. I decided to move to **Tiptap**, and to build it and package it as a shared package in the monorepo.",
+                "**Trade-off:** the team owns all development and maintenance of the editor; in return it depends less on a vendor and has better control of long-term cost."
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

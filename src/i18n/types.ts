@@ -113,11 +113,6 @@ export interface ContactCopy {
   failedAfter: string;
 }
 
-export interface ResumeCopy {
-  /** Shown beside the file name; null when the CV is in the page's language. */
-  languageNote: string | null;
-}
-
 export type DecisionStatus = "Shipped" | "Held" | "Reverted";
 
 export interface HighlightCopy {

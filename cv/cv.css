@@ -1,0 +1,410 @@
+/*
+ * The CV's look. Measurements are in pt (1/72 in) because the output is a
+ * print page; most of them were taken from the Figma-exported CV this
+ * replaces (A4, 595 x 842 pt), rendered at 200 dpi and measured.
+ *
+ * Fonts are static instances committed in cv/fonts (see build-fonts.py for
+ * why they are not variable fonts or a Google Fonts link). Family names are
+ * prefixed "CV" so a locally installed Roboto can never stand in for them.
+ */
+
+@font-face {
+  font-family: "CV Oswald";
+  src: url("fonts/oswald-700.woff2") format("woff2");
+  font-weight: 700;
+}
+@font-face {
+  font-family: "CV Roboto";
+  src: url("fonts/roboto-400.woff2") format("woff2");
+  font-weight: 400;
+}
+@font-face {
+  font-family: "CV Condensed";
+  src: url("fonts/roboto-condensed-400.woff2") format("woff2");
+  font-weight: 400;
+}
+@font-face {
+  font-family: "CV Condensed";
+  src: url("fonts/roboto-condensed-700.woff2") format("woff2");
+  font-weight: 700;
+}
+@font-face {
+  font-family: "CV Condensed";
+  src: url("fonts/roboto-condensed-400-italic.woff2") format("woff2");
+  font-weight: 400;
+  font-style: italic;
+}
+/* The arrow in "15.2s → 6.1s": none of the three families has one. */
+@font-face {
+  font-family: "CV Condensed";
+  src: url("fonts/arrow-400.woff2") format("woff2");
+  font-weight: 400;
+  unicode-range: U+2192;
+}
+@font-face {
+  font-family: "CV Condensed";
+  src: url("fonts/arrow-700.woff2") format("woff2");
+  font-weight: 700;
+  unicode-range: U+2192;
+}
+@font-face {
+  font-family: "CV Condensed";
+  src: url("fonts/arrow-400.woff2") format("woff2");
+  font-weight: 400;
+  font-style: italic;
+  unicode-range: U+2192;
+}
+
+:root {
+  /* Sampled from the old PDF's fill colours. */
+  --navy: #0d4559; /* text, headings, accents */
+  --muted: #4a7a8c; /* dates, organisations, stack tags */
+  --soft: #7fa1ae; /* footer, list rules */
+  --rule: #c9d8de; /* the hairline under each heading */
+
+  --page-w: 595.28pt;
+  --page-h: 841.89pt;
+  --gutter: 24pt; /* left and right page margin */
+  --side-w: 152pt; /* sidebar text column, 24 -> 176 pt */
+  --main-x: 218pt; /* main column starts here, ends at 571 pt (old CV: 224) */
+  --top: 25pt;
+  --bottom: 33pt; /* room for the footer */
+
+  --body: 10pt;
+  --body-lh: 14pt;
+}
+
+@page {
+  size: A4;
+  margin: 0;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+body {
+  background: #fff;
+  color: var(--navy);
+  font-family: "CV Condensed", sans-serif;
+  font-size: var(--body);
+  line-height: var(--body-lh);
+  font-kerning: normal;
+  text-rendering: geometricPrecision;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+strong {
+  font-weight: 700;
+}
+
+.sprite {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+/* ---- Page frame ------------------------------------------------------- */
+
+.page {
+  position: relative;
+  width: var(--page-w);
+  height: var(--page-h);
+  overflow: hidden;
+  background: #fff;
+  break-after: page;
+}
+.page:last-child {
+  break-after: auto;
+}
+
+.col {
+  position: absolute;
+  top: var(--top);
+  bottom: var(--bottom);
+  overflow: hidden;
+}
+.side {
+  left: var(--gutter);
+  width: var(--side-w);
+}
+.main {
+  left: var(--main-x);
+  right: var(--gutter);
+}
+
+.foot {
+  position: absolute;
+  right: 35pt;
+  bottom: 16pt;
+  font-family: "CV Roboto", sans-serif;
+  font-size: 6.6pt;
+  line-height: 10pt;
+  letter-spacing: 0.1em;
+  color: var(--soft);
+  white-space: nowrap;
+}
+.foot .sep {
+  margin: 0 0.6em;
+}
+.foot-name {
+  text-transform: uppercase;
+}
+
+/* ---- Page 1 masthead -------------------------------------------------- */
+
+.photo {
+  position: relative;
+  width: 104pt;
+  height: 104pt;
+  margin-left: 6pt;
+  border-radius: 50%;
+  overflow: hidden;
+  margin-bottom: 21pt;
+}
+/* The source photo is a 3:4 half-length shot; this frames the head the way
+   the old CV did. Offsets are fractions of the circle's diameter. */
+.photo img {
+  position: absolute;
+  width: 127%;
+  left: -11.6%;
+  top: -23.3%;
+}
+
+.masthead {
+  padding-top: 10pt;
+  margin-bottom: 18pt;
+}
+.name {
+  font-family: "CV Oswald", sans-serif;
+  font-weight: 700;
+  font-size: 36.4pt;
+  line-height: 42pt;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  margin-left: 6pt;
+}
+.headline {
+  margin-top: 3pt;
+  margin-left: 6pt;
+  font-family: "CV Roboto", sans-serif;
+  font-size: 11.6pt;
+  line-height: 15pt;
+  letter-spacing: 0.045em;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+/* ---- Blocks ----------------------------------------------------------- */
+
+.block + .block {
+  margin-top: 12pt;
+}
+.side .block + .block {
+  margin-top: 18pt;
+}
+
+/* Letter-spaced caps over a short navy bar that sits on a full-width hairline. */
+.heading {
+  font-weight: 700;
+  font-size: 12.6pt;
+  line-height: 15pt;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+.heading::after {
+  content: "";
+  display: block;
+  height: 2.5pt;
+  margin-top: 6pt;
+  margin-bottom: 6.5pt;
+  background:
+    linear-gradient(var(--navy), var(--navy)) left center / 26pt 2.5pt no-repeat,
+    linear-gradient(var(--rule), var(--rule)) left center / 100% 1pt no-repeat;
+}
+.side .heading {
+  font-size: 11.6pt;
+}
+
+/* Contact: icon + text rows. */
+.contact li {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 8pt;
+  min-height: 21pt;
+}
+.contact svg {
+  flex: none;
+  width: 11pt;
+  height: 11pt;
+  margin-left: 0.5pt;
+  fill: var(--navy);
+}
+
+/* Expertise: a plain list. */
+.plain li {
+  list-style: none;
+  line-height: 20pt;
+}
+
+/* Stack and languages: each row ends on a rule with a dot at its right end. */
+.rows li {
+  list-style: none;
+  position: relative;
+  padding: 4.5pt 0 3pt;
+  margin-bottom: 1.5pt;
+  line-height: 13pt;
+}
+.rows li::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 1pt;
+  bottom: 0;
+  height: 1.1pt;
+  background: var(--soft);
+}
+.rows li::before {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: -0.9pt;
+  width: 2.9pt;
+  height: 2.9pt;
+  border-radius: 50%;
+  background: var(--navy);
+}
+
+/* ---- Entries (education, experience, projects, leadership, decisions) -- */
+
+.entry + .entry {
+  margin-top: 8pt;
+}
+.entry-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8pt;
+}
+.entry-title {
+  font-weight: 700;
+  font-size: 10.2pt;
+  line-height: 13pt;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+.entry-period {
+  flex: none;
+  font-size: 8.4pt;
+  color: var(--muted);
+}
+.entry-org,
+.entry-note,
+.entry-tags {
+  font-style: italic;
+  color: var(--muted);
+}
+.entry-org {
+  font-size: 8.4pt;
+  line-height: 13pt;
+}
+.entry-note {
+  line-height: 16pt;
+  color: var(--navy);
+}
+.entry-tags {
+  font-size: 8.4pt;
+  line-height: 11.5pt;
+}
+.entry-text p + p {
+  margin-top: 0;
+}
+
+/* ▸ markers: drawn, not typed, so copying a bullet out of the PDF gives the
+   sentence without a stray glyph. Inline, as on the old CV: wrapped lines
+   return to the left edge. */
+.bullets li {
+  list-style: none;
+  margin-top: 2.6pt;
+}
+.bullets li::before {
+  content: "";
+  display: inline-block;
+  width: 0;
+  height: 0;
+  margin-right: 4pt;
+  vertical-align: 0.14em;
+  border-left: 4pt solid var(--navy);
+  border-top: 2.4pt solid transparent;
+  border-bottom: 2.4pt solid transparent;
+}
+
+/* Experience: the org line sits tight under the title. */
+.block--experience .entry + .entry {
+  margin-top: 9pt;
+}
+
+/* Projects: title, one line of text, the stack in small italics. */
+.block--projects .entry + .entry {
+  margin-top: 4.5pt;
+}
+
+/* Decisions: the status takes the date's place, in italics. */
+.block--decisions .entry-period {
+  font-size: 8pt;
+  font-style: italic;
+}
+.block--decisions .entry + .entry {
+  margin-top: 6pt;
+}
+
+
+/* Sidebar entries (leadership): titles wrap, and the date sits on the
+   title's last line. (The old CV centred it, which made text extraction read
+   "TITLE 2026 REST-OF-TITLE"; on the last line the title stays whole.) */
+.side .entry-head {
+  align-items: last baseline;
+}
+.side .entry-title {
+  line-height: 13pt;
+}
+.side .entry + .entry {
+  margin-top: 9pt;
+}
+.side .entry-text {
+  margin-top: 1pt;
+}
+
+/* Portfolio: the QR code with the link beside it (the old CV stacked them;
+   side by side saves the line the English sidebar needs). */
+.block--qr {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  column-gap: 8pt;
+}
+.block--qr .heading {
+  grid-column: 1 / -1;
+}
+.block--qr > a > svg {
+  display: block;
+  width: 46pt;
+  height: 46pt;
+  margin-top: 2pt;
+}
+.qr-link {
+  color: var(--muted);
+}

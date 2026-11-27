@@ -34,6 +34,7 @@ to match any reference site.
 - `npm run lint` — ESLint check
 - `npm run typecheck` — TypeScript check
 - `npm run check` — Run lint + typecheck + build
+- `npm run cv:build` — Rebuild the CV PDFs in `public/` from `cv/` (see `cv/README.md`)
 
 ## Code Style
 - TypeScript strict mode, no `any`
@@ -53,6 +54,8 @@ to match any reference site.
 
 ## Project Structure
 ```
+cv/                 # CV source: content.vi.json / content.en.json (all the text),
+                    # template.html + cv.css, build.mjs (headless Chromium -> PDF), fonts/
 src/
   app/
     (vi)/           # Vietnamese pages, at the root URLs — own root layout, <html lang="vi">
@@ -78,6 +81,7 @@ src/
     writing-en.ts   # English titles/summaries for /en/writing, keyed by slug
   lib/
     analytics.ts    # trackEvent() and the analytics ids (Vercel, Umami, Cloudflare, GA4)
+    cv.ts           # The CV PDF path per language (the files are built from cv/)
     utils.ts        # cn() utility (shadcn)
     notion.ts       # Notion client and query helpers
     markdown.ts     # Notion blocks -> HTML

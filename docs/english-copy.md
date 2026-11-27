@@ -5,7 +5,7 @@ Every English string on the English pages, grouped by page, for review without r
 - **Source of truth:** `src/i18n/en.ts` (pages) and `src/data/writing-en.ts` (article titles and summaries). This file is generated from them; edit those files, not this one.
 - **Vietnamese originals** stay in the component that shows them; each section below names it.
 - **Rules:** plain English, short sentences, active voice. Every number, unit and before → after as in the Vietnamese; only the number *format* changes ("~1.000" → "~1,000", "2,5" → "2.5"). No claim, adjective or result the Vietnamese does not make. No hype words. Headline title "Fullstack Developer"; current role "Frontend Tech Lead at SAPP Academy". Nothing says or implies fluent or native English.
-- **Only English-page additions:** labels saying which content is still Vietnamese ("In Vietnamese" on articles, "The CV is in Vietnamese"), and the contact email subject says it came from the English page.
+- **Only English-page additions:** labels saying which content is still Vietnamese ("In Vietnamese" on articles), and the contact email subject says it came from the English page.
 
 ## Page titles and meta descriptions
 
@@ -18,7 +18,7 @@ Titles are the window titles and are the same in both languages: “Lê Ngọc H
 | `/en/experience` | Lê Ngọc Hà's Fullstack experience: Frontend Tech Lead at SAPP Academy (Payoo POS on NestJS, AWS to CMC Cloud move), Tweet World Travel, Minastik. (145) |
 | `/en/projects` | Projects by Lê Ngọc Hà: SAPP Academy's LMS and operations system; Tweet World Travel's admin platform, B2B website and newsletter; EVN Hanoi modules. (149) |
 | `/en/contact` | Contact Lê Ngọc Hà by email, GitHub or LinkedIn. Available for remote work, currently in Hanoi, Vietnam (UTC+7). (112) |
-| `/en/resume` | Lê Ngọc Hà's CV: read it in the browser or download the PDF. The CV is in Vietnamese. (85) |
+| `/en/resume` | Lê Ngọc Hà's CV: read it in the browser or download the PDF. (60) |
 | `/en/decisions` | How Lê Ngọc Hà leads a team and makes technical decisions: leading with data, engineering standards, mentoring, a monorepo and an in-house Tiptap editor. (153) |
 | `/en/gallery` | Screenshots of six projects by Lê Ngọc Hà: LMS Platform, Operations, Subscriber Platform, Website B2B, Newsletter System and EVN Hanoi. (135) |
 | `/en/writing` | Articles in Vietnamese about frontend work and my projects: SAPP LMS & OPS, TravelTech, monorepo architecture, an in-house editor, AppSec. (138) |
@@ -87,7 +87,7 @@ Vietnamese original: `ROLES` in `ExperienceWindow.tsx`.
 - Owned the backend integration of the Payoo POS payment gateway on NestJS (ops, payment-service, background-job-service): create, cancel and look up orders, IPN handling, a reconciliation cron, HubSpot and SAP sync, 174 test cases.
 - Led the move of the dev server (16 NestJS apps), GitLab and the e-contract production database from AWS to CMC Cloud in 7 weeks, without renting extra machines; the production database was down for only about 2.5 minutes.
 - Upgraded the LMS from Next.js 12 → 14 App Router and optimised performance: page load time down 60% (15.2s → 6.1s), Lighthouse 29 → 65+.
-- Replaced a commercial editor with Tiptap, built as a shared private package, which reduced vendor dependence and license costs.
+- Replaced a commercial editor with Tiptap, built as a shared private package, which reduced vendor dependence and licence costs.
 - Added Gitleaks, Trivy, Semgrep and OWASP ZAP to CI/CD and built an AI Workflow: productivity up 30%, ~10 hours/week saved.
 
 ### Tweet World Travel Group — Fullstack Developer
@@ -142,9 +142,7 @@ Vietnamese original: `ContactWindow.tsx`. The heading (“Let's talk”), field 
 
 ## Resume — /en/resume
 
-The window text (“Résumé”, “Mobile browsers cannot display a PDF inline. Open it in a new tab or save it.”, “Open ↗”, “Download ↓”) was already English. The CV PDF itself is Vietnamese and unchanged.
-
-- Added beside the file name and in the mobile panel: “The CV is in Vietnamese”
+The window text (“Résumé”, “Mobile browsers cannot display a PDF inline. Open it in a new tab or save it.”, “Open ↗”, “Download ↓”) is English on both sites. On `/en/resume` the window shows the English CV, `Le-Ngoc-Ha-Fullstack-Developer-EN.pdf`. The CV's text is not in `src/i18n/en.ts`: it is in `cv/content.en.json`, which `npm run cv:build` turns into the PDF (see `cv/README.md`).
 
 ## Leadership & Technical Decisions — /en/decisions
 
@@ -218,7 +216,7 @@ A cost that grew with the number of learners became a one-time engineering inves
 *Decision:* I decided to move to Tiptap, and to build it and package it as a shared package in the monorepo.
 
 *Consequences:*
-- A variable license cost became a fixed engineering cost, and monthly spending went down with it.
+- A variable licence cost became a fixed engineering cost, and monthly spending went down with it.
 - The monorepo no longer loads TinyMCE anywhere.
 - The trade-off: the team owns all development and maintenance of the editor; in return it depends less on a vendor and has better control of long-term cost.
 
