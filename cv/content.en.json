@@ -86,7 +86,7 @@
           "type": "text",
           "heading": "Professional Summary",
           "paragraphs": [
-            "Fullstack Developer, currently Frontend Tech Lead at SAPP Academy, with almost 5 years building web systems for EdTech and TravelTech. Strongest on the frontend (React, Next.js, TypeScript): monorepo architecture, performance, and engineering and security process for the team. On the backend and infrastructure side, I integrated the Payoo POS payment gateway on NestJS, built Spring Boot microservices, and led the move of the dev servers, GitLab and a production database from AWS to CMC Cloud. **Every result comes with before-and-after numbers.**"
+            "Fullstack Developer, currently Frontend Tech Lead at SAPP Academy, with almost 5 years building web systems for EdTech and TravelTech. Strongest on the frontend (React, Next.js, TypeScript): monorepo architecture, performance, and engineering and security process for the team. On the backend and infrastructure side, I integrated the Payoo POS payment gateway on NestJS, built Spring Boot microservices, and led the move of the dev servers, GitLab and a production database from AWS to CMC Cloud."
           ]
         },
         {
@@ -223,22 +223,6 @@
           "heading": "Selected Projects",
           "entries": [
             {
-              "title": "LMS Platform · SAPP Academy",
-              "period": "2025 - Present",
-              "text": [
-                "Online learning management system; technical lead for the frontend."
-              ],
-              "tags": "Next.js 14 • Monorepo • Antd • Tailwind CSS • Redux Toolkit • React Hook Form"
-            },
-            {
-              "title": "Operations · SAPP Academy",
-              "period": "2025 - Present",
-              "text": [
-                "18 operations modules: classes, grading, attendance."
-              ],
-              "tags": "React • TypeScript • Vite • Ant Design"
-            },
-            {
               "title": "Payoo POS Payments · SAPP Academy",
               "period": "2026",
               "text": [
@@ -253,6 +237,22 @@
                 "Dev server (16 NestJS apps), GitLab, production database; 7 weeks, no extra machines rented, production database down for about 2.5 minutes."
               ],
               "tags": "Docker rootless • GitLab • MySQL 8.4 • Bash"
+            },
+            {
+              "title": "LMS Platform · SAPP Academy",
+              "period": "2025 - Present",
+              "text": [
+                "Online learning management system; technical lead for the frontend."
+              ],
+              "tags": "Next.js 14 • Monorepo • Antd • Tailwind CSS • Redux Toolkit • React Hook Form"
+            },
+            {
+              "title": "Operations · SAPP Academy",
+              "period": "2025 - Present",
+              "text": [
+                "18 operations modules: classes, grading, attendance."
+              ],
+              "tags": "React • TypeScript • Vite • Ant Design"
             },
             {
               "title": "Subscriber Platform · Tweet World Travel",

@@ -86,7 +86,7 @@
           "type": "text",
           "heading": "Professional Summary",
           "paragraphs": [
-            "Fullstack Developer, hiện là Frontend Tech Lead tại SAPP Academy, gần 5 năm xây dựng hệ thống web cho EdTech và TravelTech. Mạnh nhất ở frontend (React, Next.js, TypeScript): kiến trúc monorepo, tối ưu hiệu năng, quy trình kỹ thuật và bảo mật cho team. Ở backend và hạ tầng: tích hợp cổng thanh toán Payoo POS trên NestJS, Spring Boot microservices, và dẫn dắt chuyển server dev, GitLab, database production từ AWS sang CMC Cloud. **Kết quả nào cũng có số đo trước và sau.**"
+            "Fullstack Developer, hiện là Frontend Tech Lead tại SAPP Academy, gần 5 năm xây dựng hệ thống web cho EdTech và TravelTech. Mạnh nhất ở frontend (React, Next.js, TypeScript): kiến trúc monorepo, tối ưu hiệu năng, quy trình kỹ thuật và bảo mật cho team. Ở backend và hạ tầng: tích hợp cổng thanh toán Payoo POS trên NestJS, Spring Boot microservices, và dẫn dắt chuyển server dev, GitLab, database production từ AWS sang CMC Cloud."
           ]
         },
         {
@@ -223,22 +223,6 @@
           "heading": "Selected Projects",
           "entries": [
             {
-              "title": "LMS Platform · SAPP Academy",
-              "period": "2025 - Hiện tại",
-              "text": [
-                "Hệ thống quản lý học tập trực tuyến; dẫn dắt kỹ thuật Frontend."
-              ],
-              "tags": "Next.js 14 • Monorepo • Antd • Tailwind CSS • Redux Toolkit • React Hook Form"
-            },
-            {
-              "title": "Operations · SAPP Academy",
-              "period": "2025 - Hiện tại",
-              "text": [
-                "18 module vận hành: lớp học, chấm điểm, điểm danh."
-              ],
-              "tags": "React • TypeScript • Vite • Ant Design"
-            },
-            {
               "title": "Thanh toán Payoo POS · SAPP Academy",
               "period": "2026",
               "text": [
@@ -253,6 +237,22 @@
                 "Server dev (16 app NestJS), GitLab, database production; 7 tuần, không thuê thêm máy, database production gián đoạn khoảng 2,5 phút."
               ],
               "tags": "Docker rootless • GitLab • MySQL 8.4 • Bash"
+            },
+            {
+              "title": "LMS Platform · SAPP Academy",
+              "period": "2025 - Hiện tại",
+              "text": [
+                "Hệ thống quản lý học tập trực tuyến; dẫn dắt kỹ thuật Frontend."
+              ],
+              "tags": "Next.js 14 • Monorepo • Antd • Tailwind CSS • Redux Toolkit • React Hook Form"
+            },
+            {
+              "title": "Operations · SAPP Academy",
+              "period": "2025 - Hiện tại",
+              "text": [
+                "18 module vận hành: lớp học, chấm điểm, điểm danh."
+              ],
+              "tags": "React • TypeScript • Vite • Ant Design"
             },
             {
               "title": "Subscriber Platform · Tweet World Travel",
