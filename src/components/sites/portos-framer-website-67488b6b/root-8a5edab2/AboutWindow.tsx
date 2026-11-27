@@ -50,7 +50,7 @@ const ABOUT_COUNTERS: RollingCounter[] = [
  */
 const INTRO_PARAGRAPHS = [
   "Fullstack Developer, hiện là Frontend Tech Lead tại SAPP Academy. Gần 5 năm xây dựng hệ thống web cho EdTech và TravelTech, từ giao diện React/Next.js tới backend NestJS, Spring Boot và hạ tầng cloud.",
-  "Mạnh nhất ở frontend, với kiến trúc monorepo, tối ưu hiệu năng và quy trình kỹ thuật cho team. Ở SAPP tôi làm thêm phần backend và hạ tầng: tích hợp cổng thanh toán Payoo POS trên NestJS, và dẫn dắt đợt chuyển server dev, GitLab, database production từ AWS sang CMC Cloud mà không thuê thêm máy. Mỗi việc đều có số đo trước và sau, ghi lại trong mục Writing.",
+  "Mạnh nhất ở frontend, với kiến trúc monorepo, tối ưu hiệu năng và quy trình kỹ thuật cho team. Ở SAPP tôi làm thêm phần backend và hạ tầng: tích hợp cổng thanh toán Payoo POS trên NestJS, và dẫn dắt đợt chuyển server dev, GitLab, database production từ AWS sang CMC Cloud mà không thuê thêm máy. Mỗi việc đều có số đo trước và sau; nhiều việc có bài viết chi tiết trong mục Writing.",
 ];
 
 /** The roll captured on the live site settles in a little over a second. */
